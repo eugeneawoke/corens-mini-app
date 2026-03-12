@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5e5ce6",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121220",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>Ваше состояние</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex h-screen w-full max-w-md mx-auto flex-col overflow-hidden bg-background-light dark:bg-background-dark">
+<!-- Header -->
+<div class="flex items-center p-4 pt-6 justify-between">
+<button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10">Ваше состояние</h1>
+</div>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto px-4">
+<h2 class="text-xl font-bold leading-tight pt-6 pb-2">Как вы себя чувствуете?</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-6">Выберите ваше текущее состояние, чтобы другие знали, как с вами лучше взаимодействовать.</p>
+<!-- Grid of Selectable Tiles -->
+<div class="grid grid-cols-2 gap-4">
+<!-- Selected State: Спокойствие -->
+<div class="flex flex-col gap-3 rounded-xl border-2 border-primary bg-primary/5 p-5 transition-all cursor-pointer">
+<div class="text-primary">
+<span class="material-symbols-outlined text-3xl font-light">favorite</span>
+</div>
+<h3 class="text-base font-bold">Спокойствие</h3>
+</div>
+<div class="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-5 transition-all cursor-pointer hover:border-primary/50">
+<div class="text-slate-400">
+<span class="material-symbols-outlined text-3xl font-light">cloud</span>
+</div>
+<h3 class="text-base font-bold">Мечтательность</h3>
+</div>
+<div class="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-5 transition-all cursor-pointer hover:border-primary/50">
+<div class="text-slate-400">
+<span class="material-symbols-outlined text-3xl font-light">auto_awesome</span>
+</div>
+<h3 class="text-base font-bold">Энергия</h3>
+</div>
+<div class="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-5 transition-all cursor-pointer hover:border-primary/50">
+<div class="text-slate-400">
+<span class="material-symbols-outlined text-3xl font-light">dark_mode</span>
+</div>
+<h3 class="text-base font-bold">Отдых</h3>
+</div>
+</div>
+<!-- Description -->
+<div class="mt-8 p-4 rounded-lg bg-slate-100 dark:bg-slate-800/50">
+<p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                    Вы чувствуете себя уравновешенно и открыты к диалогу.
+                </p>
+</div>
+<!-- Cooldown -->
+<div class="mt-6 flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-sm">schedule</span>
+<p class="font-mono text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Изменение будет доступно через 12:00
+                </p>
+</div>
+</div>
+<!-- Bottom Action -->
+<div class="p-4 pb-10">
+<button class="w-full h-14 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-colors shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+<span>Сохранить</span>
+</button>
+</div>
+</div>
+</body></html>

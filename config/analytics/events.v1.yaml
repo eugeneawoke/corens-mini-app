@@ -1,0 +1,13 @@
+version: v1
+events:
+  - onboarding.completed
+  - profile.state_updated
+  - profile.intent_updated
+  - profile.trust_keys_updated
+  - matching.recompute_requested
+  - beacon.activated
+  - consent.contact_requested
+  - consent.photo_requested
+  - privacy.delete_requested
+notes:
+  - property schemas are defined when concrete analytics collection starts

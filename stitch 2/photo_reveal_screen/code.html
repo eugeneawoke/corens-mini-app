@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5e5ce6",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121220",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .backdrop-blur-custom {
+            backdrop-filter: blur(8px);
+        }
+        .soft-blur-preview {
+            backdrop-filter: blur(20px);
+            background: linear-gradient(135deg, rgba(94, 92, 230, 0.2), rgba(94, 92, 230, 0.05));
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display antialiased">
+<div class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-hidden">
+<!-- Background Mockup (Conversation/Profile behind) -->
+<div class="flex-1 flex flex-col p-6 gap-6 opacity-40">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-slate-300 dark:bg-slate-700"></div>
+<div class="flex-1 space-y-2">
+<div class="h-4 w-32 bg-slate-300 dark:bg-slate-700 rounded"></div>
+<div class="h-3 w-24 bg-slate-200 dark:bg-slate-800 rounded"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl"></div>
+<div class="aspect-square bg-slate-200 dark:bg-slate-800 rounded-xl"></div>
+</div>
+</div>
+<!-- Bottom Sheet Modal Overlay -->
+<div class="fixed inset-0 z-50 flex flex-col justify-end bg-slate-900/40 backdrop-blur-sm">
+<!-- Bottom Sheet Content -->
+<div class="flex flex-col items-stretch bg-white dark:bg-slate-900 rounded-t-xl shadow-2xl">
+<!-- BottomSheetHandle -->
+<button class="flex h-6 w-full items-center justify-center pt-2">
+<div class="h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-700"></div>
+</button>
+<div class="flex flex-col p-6 pt-2">
+<!-- Header -->
+<div class="flex flex-col items-center gap-4 mb-6">
+<div class="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined !text-4xl">visibility</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-2xl font-bold leading-tight text-center">
+                            Показать фото?
+                        </h2>
+<p class="text-slate-600 dark:text-slate-400 text-base font-normal leading-relaxed text-center px-4">
+                            После открытия ваше фото также станет видимым для партнера.
+                        </p>
+</div>
+<!-- Soft-blurred square box Preview -->
+<div class="w-full max-w-xs mx-auto mb-8">
+<div class="aspect-square rounded-xl relative overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
+<!-- Blurred background image mockup -->
+<div class="absolute inset-0 soft-blur-preview"></div>
+<img class="w-full h-full object-cover blur-2xl opacity-50" data-alt="Softly blurred portrait photo of a person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_ADFUX7t32wsFviGaORXhZAieOR3QIPjINueN7aK5CJ9opk1jwLgJZoO6vg86HoX8uBCOPUAH9T-8ZfNMYJmViQBqG4RqxHdTyWqGR2mlncdNNs6GIdEF9gwf9PLSAlKtXaFEVsGTbXKj4CGZZnbEShdb0bEd8CJHJQ7VrasCiLwY856ZlXOb0MCgfpvVtU2doF80x5TJcnROO5pLspOKqWpFIruwUb7zZze9ge82CsQ8o3STLDoH9Zx9Zam4qE1FRBl3_DpyxlI"/>
+<span class="material-symbols-outlined !text-4xl text-slate-400 dark:text-slate-500 relative z-10">lock</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex flex-col gap-3">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-5 bg-primary text-white text-lg font-bold transition-all hover:opacity-90 active:scale-[0.98]">
+<span class="truncate">Открыть фото</span>
+</button>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-5 bg-transparent text-slate-600 dark:text-slate-400 text-base font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="truncate">Отмена</span>
+</button>
+</div>
+</div>
+<!-- Safe area padding for bottom bars -->
+<div class="h-8"></div>
+</div>
+</div>
+</div>
+</body></html>

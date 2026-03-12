@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5e5ce6",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121220",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .blurred-profile {
+            filter: blur(8px);
+            background: linear-gradient(135deg, #5e5ce6 0%, #a855f7 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full max-w-md mx-auto flex-col bg-background-light dark:bg-background-dark overflow-x-hidden">
+<!-- Header / TopAppBar -->
+<div class="flex items-center p-4 pb-2 justify-between">
+<button class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-12">Текущая связь</h2>
+</div>
+<!-- Profile Preview -->
+<div class="flex p-6 @container">
+<div class="flex w-full flex-col gap-6 items-center">
+<div class="flex gap-4 flex-col items-center">
+<div class="relative">
+<div class="blurred-profile aspect-square rounded-full min-h-40 w-40 border-4 border-white dark:border-slate-800 shadow-xl" data-alt="Abstract purple and blue gradient blurred profile avatar"></div>
+<div class="absolute bottom-2 right-2 bg-primary text-white p-2 rounded-full shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">lock</span>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center">
+<p class="text-slate-900 dark:text-slate-100 text-2xl font-bold leading-tight tracking-tight text-center">Алексей</p>
+<p class="text-primary text-base font-medium leading-normal text-center mt-1">Связь установлена</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Match Keys Section -->
+<div class="px-6 py-2">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight mb-4">Общие интересы</h3>
+<div class="flex gap-2 flex-wrap">
+<div class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-primary/10 border border-primary/20 px-4">
+<span class="material-symbols-outlined text-primary text-lg">brand_awareness</span>
+<p class="text-primary text-sm font-semibold">Тишина</p>
+</div>
+<div class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-primary/10 border border-primary/20 px-4">
+<span class="material-symbols-outlined text-primary text-lg">psychology</span>
+<p class="text-primary text-sm font-semibold">Психология</p>
+</div>
+<div class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-primary/10 border border-primary/20 px-4">
+<span class="material-symbols-outlined text-primary text-lg">emoji_food_beverage</span>
+<p class="text-primary text-sm font-semibold">Чай</p>
+</div>
+</div>
+</div>
+<!-- Trust Actions -->
+<div class="px-6 py-6 flex flex-col gap-4">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">Действия доверия</h3>
+<!-- Contact Consent Card -->
+<div class="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-500">contact_page</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 font-bold">Открыть контакты</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Требуется взаимное согласие</p>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-slate-400 text-sm">lock</span>
+<span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Заблокировано</span>
+</div>
+</div>
+<!-- Photo Reveal Card -->
+<div class="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-500">visibility</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-slate-100 font-bold">Показать фото</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Уровень доверия: 2/5</p>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-slate-400 text-sm">lock</span>
+<span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Заблокировано</span>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="mt-auto p-6 flex flex-col gap-4">
+<button class="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/30 active:scale-95 transition-transform">
+                Продолжить диалог
+            </button>
+<button class="w-full bg-transparent border-2 border-transparent text-rose-500 font-semibold py-3 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/20 active:scale-95 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">link_off</span>
+                Разорвать связь
+            </button>
+</div>
+</div>
+</body></html>

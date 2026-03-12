@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5e5ce6",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121220",
+                        "danger": "#ff3b30"
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Header -->
+<header class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-4 flex items-center justify-between border-b border-primary/10">
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+</div>
+<h1 class="text-xl font-bold tracking-tight">Профиль</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<main class="flex-1 overflow-y-auto pb-24">
+<!-- User Section -->
+<section class="flex flex-col items-center py-8 px-4">
+<div class="relative">
+<div class="w-28 h-28 rounded-full bg-primary/20 flex items-center justify-center border-4 border-primary/10">
+<span class="text-3xl font-bold text-primary">М</span>
+</div>
+<button class="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-background-light dark:border-background-dark">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+</div>
+<h2 class="mt-4 text-2xl font-bold">Мария</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm">@maria_user</p>
+</section>
+<!-- Settings List -->
+<section class="px-4 space-y-6">
+<div>
+<h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2">Основные</h3>
+<div class="bg-white dark:bg-slate-900/50 rounded-xl overflow-hidden border border-primary/5 shadow-sm">
+<a class="flex items-center gap-4 p-4 hover:bg-primary/5 active:bg-primary/10 transition-colors" href="#">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<span class="flex-1 font-medium">Ваше состояние</span>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</a>
+<div class="h-px bg-primary/5 mx-4"></div>
+<a class="flex items-center gap-4 p-4 hover:bg-primary/5 active:bg-primary/10 transition-colors" href="#">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">vpn_key</span>
+</div>
+<span class="flex-1 font-medium">Ключи доверия</span>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</a>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2">Приложение</h3>
+<div class="bg-white dark:bg-slate-900/50 rounded-xl overflow-hidden border border-primary/5 shadow-sm">
+<a class="flex items-center gap-4 p-4 hover:bg-primary/5 active:bg-primary/10 transition-colors" href="#">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">lock</span>
+</div>
+<span class="flex-1 font-medium">Настройки приватности</span>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</a>
+<div class="h-px bg-primary/5 mx-4"></div>
+<a class="flex items-center gap-4 p-4 hover:bg-primary/5 active:bg-primary/10 transition-colors" href="#">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">info</span>
+</div>
+<span class="flex-1 font-medium">О приложении</span>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</a>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-semibold uppercase tracking-wider text-danger/70 px-2 mb-2">Опасная зона</h3>
+<div class="bg-white dark:bg-slate-900/50 rounded-xl overflow-hidden border border-danger/10 shadow-sm">
+<button class="w-full flex items-center gap-4 p-4 hover:bg-danger/5 active:bg-danger/10 transition-colors">
+<div class="w-10 h-10 rounded-lg bg-danger/10 flex items-center justify-center text-danger">
+<span class="material-symbols-outlined">delete_forever</span>
+</div>
+<span class="flex-1 font-medium text-danger text-left">Удалить аккаунт</span>
+<span class="material-symbols-outlined text-danger/30">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-primary/10 px-6 pb-6 pt-3 flex justify-between items-center">
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-medium">Главная</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="text-[10px] font-medium">Статистика</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="text-[10px] font-medium">Сообщения</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-1">person</span>
+<span class="text-[10px] font-medium">Профиль</span>
+</a>
+</nav>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-1 {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</body></html>

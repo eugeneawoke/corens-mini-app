@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  telegramUserId    String   @unique
+  telegramUsername  String?
+  status            String
+  firstSeenAt       DateTime @default(now())
+  lastSeenAt        DateTime @updatedAt
+}
+
+model Profile {
+  userId            String @id
+  displayName       String
+  about             String?
+  photoCount        Int    @default(0)
+  visibilityStatus  String
+  matchingEnabled   Boolean @default(true)
+}
+
+model MatchSession {
+  id                String   @id @default(cuid())
+  userAId           String
+  userBId           String
+  origin            String
+  status            String
+  score             Int?
+  createdAt         DateTime @default(now())
+  expiresAt         DateTime?
+}
+
+model ContactConsent {
+  id                String   @id @default(cuid())
+  matchSessionId    String
+  requestedBy       String
+  requestStatus     String
+  resolvedAt        DateTime?
+}
+
+model PhotoRevealConsent {
+  id                String   @id @default(cuid())
+  matchSessionId    String
+  requestedBy       String
+  requestStatus     String
+  resolvedAt        DateTime?
+}
+
+model BeaconSession {
+  id                String   @id @default(cuid())
+  userId            String
+  status            String
+  durationMinutes   Int
+  activatedAt       DateTime @default(now())
+  expiresAt         DateTime
+  cooldownUntil     DateTime?
+}
+
+model DeletionEvent {
+  id                String   @id @default(cuid())
+  userId            String
+  stage             String
+  requestedAt       DateTime @default(now())
+  completedAt       DateTime?
+}

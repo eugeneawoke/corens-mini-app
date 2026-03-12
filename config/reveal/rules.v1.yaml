@@ -1,0 +1,11 @@
+version: v1
+channels:
+  contact:
+    requires_mutual_consent: true
+    exposed_artifact: telegram_deep_link
+    soft_warning_required: true
+  photo:
+    requires_mutual_consent: true
+    exposed_artifact: photo_asset
+notes:
+  - contact and photo reveal are independent flows

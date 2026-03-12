@@ -1,0 +1,27 @@
+{
+  "name": "@corens/api",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/main.ts",
+    "lint": "echo 'No dedicated lint task is configured for @corens/api'",
+    "start": "node dist/main.js",
+    "test": "echo 'No tests are configured for @corens/api'",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@corens/config": "workspace:*",
+    "@corens/db": "workspace:*",
+    "@corens/domain": "workspace:*",
+    "@corens/telegram": "workspace:*",
+    "@types/express": "^5.0.6",
+    "@nestjs/common": "^11.1.16",
+    "@nestjs/config": "^4.0.3",
+    "@nestjs/core": "^11.1.16",
+    "@nestjs/platform-express": "^11.1.16",
+    "grammy": "^1.41.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  }
+}

@@ -1,0 +1,15 @@
+version: v1
+weights:
+  mood: 3
+  intent: 2
+  trust_overlap: 2
+  no_connections_bonus: 2
+  recent_mood_bonus: 1
+limits:
+  active_connections: 10
+cooldowns:
+  state_days: 3
+  trust_keys_days: 10
+  intent_hours: 6
+notes:
+  - runtime services must load these values instead of hardcoding them

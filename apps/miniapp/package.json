@@ -1,0 +1,25 @@
+{
+  "name": "@corens/miniapp",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "echo 'No dedicated lint task is configured for @corens/miniapp'",
+    "start": "next start",
+    "test": "echo 'No tests are configured for @corens/miniapp'",
+    "typecheck": "next build"
+  },
+  "dependencies": {
+    "@corens/domain": "workspace:*",
+    "@corens/ui": "workspace:*",
+    "lucide-react": "^0.542.0",
+    "next": "^15.5.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9"
+  }
+}

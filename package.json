@@ -1,0 +1,29 @@
+{
+  "name": "corens-mini-app",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "build": "corepack pnpm -r --if-present build",
+    "dev": "corepack pnpm -r --parallel --if-present dev",
+    "lint": "corepack pnpm -r --if-present lint",
+    "prisma:generate": "corepack pnpm --filter @corens/db exec prisma generate",
+    "test": "corepack pnpm -r --if-present test",
+    "typecheck": "corepack pnpm -r --if-present typecheck"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "prisma"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^25.4.0",
+    "prisma": "^6.16.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

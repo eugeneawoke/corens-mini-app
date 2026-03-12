@@ -1,0 +1,5 @@
+version: v1
+description: >
+  Placeholder trust-key weighting config.
+weights:
+  default_overlap_weight: 1

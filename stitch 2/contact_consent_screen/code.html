@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5e5ce6",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121220",
+                        "success": "#34c759",
+                        "warning": "#ff9f0a"
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Contact Consent</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<!-- Screen Wrapper with Background Simulation -->
+<div class="relative flex min-h-screen w-full flex-col overflow-hidden bg-background-light dark:bg-background-dark">
+<!-- Background Content (Simulating a profile screen or chat behind) -->
+<div class="flex flex-col p-6 opacity-40">
+<div class="flex items-center gap-4 mb-8">
+<div class="size-16 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">person</span>
+</div>
+<div>
+<div class="h-4 w-32 bg-slate-300 dark:bg-slate-700 rounded mb-2"></div>
+<div class="h-3 w-48 bg-slate-200 dark:bg-slate-800 rounded"></div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="h-24 w-full bg-slate-200 dark:bg-slate-800 rounded-xl"></div>
+<div class="h-24 w-full bg-slate-200 dark:bg-slate-800 rounded-xl"></div>
+<div class="h-24 w-full bg-slate-200 dark:bg-slate-800 rounded-xl"></div>
+</div>
+</div>
+<!-- Overlay/Backdrop with Blur -->
+<div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-10 flex flex-col justify-end">
+<!-- Bottom Sheet -->
+<div class="bg-white dark:bg-slate-900 rounded-t-xl shadow-2xl flex flex-col items-stretch overflow-hidden">
+<!-- BottomSheetHandle -->
+<button class="flex h-8 w-full items-center justify-center group">
+<div class="h-1.5 w-12 rounded-full bg-slate-200 dark:bg-slate-700 group-hover:bg-slate-300 transition-colors"></div>
+</button>
+<!-- Content Container -->
+<div class="px-6 pt-2 pb-8 flex flex-col items-center text-center">
+<!-- Shield Icon Section -->
+<div class="size-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1">shield</span>
+</div>
+<!-- Title -->
+<h3 class="text-slate-900 dark:text-slate-100 text-2xl font-bold leading-tight mb-3">
+                        Обмен контактами
+                    </h3>
+<!-- Body Text -->
+<p class="text-slate-600 dark:text-slate-400 text-base font-normal leading-relaxed mb-8 max-w-sm">
+                        Вы готовы обменяться контактами с Алексеем? Это произойдет только при взаимном согласии.
+                    </p>
+<!-- Status Badge -->
+<div class="w-full flex items-center gap-3 bg-warning/10 dark:bg-warning/20 px-4 py-4 rounded-xl mb-8">
+<div class="text-warning flex items-center justify-center rounded-lg bg-white dark:bg-slate-800 shrink-0 size-10 shadow-sm">
+<span class="material-symbols-outlined text-2xl">pending</span>
+</div>
+<div class="flex flex-col items-start flex-1 overflow-hidden">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-semibold truncate">Ожидание ответа партнера</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Алексей скоро примет решение</p>
+</div>
+<div class="shrink-0 flex items-center justify-center">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-warning"></span>
+</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="w-full flex flex-col gap-3">
+<button class="w-full bg-success text-white py-4 px-6 rounded-xl font-semibold text-base flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-xl">check_circle</span>
+                            Разрешить
+                        </button>
+<button class="w-full bg-transparent text-slate-500 dark:text-slate-400 py-4 px-6 rounded-xl font-medium text-base hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                            Не сейчас
+                        </button>
+</div>
+</div>
+<!-- Safe Area Padding -->
+<div class="h-4 bg-white dark:bg-slate-900"></div>
+</div>
+</div>
+</div>
+</body></html>

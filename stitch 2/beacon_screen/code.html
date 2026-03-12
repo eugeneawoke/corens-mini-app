@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Beacon Activation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5e5ce6",
+                        "accent": "#BF5AF2",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121220",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .beacon-glow {
+            background: radial-gradient(circle, rgba(191, 90, 242, 0.15) 0%, rgba(191, 90, 242, 0) 70%);
+        }
+        .beacon-core {
+            background: radial-gradient(circle, rgba(191, 90, 242, 0.4) 0%, rgba(191, 90, 242, 0.1) 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex h-screen w-full flex-col overflow-x-hidden">
+<!-- Header -->
+<header class="flex items-center px-4 py-4 justify-between sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md z-10">
+<button class="text-slate-900 dark:text-slate-100 flex size-10 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<h2 class="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10">Beacon</h2>
+</header>
+<!-- Main Content -->
+<main class="flex flex-col flex-1 items-center justify-center px-6">
+<!-- Illustration: Soft Purple Glowing Circle -->
+<div class="relative w-full max-w-sm aspect-square flex items-center justify-center mb-12">
+<!-- Large outer glow -->
+<div class="absolute inset-0 beacon-glow rounded-full animate-pulse"></div>
+<!-- Middle ring -->
+<div class="absolute w-3/4 h-3/4 border-2 border-accent/10 rounded-full"></div>
+<!-- Inner core circle -->
+<div class="relative w-40 h-40 rounded-full beacon-core flex items-center justify-center border border-accent/20">
+<span class="material-symbols-outlined text-accent text-6xl opacity-80">sensors</span>
+</div>
+<!-- Placeholder background image style from template if needed for consistency -->
+<div class="hidden w-full bg-center bg-no-repeat bg-cover aspect-auto rounded-none flex-1" data-alt="Abstract soft purple glowing energy pulse visualization" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC9dsVf3mACs0jijd2LkcClTRMYgBrXL1xxHu6OAYtc6IhLZQl0AiMJfnBNiokR_WH-uoqS6wvrdyOJ7cj7q2_eW4fwD92F5_mZxCjPulWabe4b37Iw82r8hkjpj0O0IB86ZEnyCYy2FD_SKOZpIhlNbK0U1AKX6wl0ImsS_Mhdr_vDccr8cc8pYrxYCyjUTJBCM38CdvEsyoAv_HosUMDJYpbpRmGg0tGBzZWH65CNH2Mp58y1eGQ5XNp-exZ9PkOqkI4GN_YGsv0");'></div>
+</div>
+<!-- Status & Description -->
+<div class="text-center max-w-xs mx-auto">
+<h2 class="text-2xl font-bold leading-tight mb-4 text-slate-900 dark:text-slate-100">
+                    Beacon выключен
+                </h2>
+<p class="text-base font-normal leading-relaxed text-slate-600 dark:text-slate-400">
+                    Включите Beacon, чтобы стать видимым для людей со схожими ключами на ближайшие 2 часа.
+                </p>
+</div>
+</main>
+<!-- Bottom Action Bar -->
+<footer class="p-6 bg-background-light dark:bg-background-dark">
+<div class="max-w-md mx-auto">
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-5 bg-accent hover:opacity-90 active:scale-[0.98] transition-all text-white text-base font-bold leading-normal tracking-wide shadow-lg shadow-accent/20">
+<span class="truncate">Активировать Beacon</span>
+</button>
+</div>
+<!-- SafeArea spacer for mobile devices -->
+<div class="h-4"></div>
+</footer>
+</div>
+</body></html>

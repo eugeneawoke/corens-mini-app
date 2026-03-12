@@ -1,0 +1,8 @@
+version: v1
+retention:
+  histories_months: 12
+  match_sessions_days: 90
+  reveal_consents_days: 180
+  beacon_sessions_days: 30
+notes:
+  - audit, tombstone, and media metadata retention stay aligned with security policy

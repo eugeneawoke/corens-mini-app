@@ -1,0 +1,5 @@
+version: v1
+description: >
+  Placeholder state compatibility matrix. Keep compatibility rules config-backed.
+states:
+  []

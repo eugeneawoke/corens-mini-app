@@ -1,0 +1,8 @@
+version: v1
+hidden_profile_closes_pending_connection: false
+deletion:
+  revoke_sessions_immediately: true
+  expire_beacon_immediately: true
+  close_open_consents_immediately: true
+notes:
+  - hidden profile does not auto-close an already found pending connection

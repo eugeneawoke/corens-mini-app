@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node src/index.js connect)",
+      "Bash(node src/index.js canvas info)",
+      "Bash(node src/index.js eval \"figma.currentPage.children.map\\(n => \\({ name: n.name, id: n.id, type: n.type, x: n.x, y: n.y, width: n.width, height: n.height }\\)\\)\")",
+      "Bash(node src/index.js eval \"figma.root.children.map\\(p => \\({ name: p.name, id: p.id }\\)\\)\")",
+      "Bash(node src/index.js eval \":*)",
+      "Bash(node src/index.js eval \"\\(async \\(\\) => {:*)",
+      "Bash(node src/index.js eval \"figma.root.children.map\\(p => \\({ name: p.name, id: p.id, childCount: p.children.length }\\)\\)\")"
+    ]
+  }
+}
