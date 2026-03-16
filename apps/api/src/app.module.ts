@@ -13,6 +13,7 @@ import { PrivacyController } from "./privacy.controller";
 import { ProfilesService } from "./modules/profiles";
 import { HomeService } from "./home.service";
 import { BeaconService } from "./modules/beacon/service";
+import { ConsentRuntimeService } from "./modules/consents/runtime.service";
 import { PolicyConfigService } from "./policy-config.service";
 import { MatchingRuntimeService } from "./modules/matching/runtime.service";
 
@@ -38,6 +39,7 @@ import { MatchingRuntimeService } from "./modules/matching/runtime.service";
     MaintenanceService,
     HomeService,
     BeaconService,
+    ConsentRuntimeService,
     MatchingRuntimeService,
     PolicyConfigService,
     ProfilesService
@@ -48,6 +50,7 @@ import { MatchingRuntimeService } from "./modules/matching/runtime.service";
     MaintenanceService,
     HomeService,
     BeaconService,
+    ConsentRuntimeService,
     MatchingRuntimeService,
     PolicyConfigService,
     ProfilesService

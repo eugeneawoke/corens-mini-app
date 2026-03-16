@@ -42,6 +42,17 @@ export async function approveConsentAction(channel: "contact" | "photo"): Promis
   redirect("/connection");
 }
 
+export async function declineConsentAction(channel: "contact" | "photo"): Promise<void> {
+  await sendApiMutation(`/api/consents/${channel}`, {
+    method: "POST",
+    body: JSON.stringify({ decision: "declined" })
+  });
+
+  revalidatePath("/connection");
+  revalidatePath(`/${channel === "contact" ? "contact-consent" : "photo-reveal"}`);
+  redirect("/connection");
+}
+
 export async function completeOnboardingAction(formData: FormData): Promise<void> {
   const displayName = String(formData.get("displayName") ?? "").trim();
   const stateKey = String(formData.get("stateKey") ?? "");

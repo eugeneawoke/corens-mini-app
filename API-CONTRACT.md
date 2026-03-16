@@ -44,7 +44,8 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 - Profile controls for state, intent, trust keys, and visibility now write through to Prisma-backed storage
 - Matching now creates and reads real `MatchSession` records from persisted profiles
 - Beacon activation is backend-driven and uses config-backed duration/cooldown rules
-- Consent endpoints return unavailable until a real active connection exists
+- Consent endpoints now persist per-user decisions on top of the active `MatchSession`
+- Mutual contact approval returns only a Telegram deep link, not a plain-text contact field
 - The route shapes are intended to stay stable while matching and consent move from placeholders to real persistence-backed orchestration
 
 ## Auth

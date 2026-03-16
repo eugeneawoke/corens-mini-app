@@ -49,6 +49,7 @@ export interface ConsentStatusView {
   status: "pending" | "approved" | "declined";
   warnings: string[];
   artifactType?: "telegram_deep_link" | "photo_asset";
+  artifactValue?: string;
 }
 
 export interface ConnectionSummary {

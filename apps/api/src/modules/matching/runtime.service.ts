@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { createConsentStatus, evaluateMatchingCandidate, type ConnectionSummary } from "@corens/domain";
+import { evaluateMatchingCandidate, type ConnectionSummary } from "@corens/domain";
 import type { MatchingCandidate } from "@corens/domain";
 import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
+import { ConsentRuntimeService } from "../consents/runtime.service";
 import { ProfilesService } from "../profiles";
 
 @Injectable()
@@ -10,7 +11,8 @@ export class MatchingRuntimeService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly profiles: ProfilesService,
-    private readonly policyConfig: PolicyConfigService
+    private readonly policyConfig: PolicyConfigService,
+    private readonly consents: ConsentRuntimeService
   ) {}
 
   async getCurrentConnection(): Promise<ConnectionSummary | null> {
@@ -40,6 +42,15 @@ export class MatchingRuntimeService {
     }
 
     const sharedKeys = record.profile.trustKeys.filter((item) => peer.trustKeys.includes(item));
+    const consentStatus = await this.consents.buildStatusForMatch(
+      session.id,
+      record.user.id,
+      peer.userId,
+      {
+        telegramUsername: peer.user.telegramUsername,
+        telegramUserId: peer.user.telegramUserId
+      }
+    );
 
     return {
       displayName: peer.displayName,
@@ -52,8 +63,8 @@ export class MatchingRuntimeService {
         session.origin === "beacon"
           ? "Связь найдена через Beacon fallback по тем же параметрам матрицы."
           : "Связь найдена автоматическим matching pipeline.",
-      contactConsent: createConsentStatus("contact", "pending", "pending"),
-      photoConsent: createConsentStatus("photo", "pending", "pending")
+      contactConsent: consentStatus.contact,
+      photoConsent: consentStatus.photo
     };
   }
 

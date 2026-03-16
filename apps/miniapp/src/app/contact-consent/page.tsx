@@ -2,7 +2,7 @@ import { Shield } from "lucide-react";
 import { redirect } from "next/navigation";
 import { Button, ButtonLink, NoticeCard, StatusBadge } from "@corens/ui";
 
-import { approveConsentAction } from "../actions";
+import { approveConsentAction, declineConsentAction } from "../actions";
 import { getConsentStatus, getProfileSummary } from "../../lib/api";
 
 export default async function ContactConsentPage() {
@@ -41,9 +41,20 @@ export default async function ContactConsentPage() {
 
         <div className="corens-action-stack" style={{ marginTop: 16 }}>
           <StatusBadge tone="warning">{resolution?.status ?? "pending"}</StatusBadge>
-          <form action={approveConsentAction.bind(null, "contact")}>
-            <Button variant="success">Разрешить обмен</Button>
-          </form>
+          {resolution?.status === "approved" && resolution.artifactValue ? (
+            <ButtonLink href={resolution.artifactValue} variant="success">
+              Открыть Telegram
+            </ButtonLink>
+          ) : (
+            <>
+              <form action={approveConsentAction.bind(null, "contact")}>
+                <Button variant="success">Разрешить обмен</Button>
+              </form>
+              <form action={declineConsentAction.bind(null, "contact")}>
+                <Button variant="danger">Отклонить</Button>
+              </form>
+            </>
+          )}
           <ButtonLink href="/connection" variant="ghost">
             Не сейчас
           </ButtonLink>

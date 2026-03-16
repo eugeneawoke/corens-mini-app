@@ -2,7 +2,7 @@ import { Camera, Lock } from "lucide-react";
 import { redirect } from "next/navigation";
 import { Button, ButtonLink, NoticeCard, StatusBadge } from "@corens/ui";
 
-import { approveConsentAction } from "../actions";
+import { approveConsentAction, declineConsentAction } from "../actions";
 import { getConsentStatus, getProfileSummary } from "../../lib/api";
 
 export default async function PhotoRevealPage() {
@@ -41,6 +41,9 @@ export default async function PhotoRevealPage() {
           <StatusBadge tone="warning">{resolution?.status ?? "pending"}</StatusBadge>
           <form action={approveConsentAction.bind(null, "photo")}>
             <Button>Запросить раскрытие</Button>
+          </form>
+          <form action={declineConsentAction.bind(null, "photo")}>
+            <Button variant="danger">Не показывать</Button>
           </form>
           <ButtonLink href="/connection" variant="ghost">
             Вернуться к связи
