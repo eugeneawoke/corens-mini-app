@@ -142,3 +142,41 @@ export async function updateVisibilityAction(formData: FormData): Promise<void> 
   revalidatePath("/connection");
   redirect("/privacy");
 }
+
+export async function requestDeletionAction(formData: FormData): Promise<void> {
+  const confirmation = String(formData.get("confirmation") ?? "");
+
+  await sendApiMutation("/api/privacy/delete-request", {
+    method: "POST",
+    body: JSON.stringify({ confirmation })
+  });
+
+  revalidatePath("/connection");
+  revalidatePath("/profile");
+  revalidatePath("/privacy");
+  redirect("/onboarding");
+}
+
+export async function reportConnectionAction(formData: FormData): Promise<void> {
+  const note = String(formData.get("note") ?? "");
+
+  await sendApiMutation("/api/moderation/report", {
+    method: "POST",
+    body: JSON.stringify({ note })
+  });
+
+  revalidatePath("/connection");
+  redirect("/connection");
+}
+
+export async function blockConnectionAction(formData: FormData): Promise<void> {
+  const note = String(formData.get("note") ?? "");
+
+  await sendApiMutation("/api/moderation/block", {
+    method: "POST",
+    body: JSON.stringify({ note })
+  });
+
+  revalidatePath("/connection");
+  redirect("/connection");
+}

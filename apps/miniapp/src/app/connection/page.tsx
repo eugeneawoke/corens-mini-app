@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import {
   AppSurface,
   EmptyState,
+  Button,
   ButtonLink,
+  Field,
   NoticeCard,
   Panel,
   Section,
@@ -11,6 +13,7 @@ import {
   TopBar
 } from "@corens/ui";
 
+import { blockConnectionAction, reportConnectionAction } from "../actions";
 import { getBeaconSummary, getCurrentConnection, getProfileSummary } from "../../lib/api";
 
 function toneForStatus(status: "pending" | "approved" | "declined") {
@@ -199,12 +202,35 @@ export default async function ConnectionPage() {
         </Panel>
       </Section>
 
-      <NoticeCard
-        icon={Unlink2}
-        title="Разрыв связи"
-        description="Сейчас это только UI-маркер. Реальный skip / close flow должен прийти из matching API."
-        tone="warning"
-      />
+      <Section title="Безопасность">
+        <Panel tone="warning">
+          <div className="corens-stack corens-gap-sm">
+            <div className="corens-inline-head">
+              <Unlink2 size={18} />
+              <strong className="corens-card-title">Разорвать или пожаловаться</strong>
+            </div>
+            <p className="corens-copy corens-copy-muted">
+              Жалоба и блокировка сразу закрывают активную связь и останавливают открытые consent flow.
+            </p>
+            <form action={reportConnectionAction} className="corens-stack corens-gap-sm">
+              <Field
+                name="note"
+                label="Комментарий к жалобе"
+                placeholder="Коротко опишите причину"
+              />
+              <Button type="submit" variant="secondary">Пожаловаться</Button>
+            </form>
+            <form action={blockConnectionAction} className="corens-stack corens-gap-sm">
+              <Field
+                name="note"
+                label="Причина блокировки"
+                placeholder="Коротко опишите причину"
+              />
+              <Button type="submit" variant="danger">Заблокировать и закрыть связь</Button>
+            </form>
+          </div>
+        </Panel>
+      </Section>
     </AppSurface>
   );
 }

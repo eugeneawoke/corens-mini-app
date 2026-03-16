@@ -22,3 +22,13 @@ BEGIN
       FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
   END IF;
 END $$;
+
+CREATE TABLE IF NOT EXISTS "ModerationEvent" (
+  "id" TEXT PRIMARY KEY,
+  "matchSessionId" TEXT,
+  "actorUserId" TEXT NOT NULL,
+  "targetUserId" TEXT,
+  "eventType" TEXT NOT NULL,
+  "note" TEXT,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

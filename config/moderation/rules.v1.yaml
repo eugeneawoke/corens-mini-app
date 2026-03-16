@@ -1,4 +1,4 @@
 version: v1
-description: Placeholder moderation policy surface.
+description: Runtime moderation policy surface.
 limits:
-  report_requests_per_day: 0
+  report_requests_per_day: 5

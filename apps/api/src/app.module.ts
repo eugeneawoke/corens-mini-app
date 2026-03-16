@@ -10,10 +10,13 @@ import { MatchingController } from "./matching.controller";
 import { ConsentsController } from "./consents.controller";
 import { HomeController } from "./home.controller";
 import { PrivacyController } from "./privacy.controller";
+import { ModerationController } from "./moderation.controller";
 import { ProfilesService } from "./modules/profiles";
 import { HomeService } from "./home.service";
 import { BeaconService } from "./modules/beacon/service";
 import { ConsentRuntimeService } from "./modules/consents/runtime.service";
+import { ModerationRuntimeService } from "./modules/moderation/runtime.service";
+import { PrivacyRuntimeService } from "./modules/privacy/runtime.service";
 import { PolicyConfigService } from "./policy-config.service";
 import { MatchingRuntimeService } from "./modules/matching/runtime.service";
 
@@ -29,6 +32,7 @@ import { MatchingRuntimeService } from "./modules/matching/runtime.service";
     HomeController,
     ProfileController,
     PrivacyController,
+    ModerationController,
     BeaconController,
     MatchingController,
     ConsentsController
@@ -40,6 +44,8 @@ import { MatchingRuntimeService } from "./modules/matching/runtime.service";
     HomeService,
     BeaconService,
     ConsentRuntimeService,
+    ModerationRuntimeService,
+    PrivacyRuntimeService,
     MatchingRuntimeService,
     PolicyConfigService,
     ProfilesService
@@ -51,6 +57,8 @@ import { MatchingRuntimeService } from "./modules/matching/runtime.service";
     HomeService,
     BeaconService,
     ConsentRuntimeService,
+    ModerationRuntimeService,
+    PrivacyRuntimeService,
     MatchingRuntimeService,
     PolicyConfigService,
     ProfilesService

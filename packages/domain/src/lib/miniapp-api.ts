@@ -100,6 +100,14 @@ export interface UpdateVisibilityRequest {
   isHidden: boolean;
 }
 
+export interface DeleteAccountRequest {
+  confirmation: string;
+}
+
+export interface ModerationActionRequest {
+  note?: string;
+}
+
 export interface ConsentDecisionRequest {
   decision: ConsentDecision;
 }

@@ -1,12 +1,20 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Injectable } from "@nestjs/common";
-import type { BeaconRulesConfig, MatchingScoringConfig } from "@corens/config";
+import type {
+  BeaconRulesConfig,
+  MatchingScoringConfig,
+  PrivacyRulesConfig,
+  RetentionPoliciesConfig
+} from "@corens/config";
 
 @Injectable()
 export class PolicyConfigService {
   private matchingScoringPromise: Promise<MatchingScoringConfig> | undefined;
   private beaconRulesPromise: Promise<BeaconRulesConfig> | undefined;
+  private privacyRulesPromise: Promise<PrivacyRulesConfig> | undefined;
+  private retentionPoliciesPromise: Promise<RetentionPoliciesConfig> | undefined;
+  private moderationRulesPromise: Promise<{ reportRequestsPerDay: number }> | undefined;
 
   getMatchingScoring(): Promise<MatchingScoringConfig> {
     this.matchingScoringPromise ??= this.loadMatchingScoring();
@@ -16,6 +24,21 @@ export class PolicyConfigService {
   getBeaconRules(): Promise<BeaconRulesConfig> {
     this.beaconRulesPromise ??= this.loadBeaconRules();
     return this.beaconRulesPromise;
+  }
+
+  getPrivacyRules(): Promise<PrivacyRulesConfig> {
+    this.privacyRulesPromise ??= this.loadPrivacyRules();
+    return this.privacyRulesPromise;
+  }
+
+  getRetentionPolicies(): Promise<RetentionPoliciesConfig> {
+    this.retentionPoliciesPromise ??= this.loadRetentionPolicies();
+    return this.retentionPoliciesPromise;
+  }
+
+  getModerationRules(): Promise<{ reportRequestsPerDay: number }> {
+    this.moderationRulesPromise ??= this.loadModerationRules();
+    return this.moderationRulesPromise;
   }
 
   private async loadMatchingScoring(): Promise<MatchingScoringConfig> {
@@ -44,6 +67,46 @@ export class PolicyConfigService {
       intervalsMinutes: this.readList(raw, "intervals_minutes").map((value) => Number(value)),
       cooldownMinutes: this.readNumber(raw, "cooldown_minutes"),
       activationsPerDay: this.readNumber(raw, "activations_per_day")
+    };
+  }
+
+  private async loadPrivacyRules(): Promise<PrivacyRulesConfig> {
+    const raw = await this.readLines("config/privacy/rules.v1.yaml");
+
+    return {
+      version: this.readScalar(raw, "version") ?? "v1",
+      hiddenProfileClosesPendingConnection:
+        this.readScalar(raw, "hidden_profile_closes_pending_connection") === "true",
+      deletion: {
+        revokeSessionsImmediately:
+          this.readScalar(raw, "deletion.revoke_sessions_immediately") === "true",
+        expireBeaconImmediately:
+          this.readScalar(raw, "deletion.expire_beacon_immediately") === "true",
+        closeOpenConsentsImmediately:
+          this.readScalar(raw, "deletion.close_open_consents_immediately") === "true"
+      }
+    };
+  }
+
+  private async loadRetentionPolicies(): Promise<RetentionPoliciesConfig> {
+    const raw = await this.readLines("config/retention/policies.v1.yaml");
+
+    return {
+      version: this.readScalar(raw, "version") ?? "v1",
+      retention: {
+        histories_months: this.readNumber(raw, "retention.histories_months"),
+        match_sessions_days: this.readNumber(raw, "retention.match_sessions_days"),
+        reveal_consents_days: this.readNumber(raw, "retention.reveal_consents_days"),
+        beacon_sessions_days: this.readNumber(raw, "retention.beacon_sessions_days")
+      }
+    };
+  }
+
+  private async loadModerationRules(): Promise<{ reportRequestsPerDay: number }> {
+    const raw = await this.readLines("config/moderation/rules.v1.yaml");
+
+    return {
+      reportRequestsPerDay: this.readNumber(raw, "limits.report_requests_per_day")
     };
   }
 

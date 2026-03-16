@@ -2,7 +2,7 @@ import { AlertTriangle } from "lucide-react";
 import { redirect } from "next/navigation";
 import {
   AppSurface,
-  ButtonLink,
+  Button,
   Field,
   NoticeCard,
   Panel,
@@ -10,6 +10,7 @@ import {
   TopBar
 } from "@corens/ui";
 
+import { requestDeletionAction } from "../actions";
 import { getProfileSummary } from "../../lib/api";
 
 export default async function DeletePage() {
@@ -20,18 +21,7 @@ export default async function DeletePage() {
   }
 
   return (
-    <AppSurface
-      bottomBar={
-        <div className="corens-action-stack">
-          <ButtonLink href="/profile" variant="danger">
-            Удалить навсегда
-          </ButtonLink>
-          <ButtonLink href="/profile" variant="ghost">
-            Отмена
-          </ButtonLink>
-        </div>
-      }
-    >
+    <AppSurface>
       <TopBar title="Удаление аккаунта" backHref="/privacy" />
 
       <NoticeCard
@@ -51,13 +41,22 @@ export default async function DeletePage() {
         </Panel>
       </Section>
 
-      <Section title="Подтверждение">
-        <Field
-          label='Введите "удалить"'
-          placeholder="удалить"
-          hint="Финальный destructive flow должен проверяться на backend перед запуском purge."
-        />
-      </Section>
+      <form action={requestDeletionAction} className="corens-stack corens-gap-sm">
+        <Section title="Подтверждение">
+          <Field
+            name="confirmation"
+            label='Введите "удалить"'
+            placeholder="удалить"
+            hint="После подтверждения профиль будет скрыт, связи закрыты, а данные отправлены в deletion workflow."
+          />
+        </Section>
+
+        <div className="corens-action-stack">
+          <Button type="submit" variant="danger">
+            Удалить навсегда
+          </Button>
+        </div>
+      </form>
     </AppSurface>
   );
 }

@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
 import { BeaconService } from "../modules/beacon/service";
 import { MatchingRuntimeService } from "../modules/matching/runtime.service";
+import { PrivacyRuntimeService } from "../modules/privacy/runtime.service";
 
 @Injectable()
 export class MaintenanceService implements OnModuleDestroy {
@@ -9,7 +10,8 @@ export class MaintenanceService implements OnModuleDestroy {
 
   constructor(
     private readonly beacon: BeaconService,
-    private readonly matching: MatchingRuntimeService
+    private readonly matching: MatchingRuntimeService,
+    private readonly privacy: PrivacyRuntimeService
   ) {}
 
   start(): void {
@@ -35,6 +37,7 @@ export class MaintenanceService implements OnModuleDestroy {
     try {
       await this.beacon.expireStaleSessions();
       await this.matching.sweep();
+      await this.privacy.cleanupRetention();
       this.logger.debug("maintenance sweep tick");
     } catch (error) {
       this.logger.error("maintenance sweep failed", error instanceof Error ? error.stack : undefined);

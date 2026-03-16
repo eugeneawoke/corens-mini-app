@@ -78,3 +78,13 @@ model DeletionEvent {
   requestedAt       DateTime @default(now())
   completedAt       DateTime?
 }
+
+model ModerationEvent {
+  id                String   @id @default(cuid())
+  matchSessionId    String?
+  actorUserId       String
+  targetUserId      String?
+  eventType         String
+  note              String?
+  createdAt         DateTime @default(now())
+}
