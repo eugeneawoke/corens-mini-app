@@ -1,4 +1,5 @@
 import { CircleUserRound, Compass, Radio, Sparkles } from "lucide-react";
+import { redirect } from "next/navigation";
 import {
   AppSurface,
   ButtonLink,
@@ -15,6 +16,10 @@ import { getHomeSummary } from "../lib/api";
 
 export default async function HomePage() {
   const snapshot = await getHomeSummary();
+
+  if (!snapshot.onboardingCompleted) {
+    redirect("/onboarding");
+  }
 
   return (
     <AppSurface

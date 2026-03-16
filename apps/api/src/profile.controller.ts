@@ -1,5 +1,9 @@
-import { Body, Controller, Get, Patch } from "@nestjs/common";
-import type { UpdateStateIntentRequest, UpdateTrustKeysRequest } from "@corens/domain";
+import { Body, Controller, Get, Patch, Post } from "@nestjs/common";
+import type {
+  CompleteOnboardingRequest,
+  UpdateStateIntentRequest,
+  UpdateTrustKeysRequest
+} from "@corens/domain";
 import { ProfilesService } from "./modules/profiles";
 
 @Controller("profile")
@@ -19,5 +23,10 @@ export class ProfileController {
   @Patch("trust-keys")
   updateTrustKeys(@Body() body: UpdateTrustKeysRequest) {
     return this.profiles.updateTrustKeys(body);
+  }
+
+  @Post("onboarding")
+  completeOnboarding(@Body() body: CompleteOnboardingRequest) {
+    return this.profiles.completeOnboarding(body);
   }
 }

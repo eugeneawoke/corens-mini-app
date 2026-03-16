@@ -1,4 +1,5 @@
 import { Camera, Lock, Shield, Unlink2 } from "lucide-react";
+import { redirect } from "next/navigation";
 import {
   AppSurface,
   ButtonLink,
@@ -9,7 +10,7 @@ import {
   TopBar
 } from "@corens/ui";
 
-import { getCurrentConnection } from "../../lib/api";
+import { getCurrentConnection, getProfileSummary } from "../../lib/api";
 
 function toneForStatus(status: "pending" | "approved" | "declined") {
   if (status === "approved") {
@@ -24,6 +25,12 @@ function toneForStatus(status: "pending" | "approved" | "declined") {
 }
 
 export default async function ConnectionPage() {
+  const profile = await getProfileSummary();
+
+  if (!profile.onboardingCompleted) {
+    redirect("/onboarding");
+  }
+
   const connection = await getCurrentConnection();
 
   if (!connection) {

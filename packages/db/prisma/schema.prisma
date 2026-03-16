@@ -29,6 +29,7 @@ model Profile {
   photoCount        Int      @default(0)
   visibilityStatus  String
   matchingEnabled   Boolean  @default(true)
+  onboardingCompleted Boolean @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

@@ -1,12 +1,12 @@
 import { Controller, Get } from "@nestjs/common";
-import { MvpDemoStoreService } from "./mvp-demo-store.service";
+import { HomeService } from "./home.service";
 
 @Controller("home")
 export class HomeController {
-  constructor(private readonly store: MvpDemoStoreService) {}
+  constructor(private readonly home: HomeService) {}
 
   @Get("summary")
   getSummary() {
-    return this.store.getHomeSummary();
+    return this.home.getSummary();
   }
 }

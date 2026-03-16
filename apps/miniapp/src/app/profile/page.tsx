@@ -1,10 +1,15 @@
 import { BadgeInfo, HeartHandshake, KeyRound, Lock, Trash2 } from "lucide-react";
+import { redirect } from "next/navigation";
 import { AppSurface, ListRow, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
 
 import { getProfileSummary } from "../../lib/api";
 
 export default async function ProfilePage() {
   const snapshot = await getProfileSummary();
+
+  if (!snapshot.onboardingCompleted) {
+    redirect("/onboarding");
+  }
 
   return (
     <AppSurface>

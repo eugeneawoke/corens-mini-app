@@ -1,9 +1,14 @@
+import { redirect } from "next/navigation";
 import { AppSurface, ButtonLink, KeyChip, NoticeCard, Panel, Section, TopBar } from "@corens/ui";
 
 import { getProfileSummary } from "../../lib/api";
 
 export default async function TrustKeysPage() {
   const snapshot = await getProfileSummary();
+
+  if (!snapshot.onboardingCompleted) {
+    redirect("/onboarding");
+  }
 
   return (
     <AppSurface bottomBar={<ButtonLink href="/profile">Сохранить выбор</ButtonLink>}>

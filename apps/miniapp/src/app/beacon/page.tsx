@@ -1,10 +1,17 @@
 import { Radio, TimerReset } from "lucide-react";
+import { redirect } from "next/navigation";
 import { AppSurface, Button, NoticeCard, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
 
 import { activateBeaconAction } from "../actions";
-import { getBeaconSummary } from "../../lib/api";
+import { getBeaconSummary, getProfileSummary } from "../../lib/api";
 
 export default async function BeaconPage() {
+  const profile = await getProfileSummary();
+
+  if (!profile.onboardingCompleted) {
+    redirect("/onboarding");
+  }
+
   const snapshot = await getBeaconSummary();
 
   return (

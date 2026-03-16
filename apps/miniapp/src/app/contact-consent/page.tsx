@@ -1,10 +1,17 @@
 import { Shield } from "lucide-react";
+import { redirect } from "next/navigation";
 import { Button, ButtonLink, NoticeCard, StatusBadge } from "@corens/ui";
 
 import { approveConsentAction } from "../actions";
-import { getConsentStatus } from "../../lib/api";
+import { getConsentStatus, getProfileSummary } from "../../lib/api";
 
 export default async function ContactConsentPage() {
+  const profile = await getProfileSummary();
+
+  if (!profile.onboardingCompleted) {
+    redirect("/onboarding");
+  }
+
   const resolution = await getConsentStatus("contact");
 
   return (

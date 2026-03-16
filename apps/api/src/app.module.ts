@@ -8,9 +8,10 @@ import { ProfileController } from "./profile.controller";
 import { BeaconController } from "./beacon.controller";
 import { MatchingController } from "./matching.controller";
 import { ConsentsController } from "./consents.controller";
-import { MvpDemoStoreService } from "./mvp-demo-store.service";
 import { HomeController } from "./home.controller";
 import { ProfilesService } from "./modules/profiles";
+import { HomeService } from "./home.service";
+import { BeaconService } from "./modules/beacon/service";
 
 @Module({
   imports: [
@@ -31,14 +32,16 @@ import { ProfilesService } from "./modules/profiles";
     PrismaService,
     BotWebhookService,
     MaintenanceService,
-    MvpDemoStoreService,
+    HomeService,
+    BeaconService,
     ProfilesService
   ],
   exports: [
     PrismaService,
     BotWebhookService,
     MaintenanceService,
-    MvpDemoStoreService,
+    HomeService,
+    BeaconService,
     ProfilesService
   ]
 })

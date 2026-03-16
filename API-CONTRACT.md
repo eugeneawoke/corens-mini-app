@@ -23,8 +23,9 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 
 ## First-Pass Implemented Route Shapes
 
-- `GET /api/home/summary`: compact home payload with current state, intent, beacon status, and current connection preview
+- `GET /api/home/summary`: compact home payload with onboarding status, current state, intent, beacon status, and current connection preview
 - `GET /api/profile/summary`: aggregated profile payload for Profile, State/Intent, Trust Keys, Privacy, and Delete screens
+- `POST /api/profile/onboarding`: complete first-run onboarding and unlock the rest of the Mini App
 - `PATCH /api/profile/state-intent`: first-pass update shape for current `stateKey` and `intentKey`
 - `PATCH /api/profile/trust-keys`: first-pass update shape for selected trust keys
 - `GET /api/beacon/status`: current Beacon status payload
@@ -38,8 +39,10 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 ## First-Pass Payload Notes
 
 - The current implementation uses shared DTOs from `@corens/domain`
-- These payloads are currently served from an in-memory MVP demo store inside `apps/api`
-- The route shapes are intended to stay stable while the backing storage moves from demo state to Prisma-backed persistence
+- Profile and onboarding payloads are Prisma-backed
+- Home currently returns no active connection until a real `MatchSession` exists
+- Consent endpoints return unavailable until a real active connection exists
+- The route shapes are intended to stay stable while matching and consent move from placeholders to real persistence-backed orchestration
 
 ## Auth
 

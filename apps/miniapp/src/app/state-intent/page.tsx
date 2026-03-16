@@ -1,4 +1,5 @@
 import { Heart, MoonStar, Orbit, Sparkle } from "lucide-react";
+import { redirect } from "next/navigation";
 import { AppSurface, ButtonLink, ChoiceTile, NoticeCard, Panel, Section, TopBar } from "@corens/ui";
 
 import { getProfileSummary } from "../../lib/api";
@@ -7,6 +8,10 @@ const stateIcons = [Heart, MoonStar, Sparkle, Orbit];
 
 export default async function StateIntentPage() {
   const snapshot = await getProfileSummary();
+
+  if (!snapshot.onboardingCompleted) {
+    redirect("/onboarding");
+  }
 
   return (
     <AppSurface

@@ -1,4 +1,5 @@
 import { AlertTriangle } from "lucide-react";
+import { redirect } from "next/navigation";
 import {
   AppSurface,
   ButtonLink,
@@ -13,6 +14,10 @@ import { getProfileSummary } from "../../lib/api";
 
 export default async function DeletePage() {
   const snapshot = await getProfileSummary();
+
+  if (!snapshot.onboardingCompleted) {
+    redirect("/onboarding");
+  }
 
   return (
     <AppSurface

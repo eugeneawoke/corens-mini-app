@@ -111,6 +111,7 @@ export interface DemoProfileState {
   intentKey: string;
   trustKeys: string[];
   visibility: VisibilityState;
+  onboardingCompleted: boolean;
 }
 
 export interface DemoConnectionState {
@@ -139,43 +140,19 @@ export interface DemoMvpState {
 export function createDemoMvpState(): DemoMvpState {
   return {
     profile: {
-      displayName: "Мария",
-      handle: "@maria_user",
+      displayName: "Новый профиль",
+      handle: "@corens_user",
       stateKey: "calm",
       intentKey: "slow-dialogue",
-      trustKeys: ["Тишина", "Честность", "Бережность"],
+      trustKeys: [],
       visibility: {
         userId: "user-self",
         isHidden: false,
         matchingEnabled: true
-      }
-    },
-    connection: {
-      displayName: "Алексей",
-      trustLevel: 2,
-      selfCandidate: {
-        userId: "user-self",
-        stateKey: "calm",
-        intentKey: "slow-dialogue",
-        trustKeys: ["тишина", "честность", "бережность", "чай"],
-        activeConnectionsCount: 0,
-        matchingEnabled: true,
-        isHidden: false
       },
-      peerCandidate: {
-        userId: "user-peer",
-        stateKey: "calm",
-        intentKey: "slow-dialogue",
-        trustKeys: ["тишина", "честность", "чай"],
-        activeConnectionsCount: 0,
-        matchingEnabled: true,
-        isHidden: false
-      },
-      contactActorDecision: "approved",
-      contactPeerDecision: "pending",
-      photoActorDecision: "pending",
-      photoPeerDecision: "pending"
+      onboardingCompleted: false
     },
+    connection: null,
     beacon: {
       status: "inactive",
       remainingLabel: "2:00:00"
@@ -188,6 +165,7 @@ export function createProfileSummary(state: DemoMvpState): ProfileSummary {
   const selectedIntent = findOption(intentOptions, state.profile.intentKey);
 
   return {
+    onboardingCompleted: state.profile.onboardingCompleted,
     profile: {
       displayName: state.profile.displayName,
       handle: state.profile.handle
@@ -274,6 +252,7 @@ export function createHomeSummary(state: DemoMvpState): HomeSummary {
   const profileSummary = createProfileSummary(state);
 
   return {
+    onboardingCompleted: profileSummary.onboardingCompleted,
     profile: profileSummary.profile,
     state: profileSummary.state.current,
     intent: profileSummary.intent.current,

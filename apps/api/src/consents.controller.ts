@@ -1,14 +1,12 @@
 import { Body, Controller, Get, NotFoundException, Param, Post } from "@nestjs/common";
 import type { ConsentChannel, ConsentDecisionRequest } from "@corens/domain";
-import { MvpDemoStoreService } from "./mvp-demo-store.service";
 
 @Controller("consents")
 export class ConsentsController {
-  constructor(private readonly store: MvpDemoStoreService) {}
-
   @Get(":channel")
   getStatus(@Param("channel") channel: ConsentChannel) {
-    const status = this.store.getConsentStatus(channel);
+    void channel;
+    const status = null;
 
     if (!status) {
       throw new NotFoundException("Consent status is unavailable");
@@ -22,7 +20,9 @@ export class ConsentsController {
     @Param("channel") channel: ConsentChannel,
     @Body() body: ConsentDecisionRequest
   ) {
-    const status = this.store.updateConsent(channel, body.decision);
+    void channel;
+    void body;
+    const status = null;
 
     if (!status) {
       throw new NotFoundException("Consent status is unavailable");

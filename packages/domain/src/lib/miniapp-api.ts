@@ -9,6 +9,7 @@ export interface SelectOption {
 }
 
 export interface ProfileSummary {
+  onboardingCompleted: boolean;
   profile: {
     displayName: string;
     handle: string;
@@ -70,6 +71,7 @@ export interface BeaconSummary {
 }
 
 export interface HomeSummary {
+  onboardingCompleted: boolean;
   profile: ProfileSummary["profile"];
   state: ProfileSummary["state"]["current"];
   intent: ProfileSummary["intent"]["current"];
@@ -83,6 +85,13 @@ export interface UpdateStateIntentRequest {
 }
 
 export interface UpdateTrustKeysRequest {
+  trustKeys: string[];
+}
+
+export interface CompleteOnboardingRequest {
+  displayName: string;
+  stateKey: string;
+  intentKey: string;
   trustKeys: string[];
 }
 
