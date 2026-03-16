@@ -13,6 +13,8 @@ import { PrivacyController } from "./privacy.controller";
 import { ProfilesService } from "./modules/profiles";
 import { HomeService } from "./home.service";
 import { BeaconService } from "./modules/beacon/service";
+import { PolicyConfigService } from "./policy-config.service";
+import { MatchingRuntimeService } from "./modules/matching/runtime.service";
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { BeaconService } from "./modules/beacon/service";
     MaintenanceService,
     HomeService,
     BeaconService,
+    MatchingRuntimeService,
+    PolicyConfigService,
     ProfilesService
   ],
   exports: [
@@ -44,6 +48,8 @@ import { BeaconService } from "./modules/beacon/service";
     MaintenanceService,
     HomeService,
     BeaconService,
+    MatchingRuntimeService,
+    PolicyConfigService,
     ProfilesService
   ]
 })

@@ -1,20 +1,21 @@
 import { Injectable } from "@nestjs/common";
 import type { BeaconSummary } from "@corens/domain";
 import { PrismaService } from "../../prisma.service";
+import { PolicyConfigService } from "../../policy-config.service";
 import { ProfilesService } from "../profiles";
-
-const BEACON_DURATION_MINUTES = 120;
-const BEACON_COOLDOWN_MINUTES = 180;
 
 @Injectable()
 export class BeaconService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly profiles: ProfilesService
+    private readonly profiles: ProfilesService,
+    private readonly policyConfig: PolicyConfigService
   ) {}
 
   async getSummary(): Promise<BeaconSummary> {
+    await this.expireStaleSessions();
     const record = await this.profiles.getCurrentProfileRecord();
+    const rules = await this.policyConfig.getBeaconRules();
     const now = new Date();
     const activeSession = await this.prisma.clientInstance.beaconSession.findFirst({
       where: {
@@ -31,7 +32,7 @@ export class BeaconService {
         remainingLabel: this.formatRemaining(activeSession.expiresAt, now),
         description:
           "Режим ручного поиска включается на фиксированное время и не заменяет автоматический matching.",
-        durationLabel: "2 часа"
+        durationLabel: this.formatMinutes(activeSession.durationMinutes)
       };
     }
 
@@ -45,10 +46,10 @@ export class BeaconService {
 
     return {
       status: cooldownSession ? "cooldown" : "inactive",
-      remainingLabel: "2:00:00",
+      remainingLabel: this.formatMinutes(this.defaultDurationMinutes(rules)),
       description:
         "Режим ручного поиска включается на фиксированное время и не заменяет автоматический matching.",
-      durationLabel: "2 часа",
+      durationLabel: this.formatMinutes(this.defaultDurationMinutes(rules)),
       cooldownLabel: cooldownSession?.cooldownUntil
         ? this.formatRemaining(cooldownSession.cooldownUntil, now)
         : undefined
@@ -57,14 +58,26 @@ export class BeaconService {
 
   async activate(): Promise<BeaconSummary> {
     const record = await this.profiles.getCurrentProfileRecord();
+    const rules = await this.policyConfig.getBeaconRules();
 
     if (!record.profile.onboardingCompleted) {
       return this.getSummary();
     }
 
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + BEACON_DURATION_MINUTES * 60_000);
-    const cooldownUntil = new Date(expiresAt.getTime() + BEACON_COOLDOWN_MINUTES * 60_000);
+    const durationMinutes = this.defaultDurationMinutes(rules);
+    const expiresAt = new Date(now.getTime() + durationMinutes * 60_000);
+    const cooldownUntil = new Date(expiresAt.getTime() + rules.cooldownMinutes * 60_000);
+    const activationsToday = await this.prisma.clientInstance.beaconSession.count({
+      where: {
+        userId: record.user.id,
+        activatedAt: { gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) }
+      }
+    });
+
+    if (activationsToday >= rules.activationsPerDay) {
+      return this.getSummary();
+    }
 
     await this.prisma.clientInstance.beaconSession.updateMany({
       where: {
@@ -80,7 +93,7 @@ export class BeaconService {
       data: {
         userId: record.user.id,
         status: "active",
-        durationMinutes: BEACON_DURATION_MINUTES,
+        durationMinutes,
         expiresAt,
         cooldownUntil
       }
@@ -97,5 +110,29 @@ export class BeaconService {
     const seconds = totalSeconds % 60;
 
     return [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
+  }
+
+  async expireStaleSessions(): Promise<void> {
+    await this.prisma.clientInstance.beaconSession.updateMany({
+      where: {
+        status: "active",
+        expiresAt: { lte: new Date() }
+      },
+      data: {
+        status: "expired"
+      }
+    });
+  }
+
+  private defaultDurationMinutes(rules: { intervalsMinutes: number[] }): number {
+    return [...rules.intervalsMinutes].sort((left, right) => right - left)[0] ?? 60;
+  }
+
+  private formatMinutes(minutes: number): string {
+    if (minutes >= 60 && minutes % 60 === 0) {
+      return `${minutes / 60} ч`;
+    }
+
+    return `${minutes} мин`;
   }
 }

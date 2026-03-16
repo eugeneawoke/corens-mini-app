@@ -42,7 +42,8 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 - The current implementation uses shared DTOs from `@corens/domain`
 - Profile and onboarding payloads are Prisma-backed
 - Profile controls for state, intent, trust keys, and visibility now write through to Prisma-backed storage
-- Home currently returns no active connection until a real `MatchSession` exists
+- Matching now creates and reads real `MatchSession` records from persisted profiles
+- Beacon activation is backend-driven and uses config-backed duration/cooldown rules
 - Consent endpoints return unavailable until a real active connection exists
 - The route shapes are intended to stay stable while matching and consent move from placeholders to real persistence-backed orchestration
 
