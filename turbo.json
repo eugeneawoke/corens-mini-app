@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": ["CORENS_API_BASE_URL", "NEXT_PUBLIC_CORENS_API_BASE_URL"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
