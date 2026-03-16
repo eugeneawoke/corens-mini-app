@@ -19,6 +19,18 @@ _Store accepted decisions only. Hypotheses stay out until validated._
 **Decision:** Use a zero-cost deployment baseline with one combined backend service for API plus Telegram bot webhook, while background maintenance runs in-process instead of a dedicated worker service.  
 **Why:** This keeps infrastructure inside a $0 entrypoint without violating the MVP privacy model or introducing deployment-only architecture drift.
 
+### Deployment provider split
+
+**Decision:** Use the following provider split for the MVP baseline:
+- 1 GitHub repository
+- 1 Vercel project for `apps/miniapp`
+- 1 Railway service for `apps/api`
+- 1 Neon database for PostgreSQL
+- 1 Upstash Redis instance
+- 1 Cloudflare R2 bucket for private media storage
+
+**Why:** This keeps the deployment model simple, maps cleanly to the current monorepo/runtime split, and avoids providers that immediately require a card for backend service setup.
+
 ### Matching interaction model
 
 **Decision:** Primary matching is automatic and event-driven; Beacon is the only manual matching-related mode.  

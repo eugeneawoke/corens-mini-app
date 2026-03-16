@@ -9,6 +9,15 @@ Build `corens` v1 as a modular backend that serves Telegram Bot and Telegram Min
 - `apps/api`: source-of-truth HTTP/API boundary plus Telegram bot webhook runtime
 - `apps/miniapp`: primary user interface
 
+## Deployment Baseline
+
+- GitHub: single repository for the monorepo
+- Vercel: deploy `apps/miniapp`
+- Railway: deploy the combined `apps/api` runtime
+- Neon: PostgreSQL
+- Upstash: Redis-backed limits and short-lived runtime state
+- Cloudflare R2: private media/object storage
+
 ## Shared Layers
 
 - `packages/domain`: shared contracts and domain vocabulary
