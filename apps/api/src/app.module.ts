@@ -9,6 +9,7 @@ import { BeaconController } from "./beacon.controller";
 import { MatchingController } from "./matching.controller";
 import { ConsentsController } from "./consents.controller";
 import { HomeController } from "./home.controller";
+import { PrivacyController } from "./privacy.controller";
 import { ProfilesService } from "./modules/profiles";
 import { HomeService } from "./home.service";
 import { BeaconService } from "./modules/beacon/service";
@@ -24,6 +25,7 @@ import { BeaconService } from "./modules/beacon/service";
     HealthController,
     HomeController,
     ProfileController,
+    PrivacyController,
     BeaconController,
     MatchingController,
     ConsentsController

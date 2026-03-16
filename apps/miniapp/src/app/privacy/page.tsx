@@ -2,14 +2,15 @@ import { ShieldAlert, Trash2 } from "lucide-react";
 import { redirect } from "next/navigation";
 import {
   AppSurface,
+  Button,
   ButtonLink,
   NoticeCard,
   Panel,
   Section,
-  SwitchRow,
   TopBar
 } from "@corens/ui";
 
+import { updateVisibilityAction } from "../actions";
 import { getProfileSummary } from "../../lib/api";
 
 export default async function PrivacyPage() {
@@ -20,22 +21,30 @@ export default async function PrivacyPage() {
   }
 
   return (
-    <AppSurface bottomBar={<ButtonLink href="/profile">Сохранить настройки</ButtonLink>}>
+    <AppSurface>
       <TopBar title="Приватность" backHref="/profile" />
 
       <Section
         title="Видимость профиля"
-        description="Переключатели ниже пока рендерятся из shared snapshot, но опираются на те же privacy rules, что и backend сервис."
+        description="Вы управляете только видимостью профиля. Сам automatic matching работает исключительно по алгоритму и матрице совпадений."
       >
         <Panel>
-          {snapshot.privacy.switches.map((item) => (
-            <SwitchRow
-              key={item.title}
-              title={item.title}
-              description={item.description}
-              checked={item.checked}
-            />
-          ))}
+          <div className="corens-stack corens-gap-sm">
+            {snapshot.privacy.switches.map((item) => (
+              <div key={item.title} className="corens-switch-row">
+                <div className="corens-switch-copy">
+                  <strong className="corens-list-title">{item.title}</strong>
+                  <span className="corens-list-description">{item.description}</span>
+                </div>
+                <form action={updateVisibilityAction}>
+                  <input type="hidden" name="isHidden" value={item.checked ? "false" : "true"} />
+                  <Button variant={item.checked ? "secondary" : "primary"} type="submit">
+                    {item.checked ? "Вернуть в подбор" : "Скрыть профиль"}
+                  </Button>
+                </form>
+              </div>
+            ))}
+          </div>
         </Panel>
       </Section>
 

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
-import { AppSurface, ButtonLink, KeyChip, NoticeCard, Panel, Section, TopBar } from "@corens/ui";
+import { AppSurface, Button, KeyChip, NoticeCard, Panel, Section, TopBar } from "@corens/ui";
 
+import { updateTrustKeysAction } from "../actions";
 import { getProfileSummary } from "../../lib/api";
 
 export default async function TrustKeysPage() {
@@ -11,38 +12,50 @@ export default async function TrustKeysPage() {
   }
 
   return (
-    <AppSurface bottomBar={<ButtonLink href="/profile">Сохранить выбор</ButtonLink>}>
+    <AppSurface>
       <TopBar title="Ключи доверия" backHref="/profile" />
 
-      <Panel tone="accent">
-        <div className="corens-stack corens-gap-xs">
-          <span className="corens-eyebrow">Ограничение MVP</span>
-          <h2 className="corens-section-title">{snapshot.trustKeys.limitLabel}</h2>
-          <p className="corens-copy corens-copy-muted">
-            Подбор ищет пересечение хотя бы по одному ключу. Изменение ограничено cooldown.
-          </p>
-        </div>
-      </Panel>
+      <form action={updateTrustKeysAction} className="corens-stack corens-gap-sm">
+        <Panel tone="accent">
+          <div className="corens-stack corens-gap-xs">
+            <span className="corens-eyebrow">Ограничение MVP</span>
+            <h2 className="corens-section-title">{snapshot.trustKeys.limitLabel}</h2>
+            <p className="corens-copy corens-copy-muted">
+              Подбор ищет пересечение хотя бы по одному ключу. Изменение ограничено cooldown.
+            </p>
+          </div>
+        </Panel>
 
-      {snapshot.trustKeys.groups.map((group) => (
-        <Section key={group.title} title={group.title}>
-          <Panel>
-            <div className="corens-chip-row">
-              {group.items.map((item) => (
-                <KeyChip key={item} active={snapshot.trustKeys.selected.includes(item)}>
-                  {item}
-                </KeyChip>
-              ))}
-            </div>
-          </Panel>
-        </Section>
-      ))}
+        {snapshot.trustKeys.groups.map((group) => (
+          <Section key={group.title} title={group.title}>
+            <Panel>
+              <div className="corens-chip-row">
+                {group.items.map((item) => (
+                  <label key={item} className="corens-chip-checkbox">
+                    <input
+                      type="checkbox"
+                      name="trustKeys"
+                      value={item}
+                      defaultChecked={snapshot.trustKeys.selected.includes(item)}
+                    />
+                    <KeyChip active={snapshot.trustKeys.selected.includes(item)}>
+                      {item}
+                    </KeyChip>
+                  </label>
+                ))}
+              </div>
+            </Panel>
+          </Section>
+        ))}
 
-      <NoticeCard
-        title="Cooldown"
-        description={snapshot.trustKeys.cooldownLabel}
-        tone="warning"
-      />
+        <NoticeCard
+          title="Cooldown"
+          description={snapshot.trustKeys.cooldownLabel}
+          tone="warning"
+        />
+
+        <Button type="submit">Сохранить выбор</Button>
+      </form>
     </AppSurface>
   );
 }

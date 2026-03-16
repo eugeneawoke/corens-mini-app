@@ -28,6 +28,7 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 - `POST /api/profile/onboarding`: complete first-run onboarding and unlock the rest of the Mini App
 - `PATCH /api/profile/state-intent`: first-pass update shape for current `stateKey` and `intentKey`
 - `PATCH /api/profile/trust-keys`: first-pass update shape for selected trust keys
+- `PATCH /api/privacy/visibility`: hide or restore profile participation in new matching runs
 - `GET /api/beacon/status`: current Beacon status payload
 - `POST /api/beacon/activate`: activate Beacon and return the updated Beacon payload
 - `GET /api/matching/current-connection`: current match-session preview payload for the Connection screen
@@ -40,6 +41,7 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 
 - The current implementation uses shared DTOs from `@corens/domain`
 - Profile and onboarding payloads are Prisma-backed
+- Profile controls for state, intent, trust keys, and visibility now write through to Prisma-backed storage
 - Home currently returns no active connection until a real `MatchSession` exists
 - Consent endpoints return unavailable until a real active connection exists
 - The route shapes are intended to stay stable while matching and consent move from placeholders to real persistence-backed orchestration

@@ -13,7 +13,7 @@ export default async function ProfilePage() {
 
   return (
     <AppSurface>
-      <TopBar title="Профиль" backHref="/" />
+      <TopBar title="Профиль" backHref="/connection" />
 
       <Panel className="corens-stack corens-gap-sm">
         <div className="corens-row corens-row-between">

@@ -1,7 +1,8 @@
-import { Camera, Lock, Shield, Unlink2 } from "lucide-react";
+import { Camera, CircleUserRound, Compass, Lock, Radio, Shield, Unlink2 } from "lucide-react";
 import { redirect } from "next/navigation";
 import {
   AppSurface,
+  EmptyState,
   ButtonLink,
   NoticeCard,
   Panel,
@@ -10,7 +11,7 @@ import {
   TopBar
 } from "@corens/ui";
 
-import { getCurrentConnection, getProfileSummary } from "../../lib/api";
+import { getBeaconSummary, getCurrentConnection, getProfileSummary } from "../../lib/api";
 
 function toneForStatus(status: "pending" | "approved" | "declined") {
   if (status === "approved") {
@@ -32,22 +33,85 @@ export default async function ConnectionPage() {
   }
 
   const connection = await getCurrentConnection();
+  const beacon = await getBeaconSummary();
 
   if (!connection) {
     return (
-      <AppSurface>
-        <TopBar title="Связь" backHref="/" />
-        <NoticeCard
-          title="Активной связи нет"
-          description="Когда backend найдет совместимую пару, экран связи заполнится данными о доверии и consent flow."
+      <AppSurface
+        bottomBar={
+          <ButtonLink href="/beacon" variant="beacon">
+            {beacon.status === "active" ? "Beacon уже активен" : "Включить Beacon"}
+          </ButtonLink>
+        }
+      >
+        <TopBar
+          title="Связи"
+          subtitle="Главный экран"
+          action={
+            <a className="corens-icon-button" href="/profile" aria-label="Профиль">
+              <CircleUserRound size={18} />
+            </a>
+          }
         />
+
+        <Panel className="corens-hero-card">
+          <div className="corens-hero-copy">
+            <span className="corens-eyebrow">Ваш контекст</span>
+            <h2 className="corens-hero-title">Сейчас система ждёт подходящее совпадение</h2>
+            <p className="corens-copy corens-copy-muted">
+              State <strong>{profile.state.current.label}</strong>, intent <strong>{profile.intent.current.label}</strong>.
+            </p>
+          </div>
+        </Panel>
+
+        <EmptyState
+          icon={Compass}
+          title="Активной связи пока нет"
+          description="Алгоритм матрицы совпадений проверяет совместимые пары автоматически. Beacon можно включить как ручной fallback по тем же параметрам."
+          action={
+            <div className="corens-action-stack">
+              <ButtonLink href="/beacon" variant="secondary">
+                Открыть Beacon
+              </ButtonLink>
+              <ButtonLink href="/profile" variant="ghost">
+                Открыть профиль
+              </ButtonLink>
+            </div>
+          }
+        />
+
+        <Section title="Статус Beacon">
+          <Panel tone={beacon.status === "active" ? "beacon" : "muted"}>
+            <div className="corens-row corens-row-between">
+              <div className="corens-stack corens-gap-xs">
+                <div className="corens-inline-head">
+                  <Radio size={18} />
+                  <h3 className="corens-card-title">
+                    {beacon.status === "active" ? "Beacon активен" : "Beacon выключен"}
+                  </h3>
+                </div>
+                <p className="corens-copy corens-copy-muted">{beacon.description}</p>
+              </div>
+              <StatusBadge tone={beacon.status === "active" ? "accent" : "neutral"}>
+                {beacon.status === "active" ? beacon.remainingLabel : "Готов"}
+              </StatusBadge>
+            </div>
+          </Panel>
+        </Section>
       </AppSurface>
     );
   }
 
   return (
     <AppSurface>
-      <TopBar title="Текущая связь" backHref="/" />
+      <TopBar
+        title="Текущая связь"
+        action={
+          <a className="corens-icon-button" href="/profile" aria-label="Профиль">
+            <CircleUserRound size={18} />
+          </a>
+        }
+      />
 
       <Panel className="corens-stack corens-gap-sm">
         <div className="corens-row corens-row-between">

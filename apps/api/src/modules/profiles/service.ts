@@ -2,12 +2,15 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import type {
   CompleteOnboardingRequest,
   ProfileSummary,
+  UpdateVisibilityRequest,
   UpdateStateIntentRequest,
   UpdateTrustKeysRequest
 } from "@corens/domain";
 import {
+  hideProfile,
   intentOptions,
   planDeletion,
+  restoreProfile,
   stateOptions,
   trustKeyGroups
 } from "@corens/domain";
@@ -113,6 +116,31 @@ export class ProfilesService {
     return this.ensureProfileRecord();
   }
 
+  async updateVisibility(input: UpdateVisibilityRequest): Promise<ProfileSummary> {
+    const record = await this.ensureProfileRecord();
+    const nextVisibility = input.isHidden
+      ? hideProfile({
+          userId: record.profile.userId,
+          isHidden: record.profile.visibilityStatus === "hidden",
+          matchingEnabled: record.profile.matchingEnabled
+        })
+      : restoreProfile({
+          userId: record.profile.userId,
+          isHidden: record.profile.visibilityStatus === "hidden",
+          matchingEnabled: record.profile.matchingEnabled
+        });
+
+    const updated = await this.prisma.clientInstance.profile.update({
+      where: { userId: record.user.id },
+      data: {
+        visibilityStatus: nextVisibility.isHidden ? "hidden" : "active",
+        matchingEnabled: nextVisibility.matchingEnabled
+      }
+    });
+
+    return this.buildSummary(record.user, updated);
+  }
+
   private sanitizeTrustKeys(values: string[]): string[] {
     const allowedTrustKeys = new Set<string>(trustKeyGroups.flatMap((group) => group.items));
 
@@ -196,13 +224,8 @@ export class ProfilesService {
           "Скрытый профиль исключается из новых подборов, но не ломает уже найденную pending-связь.",
         switches: [
           {
-            title: "Участвовать в автоматическом matching",
-            description: "Когда выключено, новые автоматические связи не создаются.",
-            checked: profile.matchingEnabled
-          },
-          {
             title: "Скрыть профиль из новых подборов",
-            description: "Beacon и открытые consent flow остаются под вашим контролем.",
+            description: "Алгоритм и Beacon продолжают работать только когда профиль видим для новых подборов.",
             checked: visibility.isHidden
           }
         ],

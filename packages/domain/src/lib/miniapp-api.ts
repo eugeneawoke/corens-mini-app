@@ -95,6 +95,10 @@ export interface CompleteOnboardingRequest {
   trustKeys: string[];
 }
 
+export interface UpdateVisibilityRequest {
+  isHidden: boolean;
+}
+
 export interface ConsentDecisionRequest {
   decision: ConsentDecision;
 }
