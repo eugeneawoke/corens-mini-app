@@ -1,23 +1,23 @@
 import { Body, Controller, Get, Patch } from "@nestjs/common";
 import type { UpdateStateIntentRequest, UpdateTrustKeysRequest } from "@corens/domain";
-import { MvpDemoStoreService } from "./mvp-demo-store.service";
+import { ProfilesService } from "./modules/profiles";
 
 @Controller("profile")
 export class ProfileController {
-  constructor(private readonly store: MvpDemoStoreService) {}
+  constructor(private readonly profiles: ProfilesService) {}
 
   @Get("summary")
   getSummary() {
-    return this.store.getProfileSummary();
+    return this.profiles.getSummary();
   }
 
   @Patch("state-intent")
   updateStateIntent(@Body() body: UpdateStateIntentRequest) {
-    return this.store.updateStateIntent(body);
+    return this.profiles.updateStateIntent(body);
   }
 
   @Patch("trust-keys")
   updateTrustKeys(@Body() body: UpdateTrustKeysRequest) {
-    return this.store.updateTrustKeys(body);
+    return this.profiles.updateTrustKeys(body);
   }
 }

@@ -16,7 +16,7 @@ Build `corens` v1 as a modular backend that serves Telegram Bot and Telegram Min
 - Railway: deploy the combined `apps/api` runtime
 - Neon: PostgreSQL
 - Upstash: Redis-backed limits and short-lived runtime state
-- Cloudflare R2: private media/object storage
+- Backblaze B2: private media/object storage
 
 ## Shared Layers
 

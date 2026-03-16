@@ -8,7 +8,7 @@ nixPkgs = ["nodejs_22", "pnpm"]
 cmds = ["corepack enable", "corepack pnpm install --frozen-lockfile"]
 
 [phases.build]
-cmds = ["corepack pnpm build"]
+cmds = ["corepack pnpm --filter @corens/api... build"]
 
 [start]
 cmd = "corepack pnpm --filter @corens/api start"

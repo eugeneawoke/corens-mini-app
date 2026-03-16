@@ -6,3 +6,4 @@ export const profilesModule = {
     "manage profile visibility metadata"
   ]
 } as const;
+export * from "./service";

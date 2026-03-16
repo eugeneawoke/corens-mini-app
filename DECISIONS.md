@@ -27,9 +27,9 @@ _Store accepted decisions only. Hypotheses stay out until validated._
 - 1 Railway service for `apps/api`
 - 1 Neon database for PostgreSQL
 - 1 Upstash Redis instance
-- 1 Cloudflare R2 bucket for private media storage
+- 1 Backblaze B2 bucket for private media storage
 
-**Why:** This keeps the deployment model simple, maps cleanly to the current monorepo/runtime split, and avoids providers that immediately require a card for backend service setup.
+**Why:** This keeps the deployment model simple, maps cleanly to the current monorepo/runtime split, avoids providers that immediately require a card for backend service setup, and preserves a real private media storage path for photo reveal.
 
 ### Matching interaction model
 

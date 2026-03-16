@@ -10,6 +10,7 @@ import { MatchingController } from "./matching.controller";
 import { ConsentsController } from "./consents.controller";
 import { MvpDemoStoreService } from "./mvp-demo-store.service";
 import { HomeController } from "./home.controller";
+import { ProfilesService } from "./modules/profiles";
 
 @Module({
   imports: [
@@ -26,7 +27,19 @@ import { HomeController } from "./home.controller";
     MatchingController,
     ConsentsController
   ],
-  providers: [PrismaService, BotWebhookService, MaintenanceService, MvpDemoStoreService],
-  exports: [PrismaService, BotWebhookService, MaintenanceService, MvpDemoStoreService]
+  providers: [
+    PrismaService,
+    BotWebhookService,
+    MaintenanceService,
+    MvpDemoStoreService,
+    ProfilesService
+  ],
+  exports: [
+    PrismaService,
+    BotWebhookService,
+    MaintenanceService,
+    MvpDemoStoreService,
+    ProfilesService
+  ]
 })
 export class AppModule {}

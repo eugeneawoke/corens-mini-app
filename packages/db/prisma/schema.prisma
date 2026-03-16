@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model User {
@@ -14,15 +15,22 @@ model User {
   status            String
   firstSeenAt       DateTime @default(now())
   lastSeenAt        DateTime @updatedAt
+  profile           Profile?
 }
 
 model Profile {
-  userId            String @id
+  userId            String   @id
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   displayName       String
   about             String?
-  photoCount        Int    @default(0)
+  stateKey          String   @default("calm")
+  intentKey         String   @default("slow-dialogue")
+  trustKeys         String[] @default([])
+  photoCount        Int      @default(0)
   visibilityStatus  String
-  matchingEnabled   Boolean @default(true)
+  matchingEnabled   Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model MatchSession {
