@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import express from "express";
 import { Injectable, Logger } from "@nestjs/common";
 import type { INestApplication } from "@nestjs/common";
 import { readAppEnv } from "@corens/config";
@@ -36,6 +37,18 @@ export class BotWebhookService {
       });
     });
 
+    instance.all("/telegram/webhook", (req: Request, res: Response, next: NextFunction) => {
+      if (req.method !== "POST") {
+        res.status(405).json({
+          ok: false,
+          code: "method_not_allowed"
+        });
+        return;
+      }
+
+      next();
+    });
+    instance.use("/telegram/webhook", express.json());
     instance.use("/telegram/webhook", (req: Request, res: Response, next: NextFunction) => {
       const receivedSecret = req.header("x-telegram-bot-api-secret-token");
 
@@ -43,6 +56,20 @@ export class BotWebhookService {
         res.status(401).json({
           ok: false,
           code: "invalid_webhook_secret"
+        });
+        return;
+      }
+
+      next();
+    });
+    instance.use("/telegram/webhook", (req: Request, res: Response, next: NextFunction) => {
+      if (!req.body || typeof req.body !== "object" || typeof req.body.update_id !== "number") {
+        this.logger.warn(
+          `Rejected malformed Telegram webhook payload: method=${req.method} content-type=${req.header("content-type") ?? "unknown"}`
+        );
+        res.status(400).json({
+          ok: false,
+          code: "invalid_webhook_payload"
         });
         return;
       }
