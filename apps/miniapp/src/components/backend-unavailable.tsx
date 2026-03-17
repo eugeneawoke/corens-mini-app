@@ -5,6 +5,7 @@ import { Button, NoticeCard, Panel } from "@corens/ui";
 type BackendUnavailableScreenProps = {
   title?: string;
   description?: string;
+  details?: string;
   actionLabel?: string;
   onAction?: () => void;
 };
@@ -12,6 +13,7 @@ type BackendUnavailableScreenProps = {
 export function BackendUnavailableScreen({
   title = "Сервис временно недоступен",
   description = "Mini App открылся, но backend сейчас не ответил корректно. Попробуйте перезагрузить экран через несколько секунд.",
+  details,
   actionLabel = "Попробовать снова",
   onAction
 }: BackendUnavailableScreenProps) {
@@ -26,6 +28,8 @@ export function BackendUnavailableScreen({
         </Panel>
 
         <NoticeCard title="Backend не ответил" description={description} tone="danger" />
+
+        {details ? <p className="corens-copy corens-copy-muted corens-mono">{details}</p> : null}
 
         <Button type="button" onClick={onAction ?? (() => window.location.reload())}>
           {actionLabel}

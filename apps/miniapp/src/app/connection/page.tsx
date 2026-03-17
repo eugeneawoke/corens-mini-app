@@ -1,3 +1,4 @@
+import type { BeaconSummary } from "@corens/domain";
 import { Camera, CircleUserRound, Compass, Lock, Radio, Shield, Unlink2 } from "lucide-react";
 import { redirect } from "next/navigation";
 import {
@@ -17,12 +18,20 @@ import { blockConnectionAction, reportConnectionAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import {
+  formatMiniAppBackendError,
   getBeaconSummary,
   getCurrentConnection,
   getProfileSummary,
   MiniAppBackendUnavailableError,
   MiniAppSessionRequiredError
 } from "../../lib/api";
+
+const FALLBACK_BEACON: BeaconSummary = {
+  status: "inactive" as const,
+  remainingLabel: "Недоступно",
+  description: "Статус Beacon временно недоступен. Попробуйте обновить экран позже.",
+  durationLabel: "Недоступно"
+};
 
 function toneForStatus(status: "pending" | "approved" | "declined") {
   if (status === "approved") {
@@ -38,20 +47,16 @@ function toneForStatus(status: "pending" | "approved" | "declined") {
 
 export default async function ConnectionPage() {
   let profile;
-  let connection;
-  let beacon;
 
   try {
     profile = await getProfileSummary();
-    connection = await getCurrentConnection();
-    beacon = await getBeaconSummary();
   } catch (error) {
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;
     }
 
     if (error instanceof MiniAppBackendUnavailableError) {
-      return <BackendUnavailableScreen />;
+      return <BackendUnavailableScreen details={formatMiniAppBackendError(error)} />;
     }
 
     throw error;
@@ -59,6 +64,31 @@ export default async function ConnectionPage() {
 
   if (!profile.onboardingCompleted) {
     redirect("/onboarding");
+  }
+
+  let connection;
+  let beacon = FALLBACK_BEACON;
+
+  try {
+    connection = await getCurrentConnection();
+  } catch (error) {
+    if (error instanceof MiniAppSessionRequiredError) {
+      return <AuthBootstrapScreen />;
+    }
+
+    if (error instanceof MiniAppBackendUnavailableError) {
+      return <BackendUnavailableScreen details={formatMiniAppBackendError(error)} />;
+    }
+
+    throw error;
+  }
+
+  try {
+    beacon = await getBeaconSummary();
+  } catch (error) {
+    if (!(error instanceof MiniAppBackendUnavailableError)) {
+      throw error;
+    }
   }
 
   if (!connection) {

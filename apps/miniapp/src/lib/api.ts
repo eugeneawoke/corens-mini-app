@@ -22,6 +22,12 @@ export class MiniAppBackendUnavailableError extends Error {
   }
 }
 
+export function formatMiniAppBackendError(error: MiniAppBackendUnavailableError): string {
+  return error.status
+    ? `endpoint=${error.path} status=${error.status}`
+    : `endpoint=${error.path} status=network_or_invalid_json`;
+}
+
 function getApiBaseUrl(): string | null {
   const baseUrl =
     process.env.CORENS_API_BASE_URL ?? process.env.NEXT_PUBLIC_CORENS_API_BASE_URL ?? null;

@@ -20,33 +20,73 @@ export class PolicyConfigService {
   private moderationRulesPromise: Promise<{ reportRequestsPerDay: number }> | undefined;
 
   getMatchingScoring(): Promise<MatchingScoringConfig> {
-    this.matchingScoringPromise ??= this.loadMatchingScoring();
+    this.matchingScoringPromise ??= this.memoizeWithRetry(
+      () => this.loadMatchingScoring(),
+      () => {
+        this.matchingScoringPromise = undefined;
+      }
+    );
     return this.matchingScoringPromise;
   }
 
   getBeaconRules(): Promise<BeaconRulesConfig> {
-    this.beaconRulesPromise ??= this.loadBeaconRules();
+    this.beaconRulesPromise ??= this.memoizeWithRetry(
+      () => this.loadBeaconRules(),
+      () => {
+        this.beaconRulesPromise = undefined;
+      }
+    );
     return this.beaconRulesPromise;
   }
 
   getPrivacyRules(): Promise<PrivacyRulesConfig> {
-    this.privacyRulesPromise ??= this.loadPrivacyRules();
+    this.privacyRulesPromise ??= this.memoizeWithRetry(
+      () => this.loadPrivacyRules(),
+      () => {
+        this.privacyRulesPromise = undefined;
+      }
+    );
     return this.privacyRulesPromise;
   }
 
   getRevealRules(): Promise<RevealRulesConfig> {
-    this.revealRulesPromise ??= this.loadRevealRules();
+    this.revealRulesPromise ??= this.memoizeWithRetry(
+      () => this.loadRevealRules(),
+      () => {
+        this.revealRulesPromise = undefined;
+      }
+    );
     return this.revealRulesPromise;
   }
 
   getRetentionPolicies(): Promise<RetentionPoliciesConfig> {
-    this.retentionPoliciesPromise ??= this.loadRetentionPolicies();
+    this.retentionPoliciesPromise ??= this.memoizeWithRetry(
+      () => this.loadRetentionPolicies(),
+      () => {
+        this.retentionPoliciesPromise = undefined;
+      }
+    );
     return this.retentionPoliciesPromise;
   }
 
   getModerationRules(): Promise<{ reportRequestsPerDay: number }> {
-    this.moderationRulesPromise ??= this.loadModerationRules();
+    this.moderationRulesPromise ??= this.memoizeWithRetry(
+      () => this.loadModerationRules(),
+      () => {
+        this.moderationRulesPromise = undefined;
+      }
+    );
     return this.moderationRulesPromise;
+  }
+
+  private memoizeWithRetry<T>(
+    load: () => Promise<T>,
+    reset: () => void
+  ): Promise<T> {
+    return load().catch((error) => {
+      reset();
+      throw error;
+    });
   }
 
   private async loadMatchingScoring(): Promise<MatchingScoringConfig> {
