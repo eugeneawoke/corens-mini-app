@@ -4,9 +4,11 @@ import { Button, ButtonLink, NoticeCard, StatusBadge } from "@corens/ui";
 
 import { approveConsentAction, declineConsentAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
+import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import {
   getConsentStatus,
   getProfileSummary,
+  MiniAppBackendUnavailableError,
   MiniAppSessionRequiredError
 } from "../../lib/api";
 
@@ -20,6 +22,10 @@ export default async function ContactConsentPage() {
   } catch (error) {
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;
+    }
+
+    if (error instanceof MiniAppBackendUnavailableError) {
+      return <BackendUnavailableScreen />;
     }
 
     throw error;

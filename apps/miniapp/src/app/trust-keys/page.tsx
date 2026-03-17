@@ -3,7 +3,12 @@ import { AppSurface, Button, KeyChip, NoticeCard, Panel, Section, TopBar } from 
 
 import { updateTrustKeysAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
-import { getProfileSummary, MiniAppSessionRequiredError } from "../../lib/api";
+import { BackendUnavailableScreen } from "../../components/backend-unavailable";
+import {
+  getProfileSummary,
+  MiniAppBackendUnavailableError,
+  MiniAppSessionRequiredError
+} from "../../lib/api";
 
 export default async function TrustKeysPage() {
   let snapshot;
@@ -13,6 +18,10 @@ export default async function TrustKeysPage() {
   } catch (error) {
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;
+    }
+
+    if (error instanceof MiniAppBackendUnavailableError) {
+      return <BackendUnavailableScreen />;
     }
 
     throw error;

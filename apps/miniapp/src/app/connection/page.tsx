@@ -15,10 +15,12 @@ import {
 
 import { blockConnectionAction, reportConnectionAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
+import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import {
   getBeaconSummary,
   getCurrentConnection,
   getProfileSummary,
+  MiniAppBackendUnavailableError,
   MiniAppSessionRequiredError
 } from "../../lib/api";
 
@@ -46,6 +48,10 @@ export default async function ConnectionPage() {
   } catch (error) {
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;
+    }
+
+    if (error instanceof MiniAppBackendUnavailableError) {
+      return <BackendUnavailableScreen />;
     }
 
     throw error;

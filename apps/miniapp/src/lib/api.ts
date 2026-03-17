@@ -7,6 +7,21 @@ export class MiniAppSessionRequiredError extends Error {
   }
 }
 
+export class MiniAppBackendUnavailableError extends Error {
+  constructor(
+    public readonly path: string,
+    public readonly status?: number,
+    options?: { cause?: unknown }
+  ) {
+    super(
+      status
+        ? `Mini App backend request failed for ${path} with status ${status}`
+        : `Mini App backend request failed for ${path}`,
+      options
+    );
+  }
+}
+
 function getApiBaseUrl(): string | null {
   const baseUrl =
     process.env.CORENS_API_BASE_URL ?? process.env.NEXT_PUBLIC_CORENS_API_BASE_URL ?? null;
@@ -22,22 +37,32 @@ async function fetchFromApi<T>(path: string): Promise<T> {
     throw new MiniAppSessionRequiredError();
   }
 
-  const response = await fetch(`${baseUrl}${path}`, {
-    cache: "no-store",
-    headers: {
-      authorization: `Bearer ${sessionToken}`
-    }
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${baseUrl}${path}`, {
+      cache: "no-store",
+      headers: {
+        authorization: `Bearer ${sessionToken}`
+      }
+    });
+  } catch (cause) {
+    throw new MiniAppBackendUnavailableError(path, undefined, { cause });
+  }
 
   if (response.status === 401 || response.status === 403) {
     throw new MiniAppSessionRequiredError();
   }
 
   if (!response.ok) {
-    throw new Error(`API request failed for ${path} with status ${response.status}`);
+    throw new MiniAppBackendUnavailableError(path, response.status);
   }
 
-  return (await response.json()) as T;
+  try {
+    return (await response.json()) as T;
+  } catch (cause) {
+    throw new MiniAppBackendUnavailableError(path, response.status, { cause });
+  }
 }
 
 export async function getProfileSummary(): Promise<ProfileSummary> {

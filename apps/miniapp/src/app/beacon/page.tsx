@@ -4,7 +4,13 @@ import { AppSurface, Button, NoticeCard, Panel, Section, StatusBadge, TopBar } f
 
 import { activateBeaconAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
-import { getBeaconSummary, getProfileSummary, MiniAppSessionRequiredError } from "../../lib/api";
+import { BackendUnavailableScreen } from "../../components/backend-unavailable";
+import {
+  getBeaconSummary,
+  getProfileSummary,
+  MiniAppBackendUnavailableError,
+  MiniAppSessionRequiredError
+} from "../../lib/api";
 
 export default async function BeaconPage() {
   let profile;
@@ -16,6 +22,10 @@ export default async function BeaconPage() {
   } catch (error) {
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;
+    }
+
+    if (error instanceof MiniAppBackendUnavailableError) {
+      return <BackendUnavailableScreen />;
     }
 
     throw error;
