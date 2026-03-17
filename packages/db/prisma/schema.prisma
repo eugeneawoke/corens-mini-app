@@ -16,6 +16,7 @@ model User {
   firstSeenAt       DateTime @default(now())
   lastSeenAt        DateTime @updatedAt
   profile           Profile?
+  sessions          Session[]
 }
 
 model Profile {
@@ -36,6 +37,7 @@ model Profile {
 
 model MatchSession {
   id                String   @id @default(cuid())
+  pairKey           String
   userAId           String
   userBId           String
   origin            String
@@ -43,6 +45,10 @@ model MatchSession {
   score             Int?
   createdAt         DateTime @default(now())
   expiresAt         DateTime?
+
+  @@unique([pairKey, status])
+  @@index([userAId, status])
+  @@index([userBId, status])
 }
 
 model ContactConsent {
@@ -87,4 +93,17 @@ model ModerationEvent {
   eventType         String
   note              String?
   createdAt         DateTime @default(now())
+}
+
+model Session {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash         String
+  expiresAt         DateTime
+  revokedAt         DateTime?
+  createdAt         DateTime @default(now())
+  lastSeenAt        DateTime @updatedAt
+
+  @@index([userId, expiresAt])
 }

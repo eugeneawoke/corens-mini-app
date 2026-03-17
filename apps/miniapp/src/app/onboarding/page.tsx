@@ -3,12 +3,23 @@ import { redirect } from "next/navigation";
 import { AppSurface, Button, Field, KeyChip, NoticeCard, Panel, Section, TopBar } from "@corens/ui";
 
 import { completeOnboardingAction } from "../actions";
-import { getProfileSummary } from "../../lib/api";
+import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
+import { getProfileSummary, MiniAppSessionRequiredError } from "../../lib/api";
 
 const optionIcons = [Heart, MoonStar, Sparkle, Orbit];
 
 export default async function OnboardingPage() {
-  const snapshot = await getProfileSummary();
+  let snapshot;
+
+  try {
+    snapshot = await getProfileSummary();
+  } catch (error) {
+    if (error instanceof MiniAppSessionRequiredError) {
+      return <AuthBootstrapScreen />;
+    }
+
+    throw error;
+  }
 
   if (snapshot.onboardingCompleted) {
     redirect("/");
@@ -132,7 +143,7 @@ export default async function OnboardingPage() {
 
         <NoticeCard
           title="Что будет дальше"
-          description="После сохранения вы попадете на home без фиктивной связи. Matching появится только когда backend реально создаст match session."
+          description="После сохранения вы попадете на `/connection` без фиктивной связи. Matching появится только когда backend реально создаст match session."
         />
 
         <Button type="submit">Завершить онбординг</Button>

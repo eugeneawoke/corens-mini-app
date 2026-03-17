@@ -11,10 +11,21 @@ import {
 } from "@corens/ui";
 
 import { updateVisibilityAction } from "../actions";
-import { getProfileSummary } from "../../lib/api";
+import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
+import { getProfileSummary, MiniAppSessionRequiredError } from "../../lib/api";
 
 export default async function PrivacyPage() {
-  const snapshot = await getProfileSummary();
+  let snapshot;
+
+  try {
+    snapshot = await getProfileSummary();
+  } catch (error) {
+    if (error instanceof MiniAppSessionRequiredError) {
+      return <AuthBootstrapScreen />;
+    }
+
+    throw error;
+  }
 
   if (!snapshot.onboardingCompleted) {
     redirect("/onboarding");

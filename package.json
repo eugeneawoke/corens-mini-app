@@ -8,7 +8,10 @@
     "dev": "corepack pnpm -r --parallel --if-present dev",
     "lint": "corepack pnpm -r --if-present lint",
     "prisma:generate": "corepack pnpm --filter @corens/db exec prisma generate",
-    "test": "corepack pnpm -r --if-present test",
+    "test": "vitest run tests/unit tests/contract tests/integration",
+    "test:unit": "vitest run tests/unit",
+    "test:contract": "vitest run tests/contract",
+    "test:integration": "vitest run tests/integration",
     "typecheck": "corepack pnpm -r --if-present typecheck"
   },
   "prisma": {
@@ -28,6 +31,7 @@
     "prisma": "^6.16.2",
     "tsx": "^4.21.0",
     "turbo": "^2.8.17",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
   }
 }

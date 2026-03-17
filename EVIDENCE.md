@@ -11,12 +11,16 @@ _Store verified facts only, each with a source._
 | Contact reveal and photo reveal are separate mutual consent flows | `PLAN_arch.md` |
 | Contact handoff reveals only a Telegram deep link after mutual contact consent | `PLAN_arch.md` |
 | Matching, Beacon, reveal, and retention rules must be config-backed | `PLAN_arch.md` |
-| The approved architecture package originally recommended `apps/api`, `apps/bot`, `apps/miniapp`, and `apps/worker` before the zero-cost deployment simplification | `PLAN_arch.md`, `DECISIONS.md` |
-| Workspace build completes successfully after wiring the combined API plus bot foundation and Prisma baseline | `corepack pnpm build` on 2026-03-11 |
-| Workspace typecheck completes successfully for runnable foundation packages and apps | `corepack pnpm typecheck` on 2026-03-11 |
-| Combined backend bootstrap starts and exposes `/api/health` plus `/telegram/webhook` | `corepack pnpm --filter @corens/api start` smoke run on 2026-03-11 |
+| Cleanup plan phases (A–E) define runtime sanitation, auth/session bootstrap, deterministic matching, tests, and release-ready documentation as the next set of deliverables | `/Users/eugene.gusakov/Downloads/фаза_финал.md` |
+| Auth bootstrap/session guard, no `/home`, and zero-demo fallbacks are explicit requirements for Phase A runtime sanitation | `/Users/eugene.gusakov/Downloads/фаза_финал.md` |
+| Release readiness hinges on unit/contract/integration/e2e suites plus runtime documentation refresh per the cleanup plan | `/Users/eugene.gusakov/Downloads/фаза_финал.md` |
+| Runtime demo fallbacks were removed from the Mini App data path and `/api/home/summary` was retired in favor of the `/connection` surface | local source review on 2026-03-17 |
+| Telegram Mini App init-data validation, backend session bootstrap/revoke, and per-route auth guards are implemented in the combined `apps/api` runtime | local source review on 2026-03-17 |
+| Workspace `pnpm test` passes meaningful Vitest unit, contract, and integration suites | `corepack pnpm test` on 2026-03-17 |
+| Workspace `pnpm typecheck` passes after the auth/session cleanup | `corepack pnpm typecheck` on 2026-03-17 |
+| Workspace `pnpm build` passes after the auth/session cleanup | `corepack pnpm build` on 2026-03-17 |
 
 ## Open Verification
 
-- [ ] Mini App real Next.js runtime is wired instead of placeholder scripts
-- [ ] Telegram auth validation and webhook handling pass integration tests
+- [ ] Deterministic matching, consent, deletion, and moderation transitions are race-safe
+- [ ] Full automated test pyramid (including Playwright e2e) runs with deterministic seeds and passes

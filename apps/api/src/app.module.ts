@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { AuthController } from "./auth.controller";
 import { HealthController } from "./health.controller";
 import { PrismaService } from "./prisma.service";
 import { BotWebhookService } from "./telegram/bot-webhook.service";
@@ -8,17 +9,17 @@ import { ProfileController } from "./profile.controller";
 import { BeaconController } from "./beacon.controller";
 import { MatchingController } from "./matching.controller";
 import { ConsentsController } from "./consents.controller";
-import { HomeController } from "./home.controller";
 import { PrivacyController } from "./privacy.controller";
 import { ModerationController } from "./moderation.controller";
 import { ProfilesService } from "./modules/profiles";
-import { HomeService } from "./home.service";
 import { BeaconService } from "./modules/beacon/service";
 import { ConsentRuntimeService } from "./modules/consents/runtime.service";
 import { ModerationRuntimeService } from "./modules/moderation/runtime.service";
 import { PrivacyRuntimeService } from "./modules/privacy/runtime.service";
 import { PolicyConfigService } from "./policy-config.service";
 import { MatchingRuntimeService } from "./modules/matching/runtime.service";
+import { AuthService } from "./modules/auth/service";
+import { SessionAuthGuard } from "./modules/auth/session.guard";
 
 @Module({
   imports: [
@@ -28,8 +29,8 @@ import { MatchingRuntimeService } from "./modules/matching/runtime.service";
     })
   ],
   controllers: [
+    AuthController,
     HealthController,
-    HomeController,
     ProfileController,
     PrivacyController,
     ModerationController,
@@ -41,27 +42,29 @@ import { MatchingRuntimeService } from "./modules/matching/runtime.service";
     PrismaService,
     BotWebhookService,
     MaintenanceService,
-    HomeService,
     BeaconService,
     ConsentRuntimeService,
     ModerationRuntimeService,
     PrivacyRuntimeService,
     MatchingRuntimeService,
     PolicyConfigService,
-    ProfilesService
+    ProfilesService,
+    AuthService,
+    SessionAuthGuard
   ],
   exports: [
     PrismaService,
     BotWebhookService,
     MaintenanceService,
-    HomeService,
     BeaconService,
     ConsentRuntimeService,
     ModerationRuntimeService,
     PrivacyRuntimeService,
     MatchingRuntimeService,
     PolicyConfigService,
-    ProfilesService
+    ProfilesService,
+    AuthService,
+    SessionAuthGuard
   ]
 })
 export class AppModule {}

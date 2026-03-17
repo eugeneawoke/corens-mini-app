@@ -3,16 +3,27 @@ import { redirect } from "next/navigation";
 import { AppSurface, Button, NoticeCard, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
 
 import { activateBeaconAction } from "../actions";
-import { getBeaconSummary, getProfileSummary } from "../../lib/api";
+import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
+import { getBeaconSummary, getProfileSummary, MiniAppSessionRequiredError } from "../../lib/api";
 
 export default async function BeaconPage() {
-  const profile = await getProfileSummary();
+  let profile;
+  let snapshot;
+
+  try {
+    profile = await getProfileSummary();
+    snapshot = await getBeaconSummary();
+  } catch (error) {
+    if (error instanceof MiniAppSessionRequiredError) {
+      return <AuthBootstrapScreen />;
+    }
+
+    throw error;
+  }
 
   if (!profile.onboardingCompleted) {
     redirect("/onboarding");
   }
-
-  const snapshot = await getBeaconSummary();
 
   return (
     <AppSurface

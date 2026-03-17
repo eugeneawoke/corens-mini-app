@@ -8,6 +8,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./profile-options": {
+      "types": "./dist/lib/profile-options.d.ts",
+      "default": "./dist/lib/profile-options.js"
     }
   },
   "scripts": {

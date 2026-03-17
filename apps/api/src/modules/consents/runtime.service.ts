@@ -1,25 +1,33 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { resolveConsentRequest, type ConsentChannel, type ConsentDecision, type ConsentStatusView } from "@corens/domain";
+import { createTelegramDeepLink } from "@corens/telegram";
 import { PrismaService } from "../../prisma.service";
+import { PolicyConfigService } from "../../policy-config.service";
+import type { AuthenticatedUserContext } from "../auth/service";
 import { ProfilesService } from "../profiles";
 
 @Injectable()
 export class ConsentRuntimeService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly profiles: ProfilesService
+    private readonly profiles: ProfilesService,
+    private readonly policyConfig: PolicyConfigService
   ) {}
 
-  async getStatus(channel: ConsentChannel): Promise<ConsentStatusView> {
-    const match = await this.getCurrentMatch();
+  async getStatus(
+    user: AuthenticatedUserContext,
+    channel: ConsentChannel
+  ): Promise<ConsentStatusView> {
+    const match = await this.getCurrentMatch(user);
     return this.resolveStatus(match.id, match.selfUserId, match.peerUserId, channel);
   }
 
   async updateStatus(
+    user: AuthenticatedUserContext,
     channel: ConsentChannel,
     decision: ConsentDecision
   ): Promise<ConsentStatusView> {
-    const match = await this.getCurrentMatch();
+    const match = await this.getCurrentMatch(user);
     const recordId = `${match.id}:${match.selfUserId}:${channel}`;
 
     if (channel === "contact") {
@@ -107,6 +115,7 @@ export class ConsentRuntimeService {
       decisions.find((item: { requestedBy: string; requestStatus: string }) => item.requestedBy === selfUserId)?.requestStatus ?? "pending";
     const peerDecision =
       decisions.find((item: { requestedBy: string; requestStatus: string }) => item.requestedBy === peerUserId)?.requestStatus ?? "pending";
+    const revealRules = await this.policyConfig.getRevealRules();
     const resolution = resolveConsentRequest(
       {
         matchSessionId,
@@ -115,17 +124,7 @@ export class ConsentRuntimeService {
         decisionByActor: selfDecision as ConsentDecision,
         decisionByPeer: peerDecision as ConsentDecision
       },
-      {
-        contact: {
-          requiresMutualConsent: true,
-          softWarningRequired: true,
-          exposedArtifact: "telegram_deep_link"
-        },
-        photo: {
-          requiresMutualConsent: true,
-          exposedArtifact: "photo_asset"
-        }
-      }
+      revealRules.channels
     );
 
     return {
@@ -140,13 +139,13 @@ export class ConsentRuntimeService {
     };
   }
 
-  private async getCurrentMatch(): Promise<{
+  private async getCurrentMatch(user: AuthenticatedUserContext): Promise<{
     id: string;
     selfUserId: string;
     peerUserId: string;
     peerTelegram: { telegramUsername: string | null; telegramUserId: string };
   }> {
-    const record = await this.profiles.getCurrentProfileRecord();
+    const record = await this.profiles.getCurrentProfileRecord(user);
     const match = await this.prisma.clientInstance.matchSession.findFirst({
       where: {
         status: "active",
@@ -184,7 +183,7 @@ export class ConsentRuntimeService {
     telegramUserId: string;
   }): string {
     if (peer.telegramUsername) {
-      return `https://t.me/${peer.telegramUsername}`;
+      return createTelegramDeepLink(peer.telegramUsername);
     }
 
     return `tg://user?id=${peer.telegramUserId}`;

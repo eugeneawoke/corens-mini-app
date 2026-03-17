@@ -4,11 +4,11 @@ import type { VisibilityState } from "./privacy";
 import { type MatchingEvaluation, evaluateMatchingCandidate } from "./matching-policy";
 import { planDeletion } from "./privacy-policy";
 import { resolveConsentRequest } from "./consent-policy";
+import { intentOptions, stateOptions, trustKeyGroups } from "./profile-options";
 import type {
   BeaconSummary,
   ConnectionSummary,
   ConsentStatusView,
-  HomeSummary,
   ProfileSummary,
   SelectOption
 } from "./miniapp-api";
@@ -46,63 +46,6 @@ const privacyRules = {
     closeOpenConsentsImmediately: true
   }
 } as const;
-
-export const stateOptions: ReadonlyArray<SelectOption> = [
-  {
-    key: "calm",
-    label: "Спокойствие",
-    description: "Ровный, мягкий темп без перегруза."
-  },
-  {
-    key: "reflective",
-    label: "Рефлексия",
-    description: "Хочется вдумчивого разговора и тишины."
-  },
-  {
-    key: "curious",
-    label: "Любопытство",
-    description: "Есть энергия на знакомство и новые пересечения."
-  },
-  {
-    key: "rest",
-    label: "Отдых",
-    description: "Нужен деликатный, спокойный контакт."
-  }
-];
-
-export const intentOptions: ReadonlyArray<SelectOption> = [
-  {
-    key: "slow-dialogue",
-    label: "Медленный диалог",
-    description: "Без спешки, с длинными паузами и вниманием."
-  },
-  {
-    key: "gentle-meeting",
-    label: "Аккуратное знакомство",
-    description: "Открыт к новому контакту, но без давления."
-  },
-  {
-    key: "supportive-presence",
-    label: "Присутствие рядом",
-    description: "Важно просто быть на связи и не форсировать."
-  },
-  {
-    key: "practical-talk",
-    label: "Предметный разговор",
-    description: "Хочется конкретики и понятных ожиданий."
-  }
-];
-
-export const trustKeyGroups = [
-  {
-    title: "Ценности",
-    items: ["Тишина", "Честность", "Бережность", "Доброта", "Свобода", "Уважение"]
-  },
-  {
-    title: "Ритм взаимодействия",
-    items: ["Чай", "Прогулки", "Глубокие разговоры", "Паузы", "Теплый юмор"]
-  }
-] as const;
 
 export interface DemoProfileState {
   displayName: string;
@@ -248,18 +191,6 @@ export function createBeaconSummary(state: DemoMvpState): BeaconSummary {
   };
 }
 
-export function createHomeSummary(state: DemoMvpState): HomeSummary {
-  const profileSummary = createProfileSummary(state);
-
-  return {
-    onboardingCompleted: profileSummary.onboardingCompleted,
-    profile: profileSummary.profile,
-    state: profileSummary.state.current,
-    intent: profileSummary.intent.current,
-    beacon: createBeaconSummary(state),
-    connection: createConnectionSummary(state)
-  };
-}
 
 export function createConsentStatus(
   channel: "contact" | "photo",

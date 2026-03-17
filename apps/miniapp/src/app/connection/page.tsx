@@ -14,7 +14,13 @@ import {
 } from "@corens/ui";
 
 import { blockConnectionAction, reportConnectionAction } from "../actions";
-import { getBeaconSummary, getCurrentConnection, getProfileSummary } from "../../lib/api";
+import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
+import {
+  getBeaconSummary,
+  getCurrentConnection,
+  getProfileSummary,
+  MiniAppSessionRequiredError
+} from "../../lib/api";
 
 function toneForStatus(status: "pending" | "approved" | "declined") {
   if (status === "approved") {
@@ -29,14 +35,25 @@ function toneForStatus(status: "pending" | "approved" | "declined") {
 }
 
 export default async function ConnectionPage() {
-  const profile = await getProfileSummary();
+  let profile;
+  let connection;
+  let beacon;
+
+  try {
+    profile = await getProfileSummary();
+    connection = await getCurrentConnection();
+    beacon = await getBeaconSummary();
+  } catch (error) {
+    if (error instanceof MiniAppSessionRequiredError) {
+      return <AuthBootstrapScreen />;
+    }
+
+    throw error;
+  }
 
   if (!profile.onboardingCompleted) {
     redirect("/onboarding");
   }
-
-  const connection = await getCurrentConnection();
-  const beacon = await getBeaconSummary();
 
   if (!connection) {
     return (

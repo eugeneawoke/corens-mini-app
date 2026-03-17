@@ -2,35 +2,39 @@
 
 _Current phase is marked explicitly. Update when phase scope changes._
 
-## Current Phase: Phase 0 - Architecture Foundation
+## Current Phase: Phase C - Deterministic Matching & Consent Hardening
 
 **Status:** In progress  
-**Goal:** Create the starter repository scaffold, shared contracts, and platform boundaries.  
-**Current deliverable:** Runnable zero-cost foundation with a combined API plus bot service on top of the scaffold and critical logic shells.
+**Goal:** Harden active match, consent, moderation, deletion, and retention flows now that the auth/session boundary is live.  
+**Current deliverable:** Deterministic matching pair constraints, transactional closeout paths, and config-backed consent/privacy runtime.
 
 ## Phases
 
 | # | Phase | Goal | Status |
 |---|---|---|---|
-| 0 | Architecture Foundation | Monorepo, combined backend shell, Telegram auth validation shell, config system | IN PROGRESS |
-| 1 | Bot Onboarding | Full onboarding flow through Telegram Bot | NEXT |
-| 2 | Mini App Shell + Profile Controls | Profile summary, editors, visibility controls, delete shell | PLANNED |
-| 3 | Automatic Matching + Beacon | Background matching, no-match fallback, Beacon orchestration | PLANNED |
-| 4 | Contact Consent + Photo Reveal | Separate mutual consent flows and Telegram handoff | PLANNED |
-| 5 | Privacy, Moderation, Hardening | Audit, analytics, abuse protection, deletion workflow | PLANNED |
+| A | Runtime Sanitation and Auth Boundary | Remove demo fallbacks, drop `/home`, and ship the auth bootstrap/session boundary. | DONE |
+| B | Auth + Session Layer | Validate Telegram init data, issue backend sessions, and guard all Mini App routes. | DONE |
+| C | Deterministic Matching & Consent Hardening | Database-safe matching, config-backed policies, consent determinism, moderation, and deletion guarantees. | IN PROGRESS |
+| D | Full Automated Test Pyramid | Unit, contract, integration, and Playwright e2e suites run with deterministic seeds for auth, matching, consent, and delete flows. | IN PROGRESS |
+| E | Release Readiness & Documentation | Document readiness sign-off, refresh governance, and re-baseline phases/evidence before launch. | PLANNED |
 
-## Phase 0 Deliverables
+## Phase C Deliverables
 
-- Root governance files and session protocol
-- Monorepo structure under `apps/`, `packages/`, `config/`, `docs/`
-- Backend and mini app skeletons
-- Shared domain types, config loaders, and DB schema scaffold
-- Security, env, analytics, ADR, and migration templates
-- Skeleton critical logic for matching, consent, and privacy
-- Runnable combined API plus bot bootstrap
+- Keep one active match per user pair through a DB-backed pair key and conflict-safe create path.
+- Keep reveal rules config-backed instead of hardcoded in consent runtime.
+- Make deletion and moderation closeout paths transactional and idempotent.
+- Preserve the privacy-first zero-cost architecture while hardening runtime determinism.
+
+## Release Readiness Checklist
+
+- Auth bootstrap and session revoke endpoints exist and guard Mini App traffic.
+- `/connection` remains the primary surface; `/home` and demo fallbacks are removed.
+- Matching, consent, Beacon, deletion, and moderation flows are config-driven and deterministic.
+- Logging scrubs init data, session secrets, deep links, and abuse notes.
+- Test suites span unit, contract, integration, and e2e with deterministic seeds.
 
 ## Acceptance Notes
 
-- Repository structure reflects the approved architecture package
-- Business rules are not hardcoded into app services
-- Scope remains limited to scaffold, critical logic shells, and zero-cost runnable foundation
+- Repository structure continues to reflect the approved architecture package.
+- Business rules remain config-backed and not hardcoded into runtime services.
+- Scope centers on runtime sanity, auth guardrails, and release-readiness documentation.

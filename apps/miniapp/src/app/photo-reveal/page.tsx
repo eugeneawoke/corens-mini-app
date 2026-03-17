@@ -3,16 +3,31 @@ import { redirect } from "next/navigation";
 import { Button, ButtonLink, NoticeCard, StatusBadge } from "@corens/ui";
 
 import { approveConsentAction, declineConsentAction } from "../actions";
-import { getConsentStatus, getProfileSummary } from "../../lib/api";
+import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
+import {
+  getConsentStatus,
+  getProfileSummary,
+  MiniAppSessionRequiredError
+} from "../../lib/api";
 
 export default async function PhotoRevealPage() {
-  const profile = await getProfileSummary();
+  let profile;
+  let resolution;
+
+  try {
+    profile = await getProfileSummary();
+    resolution = await getConsentStatus("photo");
+  } catch (error) {
+    if (error instanceof MiniAppSessionRequiredError) {
+      return <AuthBootstrapScreen />;
+    }
+
+    throw error;
+  }
 
   if (!profile.onboardingCompleted) {
     redirect("/onboarding");
   }
-
-  const resolution = await getConsentStatus("photo");
 
   return (
     <div className="corens-sheet-layout">

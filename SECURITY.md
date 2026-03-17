@@ -21,6 +21,7 @@ Never log:
 - storage keys
 - signed URLs
 - Telegram deep-link artifacts
+- session tokens/cookies or other session secrets
 - raw report notes in ordinary application logs
 
 Treat as sensitive:
@@ -53,3 +54,9 @@ Deletion flow must:
 - Signed URLs must be short-lived
 - Deep-link artifacts must be treated as consent-gated secrets
 - Privacy and deletion behavior must remain server-enforced
+
+## Release Readiness
+
+- Auth bootstrap and revoke flows must be documented before runtime release.
+- Every protected route enforces the backend session guard; demo fallbacks are disallowed.
+- Matching, consent, moderation, Beacon, and deletion transitions remain config-driven and deterministic.

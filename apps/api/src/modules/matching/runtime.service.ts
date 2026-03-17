@@ -3,6 +3,7 @@ import { evaluateMatchingCandidate, type ConnectionSummary } from "@corens/domai
 import type { MatchingCandidate } from "@corens/domain";
 import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
+import type { AuthenticatedUserContext } from "../auth/service";
 import { ConsentRuntimeService } from "../consents/runtime.service";
 import { ProfilesService } from "../profiles";
 
@@ -15,8 +16,8 @@ export class MatchingRuntimeService {
     private readonly consents: ConsentRuntimeService
   ) {}
 
-  async getCurrentConnection(): Promise<ConnectionSummary | null> {
-    const record = await this.profiles.getCurrentProfileRecord();
+  async getCurrentConnection(user: AuthenticatedUserContext): Promise<ConnectionSummary | null> {
+    const record = await this.profiles.getCurrentProfileRecord(user);
     await this.ensureCurrentMatch(record.user.id);
 
     const session = await this.prisma.clientInstance.matchSession.findFirst({
@@ -110,6 +111,7 @@ export class MatchingRuntimeService {
     const allProfiles = await this.prisma.clientInstance.profile.findMany({
       where: {
         onboardingCompleted: true,
+        visibilityStatus: "active",
         userId: { not: userId }
       },
       include: { user: true }
@@ -200,14 +202,28 @@ export class MatchingRuntimeService {
 
     const [userAId, userBId] = [self.userId, bestMatch.candidateUserId].sort();
 
-    await this.prisma.clientInstance.matchSession.create({
-      data: {
-        userAId,
-        userBId,
-        origin: bestMatch.origin,
-        status: "active",
-        score: bestMatch.score
+    await this.prisma.clientInstance.$transaction(async (tx) => {
+      const activePair = await tx.matchSession.findFirst({
+        where: {
+          pairKey: `${userAId}:${userBId}`,
+          status: "active"
+        }
+      });
+
+      if (activePair) {
+        return;
       }
+
+      await tx.matchSession.create({
+        data: {
+          pairKey: `${userAId}:${userBId}`,
+          userAId,
+          userBId,
+          origin: bestMatch.origin,
+          status: "active",
+          score: bestMatch.score
+        }
+      });
     });
   }
 

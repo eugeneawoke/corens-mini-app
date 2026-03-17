@@ -71,15 +71,6 @@ export interface BeaconSummary {
   cooldownLabel?: string;
 }
 
-export interface HomeSummary {
-  onboardingCompleted: boolean;
-  profile: ProfileSummary["profile"];
-  state: ProfileSummary["state"]["current"];
-  intent: ProfileSummary["intent"]["current"];
-  beacon: BeaconSummary;
-  connection: ConnectionSummary | null;
-}
-
 export interface UpdateStateIntentRequest {
   stateKey: string;
   intentKey: string;
@@ -110,4 +101,21 @@ export interface ModerationActionRequest {
 
 export interface ConsentDecisionRequest {
   decision: ConsentDecision;
+}
+
+export interface AuthBootstrapRequest {
+  initData: string;
+}
+
+export interface AuthenticatedMiniAppUser {
+  id: string;
+  telegramUserId: string;
+  telegramUsername: string | null;
+}
+
+export interface AuthBootstrapResponse {
+  sessionToken: string;
+  expiresAt: string;
+  user: AuthenticatedMiniAppUser;
+  profile: ProfileSummary;
 }

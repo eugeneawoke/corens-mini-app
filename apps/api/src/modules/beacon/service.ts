@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import type { BeaconSummary } from "@corens/domain";
 import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
+import type { AuthenticatedUserContext } from "../auth/service";
 import { ProfilesService } from "../profiles";
 
 @Injectable()
@@ -12,9 +13,9 @@ export class BeaconService {
     private readonly policyConfig: PolicyConfigService
   ) {}
 
-  async getSummary(): Promise<BeaconSummary> {
+  async getSummary(user: AuthenticatedUserContext): Promise<BeaconSummary> {
     await this.expireStaleSessions();
-    const record = await this.profiles.getCurrentProfileRecord();
+    const record = await this.profiles.getCurrentProfileRecord(user);
     const rules = await this.policyConfig.getBeaconRules();
     const now = new Date();
     const activeSession = await this.prisma.clientInstance.beaconSession.findFirst({
@@ -56,12 +57,12 @@ export class BeaconService {
     };
   }
 
-  async activate(): Promise<BeaconSummary> {
-    const record = await this.profiles.getCurrentProfileRecord();
+  async activate(user: AuthenticatedUserContext): Promise<BeaconSummary> {
+    const record = await this.profiles.getCurrentProfileRecord(user);
     const rules = await this.policyConfig.getBeaconRules();
 
     if (!record.profile.onboardingCompleted) {
-      return this.getSummary();
+      return this.getSummary(user);
     }
 
     const now = new Date();
@@ -76,7 +77,7 @@ export class BeaconService {
     });
 
     if (activationsToday >= rules.activationsPerDay) {
-      return this.getSummary();
+      return this.getSummary(user);
     }
 
     await this.prisma.clientInstance.beaconSession.updateMany({
@@ -99,7 +100,7 @@ export class BeaconService {
       }
     });
 
-    return this.getSummary();
+    return this.getSummary(user);
   }
 
   private formatRemaining(target: Date, now: Date): string {

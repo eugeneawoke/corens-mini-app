@@ -2,10 +2,21 @@ import { BadgeInfo, HeartHandshake, KeyRound, Lock, Trash2 } from "lucide-react"
 import { redirect } from "next/navigation";
 import { AppSurface, ListRow, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
 
-import { getProfileSummary } from "../../lib/api";
+import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
+import { getProfileSummary, MiniAppSessionRequiredError } from "../../lib/api";
 
 export default async function ProfilePage() {
-  const snapshot = await getProfileSummary();
+  let snapshot;
+
+  try {
+    snapshot = await getProfileSummary();
+  } catch (error) {
+    if (error instanceof MiniAppSessionRequiredError) {
+      return <AuthBootstrapScreen />;
+    }
+
+    throw error;
+  }
 
   if (!snapshot.onboardingCompleted) {
     redirect("/onboarding");

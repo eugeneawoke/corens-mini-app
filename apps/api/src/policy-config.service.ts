@@ -5,6 +5,7 @@ import type {
   BeaconRulesConfig,
   MatchingScoringConfig,
   PrivacyRulesConfig,
+  RevealRulesConfig,
   RetentionPoliciesConfig
 } from "@corens/config";
 
@@ -13,6 +14,7 @@ export class PolicyConfigService {
   private matchingScoringPromise: Promise<MatchingScoringConfig> | undefined;
   private beaconRulesPromise: Promise<BeaconRulesConfig> | undefined;
   private privacyRulesPromise: Promise<PrivacyRulesConfig> | undefined;
+  private revealRulesPromise: Promise<RevealRulesConfig> | undefined;
   private retentionPoliciesPromise: Promise<RetentionPoliciesConfig> | undefined;
   private moderationRulesPromise: Promise<{ reportRequestsPerDay: number }> | undefined;
 
@@ -29,6 +31,11 @@ export class PolicyConfigService {
   getPrivacyRules(): Promise<PrivacyRulesConfig> {
     this.privacyRulesPromise ??= this.loadPrivacyRules();
     return this.privacyRulesPromise;
+  }
+
+  getRevealRules(): Promise<RevealRulesConfig> {
+    this.revealRulesPromise ??= this.loadRevealRules();
+    return this.revealRulesPromise;
   }
 
   getRetentionPolicies(): Promise<RetentionPoliciesConfig> {
@@ -98,6 +105,28 @@ export class PolicyConfigService {
         match_sessions_days: this.readNumber(raw, "retention.match_sessions_days"),
         reveal_consents_days: this.readNumber(raw, "retention.reveal_consents_days"),
         beacon_sessions_days: this.readNumber(raw, "retention.beacon_sessions_days")
+      }
+    };
+  }
+
+  private async loadRevealRules(): Promise<RevealRulesConfig> {
+    const raw = await this.readLines("config/reveal/rules.v1.yaml");
+
+    return {
+      version: this.readScalar(raw, "version") ?? "v1",
+      channels: {
+        contact: {
+          requiresMutualConsent:
+            this.readScalar(raw, "channels.contact.requires_mutual_consent") === "true",
+          exposedArtifact: "telegram_deep_link",
+          softWarningRequired:
+            this.readScalar(raw, "channels.contact.soft_warning_required") === "true"
+        },
+        photo: {
+          requiresMutualConsent:
+            this.readScalar(raw, "channels.photo.requires_mutual_consent") === "true",
+          exposedArtifact: "photo_asset"
+        }
       }
     };
   }

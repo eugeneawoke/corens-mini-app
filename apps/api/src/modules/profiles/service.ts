@@ -8,17 +8,17 @@ import type {
 } from "@corens/domain";
 import {
   hideProfile,
-  intentOptions,
   planDeletion,
-  restoreProfile,
+  restoreProfile
+} from "@corens/domain";
+import {
+  intentOptions,
   stateOptions,
   trustKeyGroups
-} from "@corens/domain";
+} from "@corens/domain/profile-options";
 import type { Profile, User } from "@corens/db";
 import { PrismaService } from "../../prisma.service";
-
-const DEMO_TELEGRAM_USER_ID = "demo-telegram-user";
-const DEMO_TELEGRAM_USERNAME = "maria_user";
+import type { AuthenticatedUserContext } from "../auth/service";
 const privacyRules = {
   hiddenProfileClosesPendingConnection: false,
   deletion: {
@@ -32,12 +32,15 @@ const privacyRules = {
 export class ProfilesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getSummary(): Promise<ProfileSummary> {
-    const record = await this.ensureProfileRecord();
+  async getSummary(user: AuthenticatedUserContext): Promise<ProfileSummary> {
+    const record = await this.ensureProfileRecord(user);
     return this.buildSummary(record.user, record.profile);
   }
 
-  async updateStateIntent(input: UpdateStateIntentRequest): Promise<ProfileSummary> {
+  async updateStateIntent(
+    user: AuthenticatedUserContext,
+    input: UpdateStateIntentRequest
+  ): Promise<ProfileSummary> {
     if (!stateOptions.some((option) => option.key === input.stateKey)) {
       throw new BadRequestException("Unknown state key");
     }
@@ -46,7 +49,7 @@ export class ProfilesService {
       throw new BadRequestException("Unknown intent key");
     }
 
-    const record = await this.ensureProfileRecord();
+    const record = await this.ensureProfileRecord(user);
     const updated = await this.prisma.clientInstance.profile.update({
       where: { userId: record.user.id },
       data: {
@@ -58,14 +61,17 @@ export class ProfilesService {
     return this.buildSummary(record.user, updated);
   }
 
-  async updateTrustKeys(input: UpdateTrustKeysRequest): Promise<ProfileSummary> {
+  async updateTrustKeys(
+    user: AuthenticatedUserContext,
+    input: UpdateTrustKeysRequest
+  ): Promise<ProfileSummary> {
     const sanitized = this.sanitizeTrustKeys(input.trustKeys);
 
     if (sanitized.length === 0) {
       throw new BadRequestException("At least one trust key is required");
     }
 
-    const record = await this.ensureProfileRecord();
+    const record = await this.ensureProfileRecord(user);
     const updated = await this.prisma.clientInstance.profile.update({
       where: { userId: record.user.id },
       data: {
@@ -76,7 +82,10 @@ export class ProfilesService {
     return this.buildSummary(record.user, updated);
   }
 
-  async completeOnboarding(input: CompleteOnboardingRequest): Promise<ProfileSummary> {
+  async completeOnboarding(
+    user: AuthenticatedUserContext,
+    input: CompleteOnboardingRequest
+  ): Promise<ProfileSummary> {
     const displayName = input.displayName.trim();
 
     if (displayName.length < 2) {
@@ -97,7 +106,7 @@ export class ProfilesService {
       throw new BadRequestException("At least one trust key is required");
     }
 
-    const record = await this.ensureProfileRecord();
+    const record = await this.ensureProfileRecord(user);
     const updated = await this.prisma.clientInstance.profile.update({
       where: { userId: record.user.id },
       data: {
@@ -112,12 +121,15 @@ export class ProfilesService {
     return this.buildSummary(record.user, updated);
   }
 
-  async getCurrentProfileRecord(): Promise<{ user: User; profile: Profile }> {
-    return this.ensureProfileRecord();
+  async getCurrentProfileRecord(user: AuthenticatedUserContext): Promise<{ user: User; profile: Profile }> {
+    return this.ensureProfileRecord(user);
   }
 
-  async updateVisibility(input: UpdateVisibilityRequest): Promise<ProfileSummary> {
-    const record = await this.ensureProfileRecord();
+  async updateVisibility(
+    user: AuthenticatedUserContext,
+    input: UpdateVisibilityRequest
+  ): Promise<ProfileSummary> {
+    const record = await this.ensureProfileRecord(user);
     const nextVisibility = input.isHidden
       ? hideProfile({
           userId: record.profile.userId,
@@ -153,19 +165,16 @@ export class ProfilesService {
     ).slice(0, 5);
   }
 
-  private async ensureProfileRecord(): Promise<{ user: User; profile: Profile }> {
-    const user = await this.prisma.clientInstance.user.upsert({
-      where: { telegramUserId: DEMO_TELEGRAM_USER_ID },
-      update: {
-        telegramUsername: DEMO_TELEGRAM_USERNAME,
-        status: "active"
-      },
-      create: {
-        telegramUserId: DEMO_TELEGRAM_USER_ID,
-        telegramUsername: DEMO_TELEGRAM_USERNAME,
-        status: "active"
-      }
+  private async ensureProfileRecord(
+    authenticatedUser: AuthenticatedUserContext
+  ): Promise<{ user: User; profile: Profile }> {
+    const user = await this.prisma.clientInstance.user.findUnique({
+      where: { id: authenticatedUser.id }
     });
+
+    if (!user || user.status !== "active") {
+      throw new BadRequestException("Active user profile is unavailable");
+    }
 
     const profile = await this.prisma.clientInstance.profile.upsert({
       where: { userId: user.id },
@@ -201,7 +210,7 @@ export class ProfilesService {
       onboardingCompleted: profile.onboardingCompleted,
       profile: {
         displayName: profile.displayName,
-        handle: `@${user.telegramUsername ?? DEMO_TELEGRAM_USERNAME}`
+        handle: user.telegramUsername ? `@${user.telegramUsername}` : `id:${user.telegramUserId}`
       },
       state: {
         current: selectedState,

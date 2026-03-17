@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
+import type { AuthenticatedUserContext } from "../auth/service";
 import { ProfilesService } from "../profiles";
 
 @Injectable()
@@ -11,106 +12,123 @@ export class PrivacyRuntimeService {
     private readonly policyConfig: PolicyConfigService
   ) {}
 
-  async requestDeletion(confirmation: string): Promise<void> {
+  async requestDeletion(user: AuthenticatedUserContext, confirmation: string): Promise<void> {
     if (confirmation.trim().toLowerCase() !== "удалить") {
       throw new BadRequestException("Deletion confirmation is invalid");
     }
 
-    const record = await this.profiles.getCurrentProfileRecord();
+    const record = await this.profiles.getCurrentProfileRecord(user);
     const rules = await this.policyConfig.getPrivacyRules();
     const now = new Date();
+    const activeMatchIds = await this.activeMatchIds(record.user.id);
 
-    await this.prisma.clientInstance.user.update({
-      where: { id: record.user.id },
-      data: {
-        status: "pending_deletion"
-      }
-    });
-
-    await this.prisma.clientInstance.profile.update({
-      where: { userId: record.user.id },
-      data: {
-        displayName: "Удаленный профиль",
-        about: null,
-        trustKeys: [],
-        visibilityStatus: "hidden",
-        matchingEnabled: false,
-        onboardingCompleted: false
-      }
-    });
-
-    if (rules.deletion.revokeSessionsImmediately) {
-      await this.prisma.clientInstance.matchSession.updateMany({
-        where: {
-          status: "active",
-          OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
-        },
-        data: {
-          status: "closed_due_to_deletion",
-          expiresAt: now
-        }
-      });
+    if (record.user.status === "pending_deletion") {
+      return;
     }
 
-    if (rules.deletion.expireBeaconImmediately) {
-      await this.prisma.clientInstance.beaconSession.updateMany({
+    await this.prisma.clientInstance.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: record.user.id },
+        data: {
+          status: "pending_deletion"
+        }
+      });
+
+      await tx.profile.update({
+        where: { userId: record.user.id },
+        data: {
+          displayName: "Удаленный профиль",
+          about: null,
+          trustKeys: [],
+          visibilityStatus: "hidden",
+          matchingEnabled: false,
+          onboardingCompleted: false
+        }
+      });
+
+      await tx.session.updateMany({
         where: {
           userId: record.user.id,
-          status: "active"
+          revokedAt: null
         },
         data: {
-          status: "expired",
-          expiresAt: now
+          revokedAt: now
         }
       });
-    }
 
-    if (rules.deletion.closeOpenConsentsImmediately) {
-      await this.prisma.clientInstance.contactConsent.updateMany({
-        where: {
-          matchSessionId: {
-            in: await this.activeMatchIds(record.user.id)
+      if (rules.deletion.revokeSessionsImmediately) {
+        await tx.matchSession.updateMany({
+          where: {
+            status: "active",
+            OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
           },
-          requestStatus: "pending"
-        },
-        data: {
-          requestStatus: "declined",
-          resolvedAt: now
-        }
-      });
+          data: {
+            status: "closed_due_to_deletion",
+            expiresAt: now
+          }
+        });
+      }
 
-      await this.prisma.clientInstance.photoRevealConsent.updateMany({
-        where: {
-          matchSessionId: {
-            in: await this.activeMatchIds(record.user.id)
+      if (rules.deletion.expireBeaconImmediately) {
+        await tx.beaconSession.updateMany({
+          where: {
+            userId: record.user.id,
+            status: "active"
           },
-          requestStatus: "pending"
-        },
-        data: {
-          requestStatus: "declined",
-          resolvedAt: now
-        }
-      });
-    }
+          data: {
+            status: "expired",
+            expiresAt: now
+          }
+        });
+      }
 
-    const stages = [
-      "pending",
-      "sessions_revoked",
-      "consents_closed",
-      "assets_deleted",
-      "purged",
-      "completed"
-    ];
+      if (rules.deletion.closeOpenConsentsImmediately) {
+        await tx.contactConsent.updateMany({
+          where: {
+            matchSessionId: {
+              in: activeMatchIds
+            },
+            requestStatus: "pending"
+          },
+          data: {
+            requestStatus: "declined",
+            resolvedAt: now
+          }
+        });
 
-    for (const stage of stages) {
-      await this.prisma.clientInstance.deletionEvent.create({
-        data: {
-          userId: record.user.id,
-          stage,
-          completedAt: now
-        }
-      });
-    }
+        await tx.photoRevealConsent.updateMany({
+          where: {
+            matchSessionId: {
+              in: activeMatchIds
+            },
+            requestStatus: "pending"
+          },
+          data: {
+            requestStatus: "declined",
+            resolvedAt: now
+          }
+        });
+      }
+
+      const stages = [
+        "pending",
+        "sessions_revoked",
+        "consents_closed",
+        "assets_deleted",
+        "purged",
+        "completed"
+      ] as const;
+
+      for (const stage of stages) {
+        await tx.deletionEvent.create({
+          data: {
+            userId: record.user.id,
+            stage,
+            completedAt: now
+          }
+        });
+      }
+    });
   }
 
   async cleanupRetention(): Promise<void> {

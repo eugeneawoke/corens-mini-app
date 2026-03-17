@@ -7,4 +7,4 @@ export * from "./lib/matching-policy";
 export * from "./lib/consent-policy";
 export * from "./lib/privacy-policy";
 export * from "./lib/miniapp-api";
-export * from "./lib/mvp-fixtures";
+export * from "./lib/profile-options";

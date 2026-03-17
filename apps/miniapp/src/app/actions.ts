@@ -1,24 +1,33 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { intentOptions, stateOptions, trustKeyGroups } from "@corens/domain";
+import { intentOptions, stateOptions, trustKeyGroups } from "@corens/domain/profile-options";
+import { MINIAPP_SESSION_COOKIE } from "../lib/session";
 
 async function sendApiMutation(path: string, init: RequestInit): Promise<void> {
   const baseUrl = process.env.CORENS_API_BASE_URL ?? process.env.NEXT_PUBLIC_CORENS_API_BASE_URL;
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get(MINIAPP_SESSION_COOKIE)?.value;
 
-  if (!baseUrl) {
-    return;
+  if (!baseUrl || !sessionToken) {
+    throw new Error("Mini App session is required");
   }
 
-  await fetch(`${baseUrl.replace(/\/$/, "")}${path}`, {
+  const response = await fetch(`${baseUrl.replace(/\/$/, "")}${path}`, {
     ...init,
     headers: {
       "content-type": "application/json",
+      authorization: `Bearer ${sessionToken}`,
       ...(init.headers ?? {})
     },
     cache: "no-store"
   });
+
+  if (!response.ok) {
+    throw new Error(`API mutation failed for ${path} with status ${response.status}`);
+  }
 }
 
 export async function activateBeaconAction(): Promise<void> {
@@ -151,10 +160,12 @@ export async function requestDeletionAction(formData: FormData): Promise<void> {
     body: JSON.stringify({ confirmation })
   });
 
+  const cookieStore = await cookies();
+  cookieStore.delete(MINIAPP_SESSION_COOKIE);
   revalidatePath("/connection");
   revalidatePath("/profile");
   revalidatePath("/privacy");
-  redirect("/onboarding");
+  redirect("/");
 }
 
 export async function reportConnectionAction(formData: FormData): Promise<void> {

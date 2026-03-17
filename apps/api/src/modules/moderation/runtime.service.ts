@@ -1,6 +1,7 @@
 import { HttpException, Injectable, HttpStatus } from "@nestjs/common";
 import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
+import type { AuthenticatedUserContext } from "../auth/service";
 import { ProfilesService } from "../profiles";
 
 @Injectable()
@@ -11,16 +12,20 @@ export class ModerationRuntimeService {
     private readonly policyConfig: PolicyConfigService
   ) {}
 
-  async report(note?: string): Promise<void> {
-    await this.capture("report", note);
+  async report(user: AuthenticatedUserContext, note?: string): Promise<void> {
+    await this.capture(user, "report", note);
   }
 
-  async block(note?: string): Promise<void> {
-    await this.capture("block", note);
+  async block(user: AuthenticatedUserContext, note?: string): Promise<void> {
+    await this.capture(user, "block", note);
   }
 
-  private async capture(eventType: "report" | "block", note?: string): Promise<void> {
-    const record = await this.profiles.getCurrentProfileRecord();
+  private async capture(
+    user: AuthenticatedUserContext,
+    eventType: "report" | "block",
+    note?: string
+  ): Promise<void> {
+    const record = await this.profiles.getCurrentProfileRecord(user);
     const match = await this.prisma.clientInstance.matchSession.findFirst({
       where: {
         status: "active",
@@ -54,44 +59,48 @@ export class ModerationRuntimeService {
 
     const targetUserId = match.userAId === record.user.id ? match.userBId : match.userAId;
 
-    await this.prisma.clientInstance.moderationEvent.create({
-      data: {
-        matchSessionId: match.id,
-        actorUserId: record.user.id,
-        targetUserId,
-        eventType,
-        note: note?.trim() || null
-      }
-    });
+    await this.prisma.clientInstance.$transaction(async (tx) => {
+      const now = new Date();
 
-    await this.prisma.clientInstance.matchSession.update({
-      where: { id: match.id },
-      data: {
-        status: eventType === "block" ? "closed_blocked" : "closed_reported",
-        expiresAt: new Date()
-      }
-    });
+      await tx.moderationEvent.create({
+        data: {
+          matchSessionId: match.id,
+          actorUserId: record.user.id,
+          targetUserId,
+          eventType,
+          note: note?.trim() || null
+        }
+      });
 
-    await this.prisma.clientInstance.contactConsent.updateMany({
-      where: {
-        matchSessionId: match.id,
-        requestStatus: "pending"
-      },
-      data: {
-        requestStatus: "declined",
-        resolvedAt: new Date()
-      }
-    });
+      await tx.matchSession.update({
+        where: { id: match.id },
+        data: {
+          status: eventType === "block" ? "closed_blocked" : "closed_reported",
+          expiresAt: now
+        }
+      });
 
-    await this.prisma.clientInstance.photoRevealConsent.updateMany({
-      where: {
-        matchSessionId: match.id,
-        requestStatus: "pending"
-      },
-      data: {
-        requestStatus: "declined",
-        resolvedAt: new Date()
-      }
+      await tx.contactConsent.updateMany({
+        where: {
+          matchSessionId: match.id,
+          requestStatus: "pending"
+        },
+        data: {
+          requestStatus: "declined",
+          resolvedAt: now
+        }
+      });
+
+      await tx.photoRevealConsent.updateMany({
+        where: {
+          matchSessionId: match.id,
+          requestStatus: "pending"
+        },
+        data: {
+          requestStatus: "declined",
+          resolvedAt: now
+        }
+      });
     });
   }
 }
