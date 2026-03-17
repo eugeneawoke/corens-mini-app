@@ -10,10 +10,8 @@ type RootLayoutProps = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="ru">
-      <head>
-        <Script src="https://telegram.org/js/telegram-web-app.js?61" strategy="beforeInteractive" />
-      </head>
       <body>
+        <Script src="https://telegram.org/js/telegram-web-app.js?61" strategy="beforeInteractive" />
         {children}
       </body>
     </html>
