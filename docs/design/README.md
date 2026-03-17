@@ -34,6 +34,7 @@ The Stitch exports currently include patterns that should **not** be implemented
 
 - shared primitives live in `packages/ui`
 - route composition lives in `apps/miniapp/src/app`
-- domain-backed demo/view state lives in `apps/miniapp/src/lib/mvp-data.ts`
+- Telegram session bootstrap lives in `apps/miniapp/src/components/auth-bootstrap.tsx` and `apps/miniapp/src/app/auth/bootstrap/route.ts`
+- Mini App data loading now flows through the guarded backend API instead of a local demo/view-model layer
 
-As real Mini App API endpoints are implemented, the local view-model layer should be replaced screen-by-screen with server data while preserving the same design structure.
+Screen implementations should preserve the approved design structure while binding to the current auth/session boundary and backend-backed route data.
