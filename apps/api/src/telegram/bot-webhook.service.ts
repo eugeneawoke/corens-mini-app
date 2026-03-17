@@ -29,6 +29,7 @@ export class BotWebhookService {
     }
 
     const instance = app.getHttpAdapter().getInstance();
+    const webhook = webhookCallback(this.bot, "express");
 
     instance.get("/bot/health", (_req: Request, res: Response) => {
       res.json({
@@ -48,35 +49,38 @@ export class BotWebhookService {
 
       next();
     });
-    instance.use("/telegram/webhook", express.json());
-    instance.use("/telegram/webhook", (req: Request, res: Response, next: NextFunction) => {
-      const receivedSecret = req.header("x-telegram-bot-api-secret-token");
+    instance.post(
+      "/telegram/webhook",
+      express.json(),
+      (req: Request, res: Response, next: NextFunction) => {
+        const receivedSecret = req.header("x-telegram-bot-api-secret-token");
 
-      if (!verifyTelegramWebhookSecret(receivedSecret, this.env.TELEGRAM_BOT_WEBHOOK_SECRET)) {
-        res.status(401).json({
-          ok: false,
-          code: "invalid_webhook_secret"
-        });
-        return;
-      }
+        if (!verifyTelegramWebhookSecret(receivedSecret, this.env.TELEGRAM_BOT_WEBHOOK_SECRET)) {
+          res.status(401).json({
+            ok: false,
+            code: "invalid_webhook_secret"
+          });
+          return;
+        }
 
-      next();
-    });
-    instance.use("/telegram/webhook", (req: Request, res: Response, next: NextFunction) => {
-      if (!req.body || typeof req.body !== "object" || typeof req.body.update_id !== "number") {
-        this.logger.warn(
-          `Rejected malformed Telegram webhook payload: method=${req.method} content-type=${req.header("content-type") ?? "unknown"}`
-        );
-        res.status(400).json({
-          ok: false,
-          code: "invalid_webhook_payload"
-        });
-        return;
-      }
+        next();
+      },
+      (req: Request, res: Response, next: NextFunction) => {
+        if (!req.body || typeof req.body !== "object" || typeof req.body.update_id !== "number") {
+          this.logger.warn(
+            `Rejected malformed Telegram webhook payload: method=${req.method} content-type=${req.header("content-type") ?? "unknown"}`
+          );
+          res.status(400).json({
+            ok: false,
+            code: "invalid_webhook_payload"
+          });
+          return;
+        }
 
-      next();
-    });
-    instance.use("/telegram/webhook", webhookCallback(this.bot, "express"));
+        next();
+      },
+      webhook
+    );
 
     this.mounted = true;
     this.logger.log("Telegram webhook mounted at /telegram/webhook");

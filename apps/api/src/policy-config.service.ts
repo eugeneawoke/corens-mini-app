@@ -11,6 +11,7 @@ import type {
 
 @Injectable()
 export class PolicyConfigService {
+  private readonly configRoot = this.resolveConfigRoot();
   private matchingScoringPromise: Promise<MatchingScoringConfig> | undefined;
   private beaconRulesPromise: Promise<BeaconRulesConfig> | undefined;
   private privacyRulesPromise: Promise<PrivacyRulesConfig> | undefined;
@@ -140,8 +141,24 @@ export class PolicyConfigService {
   }
 
   private async readLines(relativePath: string): Promise<string[]> {
-    const content = await readFile(resolve(process.cwd(), relativePath), "utf8");
+    const content = await readFile(resolve(this.configRoot, relativePath), "utf8");
     return content.split("\n");
+  }
+
+  private resolveConfigRoot(): string {
+    const candidates = [
+      process.cwd(),
+      resolve(__dirname, "../../.."),
+      resolve(__dirname, "../../../..")
+    ];
+
+    for (const candidate of candidates) {
+      if (candidate && !candidate.endsWith("/apps/api")) {
+        return candidate;
+      }
+    }
+
+    return process.cwd();
   }
 
   private readScalar(lines: string[], key: string): string | undefined {
