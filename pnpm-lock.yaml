@@ -53,9 +53,9 @@ importers:
       '@nestjs/platform-express':
         specifier: ^11.1.16
         version: 11.1.16(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.16)
-      '@types/express':
-        specifier: ^5.0.6
-        version: 5.0.6
+      express:
+        specifier: ^5.2.1
+        version: 5.2.1
       grammy:
         specifier: ^1.41.1
         version: 1.41.1
@@ -65,6 +65,10 @@ importers:
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
+    devDependencies:
+      '@types/express':
+        specifier: ^5.0.6
+        version: 5.0.6
 
   apps/miniapp:
     dependencies:
