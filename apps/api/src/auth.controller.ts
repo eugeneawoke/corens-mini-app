@@ -1,6 +1,8 @@
-import { Body, Controller, Headers, HttpCode, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, HttpCode, Post, UseGuards } from "@nestjs/common";
 import type { AuthBootstrapRequest } from "@corens/domain";
+import { AuthenticatedUser } from "./modules/auth/authenticated-user.decorator";
 import { AuthService } from "./modules/auth/service";
+import type { AuthenticatedUserContext } from "./modules/auth/service";
 import { SessionAuthGuard } from "./modules/auth/session.guard";
 
 @Controller("auth")
@@ -15,11 +17,7 @@ export class AuthController {
   @Post("revoke")
   @HttpCode(204)
   @UseGuards(SessionAuthGuard)
-  async revoke(@Headers("authorization") authorization?: string): Promise<void> {
-    const sessionToken = authorization?.startsWith("Bearer ")
-      ? authorization.slice("Bearer ".length).trim()
-      : "";
-
-    await this.auth.revoke(sessionToken);
+  async revoke(@AuthenticatedUser() user: AuthenticatedUserContext): Promise<void> {
+    await this.auth.revokeSessionById(user.sessionId);
   }
 }

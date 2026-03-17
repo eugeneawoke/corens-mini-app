@@ -46,7 +46,7 @@ model MatchSession {
   createdAt         DateTime @default(now())
   expiresAt         DateTime?
 
-  @@unique([pairKey, status])
+  @@index([pairKey, status])
   @@index([userAId, status])
   @@index([userBId, status])
 }

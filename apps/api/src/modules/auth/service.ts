@@ -15,6 +15,7 @@ const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 
 export interface AuthenticatedUserContext {
   id: string;
+  sessionId: string;
   telegramUserId: string;
   telegramUsername: string | null;
 }
@@ -77,7 +78,7 @@ export class AuthService {
     return {
       sessionToken,
       expiresAt: expiresAt.toISOString(),
-      user: this.toContext(user),
+      user: this.toPublicUser(user),
       profile
     };
   }
@@ -89,9 +90,13 @@ export class AuthService {
       return;
     }
 
+    await this.revokeSessionById(parsed.sessionId);
+  }
+
+  async revokeSessionById(sessionId: string): Promise<void> {
     await this.prisma.clientInstance.session.updateMany({
       where: {
-        id: parsed.sessionId,
+        id: sessionId,
         revokedAt: null
       },
       data: {
@@ -134,7 +139,7 @@ export class AuthService {
       }
     });
 
-    return this.toContext(session.user);
+    return this.toContext(session.user, session.id);
   }
 
   private async ensureProfile(user: User): Promise<Profile> {
@@ -180,7 +185,16 @@ export class AuthService {
     };
   }
 
-  private toContext(user: User): AuthenticatedUserContext {
+  private toContext(user: User, sessionId = ""): AuthenticatedUserContext {
+    return {
+      id: user.id,
+      sessionId,
+      telegramUserId: user.telegramUserId,
+      telegramUsername: user.telegramUsername
+    };
+  }
+
+  private toPublicUser(user: User): AuthBootstrapResponse["user"] {
     return {
       id: user.id,
       telegramUserId: user.telegramUserId,

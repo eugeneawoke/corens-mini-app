@@ -14,7 +14,8 @@ export class SessionAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const token = this.readSessionToken(request);
-    request.authenticatedUser = await this.auth.authenticate(token);
+    const authenticatedUser = await this.auth.authenticate(token);
+    request.authenticatedUser = authenticatedUser;
     return true;
   }
 

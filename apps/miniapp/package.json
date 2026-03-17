@@ -8,7 +8,7 @@
     "lint": "echo 'No dedicated lint task is configured for @corens/miniapp'",
     "start": "next start",
     "test": "echo 'No tests are configured for @corens/miniapp'",
-    "typecheck": "next build"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@corens/domain": "workspace:*",

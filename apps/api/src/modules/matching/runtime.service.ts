@@ -1,6 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { evaluateMatchingCandidate, type ConnectionSummary } from "@corens/domain";
-import type { MatchingCandidate } from "@corens/domain";
+import {
+  evaluateMatchingCandidate,
+  type ConnectionSummary,
+  type MatchingCandidate
+} from "@corens/domain";
+import { Prisma } from "@corens/db";
 import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
 import type { AuthenticatedUserContext } from "../auth/service";
@@ -214,16 +218,27 @@ export class MatchingRuntimeService {
         return;
       }
 
-      await tx.matchSession.create({
-        data: {
-          pairKey: `${userAId}:${userBId}`,
-          userAId,
-          userBId,
-          origin: bestMatch.origin,
-          status: "active",
-          score: bestMatch.score
+      try {
+        await tx.matchSession.create({
+          data: {
+            pairKey: `${userAId}:${userBId}`,
+            userAId,
+            userBId,
+            origin: bestMatch.origin,
+            status: "active",
+            score: bestMatch.score
+          }
+        });
+      } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        ) {
+          return;
         }
-      });
+
+        throw error;
+      }
     });
   }
 
