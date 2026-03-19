@@ -14,6 +14,10 @@ export interface ProfileSummary {
     displayName: string;
     handle: string;
   };
+  photo: {
+    hasPhoto: boolean;
+    statusLabel: string;
+  };
   state: {
     current: SelectOption;
     options: ReadonlyArray<SelectOption>;
@@ -129,4 +133,39 @@ export interface AuthBootstrapResponse {
   expiresAt: string;
   user: AuthenticatedMiniAppUser;
   profile: ProfileSummary;
+}
+
+export interface PhotoSummary {
+  hasPhoto: boolean;
+  status: "missing" | "ready";
+  statusCopy: string;
+  previewUrl?: string;
+}
+
+export interface PhotoUploadIntent {
+  uploadUrl: string;
+  authorizationToken: string;
+  objectKey: string;
+  intentToken: string;
+  expiresAt: string;
+  maxBytes: number;
+  allowedMimeTypes: string[];
+}
+
+export interface CreatePhotoUploadIntentRequest {
+  contentType: string;
+}
+
+export interface ConfirmPhotoUploadRequest {
+  intentToken: string;
+  fileId: string;
+  contentType: string;
+  sizeBytes: number;
+}
+
+export interface PhotoRevealSummary {
+  state: "locked" | "ready" | "photo_missing";
+  title: string;
+  description: string;
+  imageUrl?: string;
 }

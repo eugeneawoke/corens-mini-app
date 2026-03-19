@@ -11,9 +11,11 @@ import { MatchingController } from "./matching.controller";
 import { ConsentsController } from "./consents.controller";
 import { PrivacyController } from "./privacy.controller";
 import { ModerationController } from "./moderation.controller";
+import { MediaController } from "./media.controller";
 import { ProfilesService } from "./modules/profiles";
 import { BeaconService } from "./modules/beacon/service";
 import { ConsentRuntimeService } from "./modules/consents/runtime.service";
+import { MediaService } from "./modules/media/service";
 import { ModerationRuntimeService } from "./modules/moderation/runtime.service";
 import { PrivacyRuntimeService } from "./modules/privacy/runtime.service";
 import { PolicyConfigService } from "./policy-config.service";
@@ -36,7 +38,8 @@ import { SessionAuthGuard } from "./modules/auth/session.guard";
     ModerationController,
     BeaconController,
     MatchingController,
-    ConsentsController
+    ConsentsController,
+    MediaController
   ],
   providers: [
     PrismaService,
@@ -44,6 +47,7 @@ import { SessionAuthGuard } from "./modules/auth/session.guard";
     MaintenanceService,
     BeaconService,
     ConsentRuntimeService,
+    MediaService,
     ModerationRuntimeService,
     PrivacyRuntimeService,
     MatchingRuntimeService,
@@ -58,6 +62,7 @@ import { SessionAuthGuard } from "./modules/auth/session.guard";
     MaintenanceService,
     BeaconService,
     ConsentRuntimeService,
+    MediaService,
     ModerationRuntimeService,
     PrivacyRuntimeService,
     MatchingRuntimeService,

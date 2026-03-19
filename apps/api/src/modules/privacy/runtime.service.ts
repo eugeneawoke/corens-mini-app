@@ -3,6 +3,7 @@ import type { PrismaClient } from "@corens/db";
 import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
 import type { AuthenticatedUserContext } from "../auth/service";
+import { MediaService } from "../media/service";
 
 const AGGREGATE_DELETION_ANALYTICS_USER_ID = "__aggregate__";
 const PEER_DELETED_PREFIX = "deleted:";
@@ -13,7 +14,8 @@ type TransactionClient = Parameters<Parameters<PrismaClient["$transaction"]>[0]>
 export class PrivacyRuntimeService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly policyConfig: PolicyConfigService
+    private readonly policyConfig: PolicyConfigService,
+    private readonly media: MediaService
   ) {}
 
   async requestDeletion(user: AuthenticatedUserContext, confirmation: string): Promise<void> {
@@ -36,6 +38,9 @@ export class PrivacyRuntimeService {
   ): Promise<void> {
     const record = await this.prisma.clientInstance.user.findUnique({
       where: { id: userId }
+    });
+    const userPhoto = await this.prisma.clientInstance.userPhoto.findUnique({
+      where: { userId }
     });
 
     if (!record) {
@@ -86,6 +91,10 @@ export class PrivacyRuntimeService {
         where: { userId }
       });
 
+      await tx.userPhoto.deleteMany({
+        where: { userId }
+      });
+
       await tx.profile.deleteMany({
         where: { userId }
       });
@@ -104,6 +113,10 @@ export class PrivacyRuntimeService {
         });
       }
     });
+
+    if (userPhoto) {
+      await this.media.deleteStoredPhotoBytes(userPhoto);
+    }
   }
 
   async cleanupRetention(): Promise<void> {

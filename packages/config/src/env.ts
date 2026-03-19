@@ -15,7 +15,13 @@ const envSchema = z.object({
   TELEGRAM_MINI_APP_URL: z.string().url(),
   DATABASE_URL: z.string().min(1),
   REDIS_URL: z.string().min(1),
-  SESSION_SECRET: z.string().min(1)
+  SESSION_SECRET: z.string().min(1),
+  B2_KEY_ID: z.string().optional().default(""),
+  B2_APPLICATION_KEY: z.string().optional().default(""),
+  B2_BUCKET_ID: z.string().optional().default(""),
+  B2_BUCKET_NAME: z.string().optional().default(""),
+  B2_ENDPOINT: z.string().optional().default(""),
+  B2_PUBLIC_BASE_URL: z.string().optional().default("")
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

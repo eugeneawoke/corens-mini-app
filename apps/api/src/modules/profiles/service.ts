@@ -34,7 +34,7 @@ export class ProfilesService {
 
   async getSummary(user: AuthenticatedUserContext): Promise<ProfileSummary> {
     const record = await this.ensureProfileRecord(user);
-    return this.buildSummary(record.user, record.profile);
+    return this.buildSummary(record.user, record.profile, await this.hasPhoto(record.user.id));
   }
 
   async updateStateIntent(
@@ -58,7 +58,7 @@ export class ProfilesService {
       }
     });
 
-    return this.buildSummary(record.user, updated);
+    return this.buildSummary(record.user, updated, await this.hasPhoto(record.user.id));
   }
 
   async updateTrustKeys(
@@ -79,7 +79,7 @@ export class ProfilesService {
       }
     });
 
-    return this.buildSummary(record.user, updated);
+    return this.buildSummary(record.user, updated, await this.hasPhoto(record.user.id));
   }
 
   async completeOnboarding(
@@ -118,7 +118,7 @@ export class ProfilesService {
       }
     });
 
-    return this.buildSummary(record.user, updated);
+    return this.buildSummary(record.user, updated, await this.hasPhoto(record.user.id));
   }
 
   async getCurrentProfileRecord(user: AuthenticatedUserContext): Promise<{ user: User; profile: Profile }> {
@@ -150,7 +150,7 @@ export class ProfilesService {
       }
     });
 
-    return this.buildSummary(record.user, updated);
+    return this.buildSummary(record.user, updated, await this.hasPhoto(record.user.id));
   }
 
   private sanitizeTrustKeys(values: string[]): string[] {
@@ -194,7 +194,15 @@ export class ProfilesService {
     return { user, profile };
   }
 
-  private buildSummary(user: User, profile: Profile): ProfileSummary {
+  private async hasPhoto(userId: string): Promise<boolean> {
+    const photo = await this.prisma.clientInstance.userPhoto.findUnique({
+      where: { userId }
+    });
+
+    return Boolean(photo && photo.status === "ready");
+  }
+
+  private buildSummary(user: User, profile: Profile, hasPhoto: boolean): ProfileSummary {
     const visibility = {
       userId: profile.userId,
       isHidden: profile.visibilityStatus === "hidden",
@@ -211,6 +219,10 @@ export class ProfilesService {
       profile: {
         displayName: profile.displayName,
         handle: user.telegramUsername ? `@${user.telegramUsername}` : `id:${user.telegramUserId}`
+      },
+      photo: {
+        hasPhoto,
+        statusLabel: hasPhoto ? "Фото загружено" : "Фото не добавлено"
       },
       state: {
         current: selectedState,

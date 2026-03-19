@@ -54,6 +54,9 @@ function createAuthServiceFixture() {
           return profile;
         }
       },
+      userPhoto: {
+        findUnique: async () => null
+      },
       session: {
         create: async ({ data }: { data: Pick<Session, "userId" | "tokenHash" | "expiresAt"> }) => {
           const session: SessionRecord = {
@@ -104,6 +107,10 @@ function createAuthServiceFixture() {
       profile: {
         displayName: "Новый профиль",
         handle: "@corens_user"
+      },
+      photo: {
+        hasPhoto: false,
+        statusLabel: "Фото не добавлено"
       },
       state: {
         current: { key: "calm", label: "Спокойствие", description: "..." },

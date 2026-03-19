@@ -113,6 +113,10 @@ export function createProfileSummary(state: DemoMvpState): ProfileSummary {
       displayName: state.profile.displayName,
       handle: state.profile.handle
     },
+    photo: {
+      hasPhoto: false,
+      statusLabel: "Фото не добавлено"
+    },
     state: {
       current: selectedState,
       options: stateOptions,

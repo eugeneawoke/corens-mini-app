@@ -8,10 +8,12 @@ import type {
   PhotoRevealConsent,
   Profile,
   Session,
+  UserPhoto,
   User
 } from "@corens/db";
 import { AuthService } from "../../apps/api/src/modules/auth/service";
 import { ConsentRuntimeService } from "../../apps/api/src/modules/consents/runtime.service";
+import type { MediaService } from "../../apps/api/src/modules/media/service";
 import { MatchingRuntimeService } from "../../apps/api/src/modules/matching/runtime.service";
 import { PrivacyRuntimeService } from "../../apps/api/src/modules/privacy/runtime.service";
 import type { ProfilesService } from "../../apps/api/src/modules/profiles";
@@ -41,6 +43,18 @@ function createHardDeleteFixture() {
       firstSeenAt: new Date(),
       lastSeenAt: new Date(),
       profile: null
+    }
+  ];
+  const userPhotos: UserPhoto[] = [
+    {
+      userId: "user-1",
+      objectKey: "user-photo/user-1/seed.jpg",
+      objectVersionId: "file-1",
+      mimeType: "image/jpeg",
+      sizeBytes: 1024,
+      status: "ready",
+      createdAt: new Date(),
+      updatedAt: new Date()
     }
   ];
   const profiles: Profile[] = [
@@ -310,6 +324,39 @@ function createHardDeleteFixture() {
           return { count: before - profiles.length };
         }
       },
+      userPhoto: {
+        findUnique: async ({ where }: { where: { userId: string } }) =>
+          userPhotos.find((photo) => photo.userId === where.userId) ?? null,
+        findFirst: async ({
+          where
+        }: {
+          where?: { objectKey?: string; status?: string };
+        }) =>
+          userPhotos.find((photo) => {
+            if (where?.objectKey && photo.objectKey !== where.objectKey) {
+              return false;
+            }
+
+            if (where?.status && photo.status !== where.status) {
+              return false;
+            }
+
+            return true;
+          }) ?? null,
+        delete: async ({ where }: { where: { userId: string } }) => {
+          const index = userPhotos.findIndex((photo) => photo.userId === where.userId);
+          return userPhotos.splice(index, 1)[0];
+        },
+        deleteMany: async ({ where }: { where: { userId: string } }) => {
+          const before = userPhotos.length;
+          for (let index = userPhotos.length - 1; index >= 0; index -= 1) {
+            if (userPhotos[index].userId === where.userId) {
+              userPhotos.splice(index, 1);
+            }
+          }
+          return { count: before - userPhotos.length };
+        }
+      },
       session: {
         create: async ({ data }: { data: Pick<Session, "userId" | "tokenHash" | "expiresAt"> }) => {
           const session: Session = {
@@ -538,6 +585,10 @@ function createHardDeleteFixture() {
         displayName: "Новый профиль",
         handle: "@eugene"
       },
+      photo: {
+        hasPhoto: false,
+        statusLabel: "Фото не добавлено"
+      },
       state: {
         current: { key: "calm", label: "Спокойствие", description: "..." },
         options: [],
@@ -617,7 +668,11 @@ function createHardDeleteFixture() {
     })
   };
 
-  const privacy = new PrivacyRuntimeService(prisma, policyConfig as never);
+  const media = {
+    deleteStoredPhotoBytes: async () => undefined
+  } as unknown as MediaService;
+
+  const privacy = new PrivacyRuntimeService(prisma, policyConfig as never, media);
   const consents = new ConsentRuntimeService(prisma, profilesService, policyConfig as never);
   const matching = new MatchingRuntimeService(
     prisma,
@@ -637,6 +692,7 @@ function createHardDeleteFixture() {
     beaconSessions,
     moderationEvents,
     deletionEvents,
+    userPhotos,
     privacy,
     consents,
     matching,
@@ -678,6 +734,7 @@ describe("hard delete flow", () => {
     expect(fixture.users.find((user) => user.id === "user-1")).toBeUndefined();
     expect(fixture.profiles.find((profile) => profile.userId === "user-1")).toBeUndefined();
     expect(fixture.sessions.filter((session) => session.userId === "user-1")).toHaveLength(0);
+    expect(fixture.userPhotos.filter((photo) => photo.userId === "user-1")).toHaveLength(0);
     expect(fixture.contactConsents).toHaveLength(0);
     expect(fixture.photoConsents).toHaveLength(0);
     expect(fixture.beaconSessions).toHaveLength(0);

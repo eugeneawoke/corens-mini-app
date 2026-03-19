@@ -1,4 +1,11 @@
-import type { BeaconSummary, ConnectionSummary, ConsentStatusView, ProfileSummary } from "@corens/domain";
+import type {
+  BeaconSummary,
+  ConnectionSummary,
+  ConsentStatusView,
+  PhotoRevealSummary,
+  PhotoSummary,
+  ProfileSummary
+} from "@corens/domain";
 import { getMiniAppSessionToken } from "./session.server";
 
 export class MiniAppSessionRequiredError extends Error {
@@ -87,4 +94,12 @@ export async function getConsentStatus(
   channel: "contact" | "photo"
 ): Promise<ConsentStatusView | null> {
   return fetchFromApi(`/api/consents/${channel}`);
+}
+
+export async function getPhotoSummary(): Promise<PhotoSummary> {
+  return fetchFromApi("/api/media/photo");
+}
+
+export async function getPhotoRevealSummary(): Promise<PhotoRevealSummary> {
+  return fetchFromApi("/api/media/photo-reveal");
 }
