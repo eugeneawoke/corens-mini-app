@@ -3,16 +3,17 @@
   --corens-surface: #ffffff;
   --corens-surface-muted: #f3f2ef;
   --corens-text: #1c1c1e;
-  --corens-text-secondary: #6f6f75;
-  --corens-text-tertiary: #9e9ea5;
-  --corens-border: #e6e4de;
-  --corens-accent: #5e5ce6;
-  --corens-accent-muted: #efeeff;
-  --corens-success: #34c759;
-  --corens-warning: #ff9f0a;
-  --corens-danger: #ff3b30;
-  --corens-beacon: #bf5af2;
-  --corens-shadow: 0 12px 28px rgba(28, 28, 30, 0.05);
+  --corens-text-secondary: #8e8e93;
+  --corens-text-tertiary: #c7c7cc;
+  --corens-border: #e5e5ea;
+  --corens-accent: #6c6ac4;
+  --corens-accent-hover: #5856a8;
+  --corens-accent-muted: #ebebf6;
+  --corens-success: #3d9b58;
+  --corens-warning: #c4811a;
+  --corens-danger: #c4453c;
+  --corens-beacon: #9b6bc4;
+  --corens-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   --corens-radius-card: 20px;
   --corens-radius-control: 12px;
   --corens-page-width: 440px;
@@ -60,7 +61,7 @@ textarea {
   position: relative;
   padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
   background:
-    radial-gradient(circle at top center, rgba(94, 92, 230, 0.06), transparent 30%),
+    radial-gradient(circle at top center, rgba(108, 106, 196, 0.06), transparent 30%),
     linear-gradient(180deg, #fbfbf9 0%, var(--corens-bg) 100%);
 }
 
@@ -153,8 +154,8 @@ textarea {
 
 .corens-copy {
   margin: 0;
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 .corens-copy-muted {
@@ -164,7 +165,7 @@ textarea {
 .corens-hero-card,
 .corens-panel {
   background: rgba(255, 255, 255, 0.86);
-  border: 1px solid rgba(230, 228, 222, 0.9);
+  border: 1px solid rgba(229, 229, 234, 0.9);
   border-radius: var(--corens-radius-card);
   box-shadow: var(--corens-shadow);
   padding: 18px;
@@ -175,22 +176,22 @@ textarea {
 }
 
 .corens-panel-accent {
-  background: linear-gradient(180deg, rgba(239, 238, 255, 0.96), rgba(255, 255, 255, 0.96));
+  background: linear-gradient(180deg, rgba(108, 106, 196, 0.06), rgba(255, 255, 255, 0.96));
 }
 
 .corens-panel-warning {
-  background: rgba(255, 159, 10, 0.07);
-  border-color: rgba(255, 159, 10, 0.16);
+  background: rgba(196, 129, 26, 0.07);
+  border-color: rgba(196, 129, 26, 0.16);
 }
 
 .corens-panel-danger {
-  background: rgba(255, 59, 48, 0.06);
-  border-color: rgba(255, 59, 48, 0.16);
+  background: rgba(196, 69, 60, 0.06);
+  border-color: rgba(196, 69, 60, 0.16);
 }
 
 .corens-panel-beacon {
-  background: rgba(191, 90, 242, 0.08);
-  border-color: rgba(191, 90, 242, 0.18);
+  background: rgba(155, 107, 196, 0.08);
+  border-color: rgba(155, 107, 196, 0.18);
 }
 
 .corens-hero-card {
@@ -234,7 +235,7 @@ textarea {
   height: 132px;
   border-radius: 999px;
   background:
-    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.95), rgba(94, 92, 230, 0.14) 70%);
+    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.95), rgba(108, 106, 196, 0.14) 70%);
   filter: blur(4px);
 }
 
@@ -249,8 +250,8 @@ textarea {
   justify-content: center;
   border-radius: 20px;
   background:
-    linear-gradient(135deg, rgba(94, 92, 230, 0.2), rgba(191, 90, 242, 0.14));
-  border: 1px solid rgba(94, 92, 230, 0.24);
+    linear-gradient(135deg, rgba(108, 106, 196, 0.2), rgba(155, 107, 196, 0.14));
+  border: 1px solid rgba(108, 106, 196, 0.24);
   color: var(--corens-accent);
   transform: rotate(14deg);
 }
@@ -273,22 +274,22 @@ textarea {
 }
 
 .corens-badge-accent {
-  background: rgba(94, 92, 230, 0.1);
+  background: rgba(108, 106, 196, 0.1);
   color: var(--corens-accent);
 }
 
 .corens-badge-success {
-  background: rgba(52, 199, 89, 0.12);
+  background: rgba(61, 155, 88, 0.12);
   color: var(--corens-success);
 }
 
 .corens-badge-warning {
-  background: rgba(255, 159, 10, 0.12);
-  color: #b36800;
+  background: rgba(196, 129, 26, 0.12);
+  color: var(--corens-warning);
 }
 
 .corens-badge-danger {
-  background: rgba(255, 59, 48, 0.12);
+  background: rgba(196, 69, 60, 0.12);
   color: var(--corens-danger);
 }
 
@@ -366,13 +367,13 @@ textarea {
 }
 
 .corens-list-title {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.4;
   font-weight: 600;
 }
 
 .corens-list-description {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.4;
   color: var(--corens-text-secondary);
 }
@@ -384,7 +385,7 @@ textarea {
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: rgba(94, 92, 230, 0.08);
+  background: rgba(108, 106, 196, 0.08);
   color: var(--corens-accent);
 }
 
@@ -410,8 +411,8 @@ textarea {
 }
 
 .corens-chip-checkbox input:checked + .corens-chip {
-  background: rgba(61, 118, 255, 0.14);
-  border-color: rgba(61, 118, 255, 0.3);
+  background: rgba(108, 106, 196, 0.08);
+  border-color: var(--corens-accent);
   color: var(--corens-accent);
 }
 
@@ -430,8 +431,8 @@ textarea {
 }
 
 .corens-chip-active {
-  border-color: rgba(94, 92, 230, 0.28);
-  background: rgba(94, 92, 230, 0.08);
+  border-color: var(--corens-accent);
+  background: rgba(108, 106, 196, 0.08);
   color: var(--corens-accent);
 }
 
@@ -464,14 +465,13 @@ textarea {
   text-align: left;
   transition:
     border-color 150ms ease,
-    box-shadow 150ms ease,
-    transform 150ms ease;
+    box-shadow 150ms ease;
 }
 
 .corens-choice-input:checked + .corens-choice-card {
-  border-color: rgba(61, 118, 255, 0.32);
-  box-shadow: 0 18px 34px rgba(61, 118, 255, 0.12);
-  transform: translateY(-1px);
+  border-color: rgba(108, 106, 196, 0.3);
+  background: rgba(108, 106, 196, 0.05);
+  box-shadow: 0 0 48px 4px rgba(108, 106, 196, 0.67);
 }
 
 .corens-choice-tile {
@@ -489,8 +489,9 @@ textarea {
 }
 
 .corens-choice-tile-selected {
-  border-color: rgba(94, 92, 230, 0.26);
-  background: rgba(239, 238, 255, 0.95);
+  border-color: rgba(108, 106, 196, 0.3);
+  background: rgba(108, 106, 196, 0.05);
+  box-shadow: 0 0 48px 4px rgba(108, 106, 196, 0.67);
 }
 
 .corens-choice-header {
@@ -517,7 +518,7 @@ textarea {
 }
 
 .corens-choice-description {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
   color: var(--corens-text-secondary);
 }
@@ -530,10 +531,14 @@ textarea {
   justify-content: center;
   border-radius: var(--corens-radius-control);
   border: 1px solid transparent;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.4;
-  font-weight: 700;
+  font-weight: 600;
   transition: opacity 150ms ease;
+}
+
+.corens-button:active {
+  opacity: 0.8;
 }
 
 .corens-button-primary {
@@ -634,7 +639,7 @@ textarea {
 }
 
 .corens-field-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--corens-text-secondary);
 }
@@ -647,6 +652,12 @@ textarea {
   background: rgba(255, 255, 255, 0.92);
   color: var(--corens-text);
   padding: 14px 16px;
+}
+
+.corens-field:focus,
+.corens-textarea:focus {
+  outline: none;
+  border-color: var(--corens-accent);
 }
 
 .corens-textarea {
@@ -707,12 +718,12 @@ textarea {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: rgba(28, 28, 30, 0.18);
+  background: rgba(28, 28, 30, 0.4);
 }
 
 .corens-sheet {
   width: min(100%, 408px);
-  border-radius: 28px 28px 0 0;
+  border-radius: 24px 24px 0 0;
   background: rgba(255, 255, 255, 0.98);
   padding: 12px 18px calc(24px + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -12px 36px rgba(28, 28, 30, 0.12);
@@ -742,7 +753,7 @@ textarea {
   justify-content: center;
   border-radius: 999px;
   margin: 0 auto;
-  background: rgba(94, 92, 230, 0.1);
+  background: rgba(108, 106, 196, 0.1);
   color: var(--corens-accent);
 }
 
@@ -760,7 +771,7 @@ textarea {
   justify-content: center;
   border-radius: 28px;
   background:
-    linear-gradient(135deg, rgba(230, 228, 222, 0.88), rgba(159, 159, 165, 0.14));
+    linear-gradient(135deg, rgba(229, 229, 234, 0.88), rgba(159, 159, 165, 0.14));
   color: var(--corens-text-tertiary);
 }
 
