@@ -39,18 +39,18 @@ export default async function BeaconPage() {
     <AppSurface
       bottomBar={
         <form action={activateBeaconAction}>
-          <Button variant="beacon">Активировать Beacon</Button>
+          <Button variant="beacon">Зажечь маяк</Button>
         </form>
       }
     >
-      <TopBar title="Beacon" backHref="/" />
+      <TopBar title="Маяк" backHref="/" />
 
       <Panel className="corens-stack corens-gap-sm" tone="beacon">
         <div className="corens-row corens-row-between">
           <div className="corens-inline-head">
             <Radio size={18} />
             <div className="corens-stack corens-gap-xs">
-              <h2 className="corens-section-title">Ручной режим поиска</h2>
+              <h2 className="corens-section-title">Побыть заметнее</h2>
               <p className="corens-copy corens-copy-muted">
                 {snapshot.description}
               </p>
@@ -60,16 +60,16 @@ export default async function BeaconPage() {
         </div>
       </Panel>
 
-      <Section title="Что происходит при активации">
+      <Section title="Как это работает">
         <Panel>
           <div className="corens-stack corens-gap-sm">
             <p className="corens-copy corens-copy-muted">
-              Профиль становится временно заметнее только в рамках Beacon policy. Это не замена основному matching pipeline.
+              На короткое время вы становитесь чуть заметнее для тех, кто сейчас рядом. Поиск при этом продолжается как обычно.
             </p>
             <div className="corens-row">
-              <StatusBadge tone="accent">Ручной режим</StatusBadge>
-              <StatusBadge tone="neutral">Без чата</StatusBadge>
-              <StatusBadge tone="neutral">Privacy-first</StatusBadge>
+              <StatusBadge tone="accent">По желанию</StatusBadge>
+              <StatusBadge tone="neutral">Без лишнего</StatusBadge>
+              <StatusBadge tone="neutral">Приватно</StatusBadge>
             </div>
           </div>
         </Panel>
@@ -77,8 +77,8 @@ export default async function BeaconPage() {
 
       <NoticeCard
         icon={TimerReset}
-        title="Cooldown и таймер"
-        description="Таймер лучше показывать серверным значением. Пока здесь только дизайн-маркер для будущей интеграции с beacon API."
+        title="Пауза между включениями"
+        description="После отключения маяка нужно немного подождать, прежде чем зажечь его снова."
       />
     </AppSurface>
   );

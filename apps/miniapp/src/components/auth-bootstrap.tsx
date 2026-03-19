@@ -56,18 +56,15 @@ export function AuthBootstrapScreen() {
     <div className="corens-sheet-layout">
       <div className="corens-sheet">
         <Panel className="corens-stack corens-gap-sm">
-          <h1 className="corens-section-title">Подключаем защищенную сессию</h1>
-          <p className="corens-copy corens-copy-muted">
-            Mini App больше не использует demo fallback. Сессия создается только из валидного Telegram `initData`.
-          </p>
+          <h1 className="corens-section-title">Входим...</h1>
         </Panel>
 
         <NoticeCard
-          title={status === "bootstrapping" ? "Проверяем Telegram auth" : "Не удалось открыть сессию"}
+          title={status === "bootstrapping" ? "Проверяем вашу сессию" : "Не получилось войти"}
           description={
             status === "bootstrapping"
-              ? "Ждем валидный Telegram контекст и создаем backend session."
-              : "Откройте Mini App из Telegram. В обычном браузере без `initData` этот экран не продолжит работу."
+              ? "Пожалуйста, подождите пару секунд."
+              : "Откройте приложение через Telegram — иначе войти не получится."
           }
           tone={status === "bootstrapping" ? "accent" : "danger"}
         />

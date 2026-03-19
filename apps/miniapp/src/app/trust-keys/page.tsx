@@ -38,10 +38,10 @@ export default async function TrustKeysPage() {
       <form action={updateTrustKeysAction} className="corens-stack corens-gap-sm">
         <Panel tone="accent">
           <div className="corens-stack corens-gap-xs">
-            <span className="corens-eyebrow">Ограничение MVP</span>
+            <span className="corens-eyebrow">Важно знать</span>
             <h2 className="corens-section-title">{snapshot.trustKeys.limitLabel}</h2>
             <p className="corens-copy corens-copy-muted">
-              Подбор ищет пересечение хотя бы по одному ключу. Изменение ограничено cooldown.
+              Мы ищем тех, у кого хотя бы один ключ доверия совпадает с вашим. Менять их можно, но не слишком часто.
             </p>
           </div>
         </Panel>
@@ -69,12 +69,12 @@ export default async function TrustKeysPage() {
         ))}
 
         <NoticeCard
-          title="Cooldown"
+          title="Следующее изменение"
           description={snapshot.trustKeys.cooldownLabel}
           tone="warning"
         />
 
-        <Button type="submit">Сохранить выбор</Button>
+        <Button type="submit">Сохранить</Button>
       </form>
     </AppSurface>
   );

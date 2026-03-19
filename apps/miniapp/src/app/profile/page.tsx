@@ -38,19 +38,19 @@ export default async function ProfilePage() {
       <Panel className="corens-stack corens-gap-sm">
         <div className="corens-row corens-row-between">
           <div className="corens-stack corens-gap-xs">
-            <span className="corens-eyebrow">Аккаунт</span>
+            <span className="corens-eyebrow">Вы</span>
             <h2 className="corens-section-title">{snapshot.profile.displayName}</h2>
             <p className="corens-copy corens-copy-muted">{snapshot.profile.handle}</p>
           </div>
-          <StatusBadge tone="success">Активен</StatusBadge>
+          <StatusBadge tone="success">В поиске</StatusBadge>
         </div>
       </Panel>
 
-      <Section title="Основные настройки">
+      <Section title="О вас">
         <Panel>
           <ListRow
             href="/state-intent"
-            title="State и Intent"
+            title="Настроение и формат"
             description={`${snapshot.state.current.label} • ${snapshot.intent.current.label}`}
             icon={HeartHandshake}
           />
@@ -63,24 +63,24 @@ export default async function ProfilePage() {
           <ListRow
             href="/privacy"
             title="Приватность"
-            description="Видимость, скрытие профиля, удаление"
+            description="Что и кому видно"
             icon={Lock}
           />
         </Panel>
       </Section>
 
-      <Section title="Сервисные экраны">
+      <Section title="Дополнительно">
         <Panel>
           <ListRow
             href="/connection"
-            title="Связь"
-            description="Краткий preview активного match session"
+            title="Текущая связь"
+            description="Кто сейчас рядом с вами"
             icon={BadgeInfo}
           />
           <ListRow
             href="/delete"
             title="Удалить аккаунт"
-            description="Destructive flow с подтверждением"
+            description="Безвозвратное действие"
             icon={Trash2}
           />
         </Panel>

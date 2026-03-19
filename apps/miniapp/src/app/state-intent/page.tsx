@@ -36,12 +36,12 @@ export default async function StateIntentPage() {
 
   return (
     <AppSurface>
-      <TopBar title="State и Intent" backHref="/profile" />
+      <TopBar title="Настроение и формат" backHref="/profile" />
 
       <form action={updateStateIntentAction} className="corens-stack corens-gap-sm">
         <Section
           title="Как вы сейчас?"
-          description="Первый блок описывает текущее состояние и помогает matching policy выбрать корректный контекст."
+          description="Это помогает нам искать тех, кто сейчас чувствует похожее."
         >
           <div className="corens-choice-grid">
             {snapshot.state.options.map((option, index) => {
@@ -73,7 +73,7 @@ export default async function StateIntentPage() {
 
         <Panel tone="muted">
           <div className="corens-stack corens-gap-sm">
-            <strong className="corens-card-title">Текущее описание</strong>
+            <strong className="corens-card-title">Сейчас у вас</strong>
             <p className="corens-copy corens-copy-muted">
               {snapshot.state.current.description}
             </p>
@@ -82,8 +82,8 @@ export default async function StateIntentPage() {
         </Panel>
 
         <Section
-          title="Какой ритм контакта вам нужен?"
-          description="Intent меняет ожидание от взаимодействия и должен быть предельно ясным."
+          title="Как вам комфортно общаться?"
+          description="Это помогает встретить человека с похожим ожиданием."
         >
           <div className="corens-choice-grid">
             {snapshot.intent.options.map((option, index) => {
@@ -114,11 +114,11 @@ export default async function StateIntentPage() {
         </Section>
 
         <NoticeCard
-          title="Сохранение"
-          description="Изменение сохраняется на backend и влияет на алгоритм матрицы совпадений."
+          title="Это влияет на поиск"
+          description="После сохранения мы обновим, кого ищем для вас."
         />
 
-        <Button type="submit">Сохранить изменения</Button>
+        <Button type="submit">Сохранить</Button>
       </form>
     </AppSurface>
   );

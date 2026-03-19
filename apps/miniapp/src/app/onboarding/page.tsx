@@ -36,14 +36,14 @@ export default async function OnboardingPage() {
 
   return (
     <AppSurface>
-      <TopBar title="Онбординг" subtitle="Первый запуск" />
+      <TopBar title="Добро пожаловать" subtitle="Давайте познакомимся" />
 
       <Panel className="corens-hero-card">
         <div className="corens-hero-copy">
-          <span className="corens-eyebrow">Старт</span>
-          <h2 className="corens-hero-title">Сначала профиль, потом matching</h2>
+          <span className="corens-eyebrow">Первый шаг</span>
+          <h2 className="corens-hero-title">Расскажите немного о себе</h2>
           <p className="corens-copy corens-copy-muted">
-            Пока вы не завершили онбординг, активная связь, consent и Beacon недоступны.
+            Пока вы не заполнили профиль, поиск близкого человека не начнётся.
           </p>
         </div>
         <div className="corens-hero-orbit">
@@ -69,7 +69,7 @@ export default async function OnboardingPage() {
           </Panel>
         </Section>
 
-        <Section title="Ваш state">
+        <Section title="Как вы сейчас?">
           <div className="corens-choice-grid">
             {snapshot.state.options.map((option, index) => {
               const Icon = optionIcons[index % optionIcons.length];
@@ -98,7 +98,7 @@ export default async function OnboardingPage() {
           </div>
         </Section>
 
-        <Section title="Ваш intent">
+        <Section title="Какое общение вам близко?">
           <div className="corens-choice-grid">
             {snapshot.intent.options.map((option, index) => {
               const Icon = optionIcons[(index + 1) % optionIcons.length];
@@ -151,11 +151,11 @@ export default async function OnboardingPage() {
         </Section>
 
         <NoticeCard
-          title="Что будет дальше"
-          description="После сохранения вы попадете на `/connection` без фиктивной связи. Matching появится только когда backend реально создаст match session."
+          title="После этого"
+          description="Мы начнём искать человека, созвучного вам. Когда найдём — напишем вам в бот."
         />
 
-        <Button type="submit">Завершить онбординг</Button>
+        <Button type="submit">Начать</Button>
       </form>
     </AppSurface>
   );

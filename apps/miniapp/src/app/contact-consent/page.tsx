@@ -43,19 +43,19 @@ export default async function ContactConsentPage() {
           <div className="corens-sheet-icon">
             <Shield size={28} />
           </div>
-          <span className="corens-eyebrow">Mutual consent</span>
-          <h1 className="corens-section-title">Обмен контактами</h1>
+          <span className="corens-eyebrow">Взаимное согласие</span>
+          <h1 className="corens-section-title">Написать друг другу?</h1>
           <p className="corens-copy corens-copy-muted">
-            Контакты открываются только при взаимном согласии, а артефакт остается Telegram deep link, а не plain-text поле.
+            Ссылка для общения откроется только после взаимного согласия. Ничего лишнего не передаётся.
           </p>
         </div>
 
         <NoticeCard
-          title="Текущий статус"
+          title="Пока здесь"
           description={
             resolution?.warnings.includes("telegram_handoff_warning_required")
-              ? "Backend policy требует мягкое предупреждение перед открытием контакта."
-              : "Ожидается действие второго участника."
+              ? "Прежде чем продолжить, убедитесь, что вы готовы к этому шагу."
+              : "Ждём, пока другой человек примет решение."
           }
           tone="warning"
         />
@@ -69,15 +69,15 @@ export default async function ContactConsentPage() {
           ) : (
             <>
               <form action={approveConsentAction.bind(null, "contact")}>
-                <Button variant="success">Разрешить обмен</Button>
+                <Button variant="success">Да, хочу написать</Button>
               </form>
               <form action={declineConsentAction.bind(null, "contact")}>
-                <Button variant="danger">Отклонить</Button>
+                <Button variant="danger">Пока нет</Button>
               </form>
             </>
           )}
           <ButtonLink href="/connection" variant="ghost">
-            Не сейчас
+            Вернуться
           </ButtonLink>
         </div>
       </div>

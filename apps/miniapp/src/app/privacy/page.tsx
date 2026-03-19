@@ -45,8 +45,8 @@ export default async function PrivacyPage() {
       <TopBar title="Приватность" backHref="/profile" />
 
       <Section
-        title="Видимость профиля"
-        description="Вы управляете только видимостью профиля. Сам automatic matching работает исключительно по алгоритму и матрице совпадений."
+        title="Кто вас видит"
+        description="Вы можете временно исчезнуть из поиска — уже найденные связи при этом не закроются."
       >
         <Panel>
           <div className="corens-stack corens-gap-sm">
@@ -59,7 +59,7 @@ export default async function PrivacyPage() {
                 <form action={updateVisibilityAction}>
                   <input type="hidden" name="isHidden" value={item.checked ? "false" : "true"} />
                   <Button variant={item.checked ? "secondary" : "primary"} type="submit">
-                    {item.checked ? "Вернуть в подбор" : "Скрыть профиль"}
+                    {item.checked ? "Снова быть видимым" : "Скрыться из поиска"}
                   </Button>
                 </form>
               </div>
@@ -74,18 +74,18 @@ export default async function PrivacyPage() {
         description={snapshot.privacy.privacyCopy}
       />
 
-      <Section title="Удаление">
+      <Section title="Уйти из сервиса">
         <Panel tone="danger">
           <div className="corens-stack corens-gap-sm">
             <div className="corens-inline-head">
               <Trash2 size={18} />
-              <strong className="corens-card-title">Delete flow</strong>
+              <strong className="corens-card-title">Удаление аккаунта</strong>
             </div>
             <p className="corens-copy corens-copy-muted">
-              План удаления уже рассчитывается через shared privacy policy и может быть отображен пользователю до подтверждения.
+              Перед удалением мы покажем, что именно будет очищено.
             </p>
             <ButtonLink href="/delete" variant="ghost">
-              Открыть удаление аккаунта
+              Удалить аккаунт
             </ButtonLink>
           </div>
         </Panel>

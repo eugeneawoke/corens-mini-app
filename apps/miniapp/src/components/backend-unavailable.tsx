@@ -11,8 +11,8 @@ type BackendUnavailableScreenProps = {
 };
 
 export function BackendUnavailableScreen({
-  title = "Сервис временно недоступен",
-  description = "Mini App открылся, но backend сейчас не ответил корректно. Попробуйте перезагрузить экран через несколько секунд.",
+  title = "Что-то пошло не так",
+  description = "Мы уже знаем об этом. Попробуйте вернуться через несколько секунд.",
   details,
   actionLabel = "Попробовать снова",
   onAction
@@ -23,11 +23,11 @@ export function BackendUnavailableScreen({
         <Panel className="corens-stack corens-gap-sm">
           <h1 className="corens-section-title">{title}</h1>
           <p className="corens-copy corens-copy-muted">
-            Если ошибка повторяется, проверьте свежие логи Vercel и Railway для текущего deploy.
+            Попробуйте вернуться через несколько секунд.
           </p>
         </Panel>
 
-        <NoticeCard title="Backend не ответил" description={description} tone="danger" />
+        <NoticeCard title="Нет соединения с сервером" description={description} tone="danger" />
 
         {details ? <p className="corens-copy corens-copy-muted corens-mono">{details}</p> : null}
 

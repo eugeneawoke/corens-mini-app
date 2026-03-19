@@ -29,7 +29,7 @@ import {
 const FALLBACK_BEACON: BeaconSummary = {
   status: "inactive" as const,
   remainingLabel: "Недоступно",
-  description: "Статус Beacon временно недоступен. Попробуйте обновить экран позже.",
+  description: "Статус маяка временно недоступен. Попробуйте обновить экран позже.",
   durationLabel: "Недоступно"
 };
 
@@ -96,13 +96,12 @@ export default async function ConnectionPage() {
       <AppSurface
         bottomBar={
           <ButtonLink href="/beacon" variant="beacon">
-            {beacon.status === "active" ? "Beacon уже активен" : "Включить Beacon"}
+            {beacon.status === "active" ? "Маяк горит" : "Зажечь маяк"}
           </ButtonLink>
         }
       >
         <TopBar
-          title="Связи"
-          subtitle="Главный экран"
+          title="Рядом"
           action={
             <a className="corens-icon-button" href="/profile" aria-label="Профиль">
               <CircleUserRound size={18} />
@@ -112,44 +111,44 @@ export default async function ConnectionPage() {
 
         <Panel className="corens-hero-card">
           <div className="corens-hero-copy">
-            <span className="corens-eyebrow">Ваш контекст</span>
-            <h2 className="corens-hero-title">Сейчас система ждёт подходящее совпадение</h2>
+            <span className="corens-eyebrow">Прямо сейчас</span>
+            <h2 className="corens-hero-title">Мы ищем кого-то близкого вам</h2>
             <p className="corens-copy corens-copy-muted">
-              State <strong>{profile.state.current.label}</strong>, intent <strong>{profile.intent.current.label}</strong>.
+              Настроение: <strong>{profile.state.current.label}</strong> · Формат: <strong>{profile.intent.current.label}</strong>.
             </p>
           </div>
         </Panel>
 
         <EmptyState
           icon={Compass}
-          title="Активной связи пока нет"
-          description="Алгоритм матрицы совпадений проверяет совместимые пары автоматически. Beacon можно включить как ручной fallback по тем же параметрам."
+          title="Пока тихо"
+          description="Поиск идёт сам, без вашего участия. Если хотите ускорить — можно зажечь маяк."
           action={
             <div className="corens-action-stack">
               <ButtonLink href="/beacon" variant="secondary">
-                Открыть Beacon
+                Зажечь маяк
               </ButtonLink>
               <ButtonLink href="/profile" variant="ghost">
-                Открыть профиль
+                Мой профиль
               </ButtonLink>
             </div>
           }
         />
 
-        <Section title="Статус Beacon">
+        <Section title="Маяк">
           <Panel tone={beacon.status === "active" ? "beacon" : "muted"}>
             <div className="corens-row corens-row-between">
               <div className="corens-stack corens-gap-xs">
                 <div className="corens-inline-head">
                   <Radio size={18} />
                   <h3 className="corens-card-title">
-                    {beacon.status === "active" ? "Beacon активен" : "Beacon выключен"}
+                    {beacon.status === "active" ? "Маяк горит" : "Маяк не горит"}
                   </h3>
                 </div>
                 <p className="corens-copy corens-copy-muted">{beacon.description}</p>
               </div>
               <StatusBadge tone={beacon.status === "active" ? "accent" : "neutral"}>
-                {beacon.status === "active" ? beacon.remainingLabel : "Готов"}
+                {beacon.status === "active" ? beacon.remainingLabel : "Можно включить"}
               </StatusBadge>
             </div>
           </Panel>
@@ -161,7 +160,7 @@ export default async function ConnectionPage() {
   return (
     <AppSurface>
       <TopBar
-        title="Текущая связь"
+        title="Ваша связь"
         action={
           <a className="corens-icon-button" href="/profile" aria-label="Профиль">
             <CircleUserRound size={18} />
@@ -172,10 +171,10 @@ export default async function ConnectionPage() {
       <Panel className="corens-stack corens-gap-sm">
         <div className="corens-row corens-row-between">
           <div className="corens-stack corens-gap-xs">
-            <span className="corens-eyebrow">Preview профиля</span>
+            <span className="corens-eyebrow">О человеке рядом</span>
             <h2 className="corens-section-title">{connection.displayName}</h2>
             <p className="corens-copy corens-copy-muted">
-              Фото и прямой контакт остаются закрыты до отдельного mutual consent.
+              Фото и способ связаться откроются только если вы оба захотите.
             </p>
           </div>
           <div className="corens-status-lock">
@@ -191,34 +190,31 @@ export default async function ConnectionPage() {
         </div>
       </Panel>
 
-      <Section
-        title="Контекст совпадения"
-        description="Эти блоки получают статус через те же shared domain policy, что и backend."
-      >
+      <Section title="Почему вы рядом">
         <Panel>
           <div className="corens-stack corens-gap-sm">
             <div className="corens-row corens-row-between">
               <div>
-                <h3 className="corens-card-title">Ритм связи</h3>
+                <h3 className="corens-card-title">Общее между вами</h3>
                 <p className="corens-copy corens-copy-muted">{connection.sharedState}</p>
               </div>
-              <StatusBadge tone="success">Score {connection.matchScore}</StatusBadge>
+              <StatusBadge tone="success">Созвучность: {connection.matchScore}</StatusBadge>
             </div>
             <p className="corens-copy corens-copy-muted">{connection.statusCopy}</p>
           </div>
         </Panel>
       </Section>
 
-      <Section title="Действия доверия">
+      <Section title="Открыться навстречу">
         <Panel>
           <div className="corens-stack corens-gap-sm">
             <div className="corens-row corens-row-between">
               <div className="corens-inline-head">
                 <Shield size={18} />
                 <div className="corens-stack corens-gap-xs">
-                  <strong className="corens-card-title">Контакты</strong>
+                  <strong className="corens-card-title">Способ связаться</strong>
                   <span className="corens-list-description">
-                    После одобрения откроется только Telegram deep link.
+                    Ссылка для общения откроется только после взаимного согласия.
                   </span>
                 </div>
               </div>
@@ -227,7 +223,7 @@ export default async function ConnectionPage() {
               </StatusBadge>
             </div>
             <ButtonLink href="/contact-consent" variant="secondary">
-              Открыть Contact Consent
+              Обменяться контактами
             </ButtonLink>
           </div>
         </Panel>
@@ -238,9 +234,9 @@ export default async function ConnectionPage() {
               <div className="corens-inline-head">
                 <Camera size={18} />
                 <div className="corens-stack corens-gap-xs">
-                  <strong className="corens-card-title">Фото</strong>
+                  <strong className="corens-card-title">Фотография</strong>
                   <span className="corens-list-description">
-                    Photo reveal живет отдельно от consent на контакты.
+                    Открыть фото можно отдельно — это самостоятельный шаг.
                   </span>
                 </div>
               </div>
@@ -249,37 +245,37 @@ export default async function ConnectionPage() {
               </StatusBadge>
             </div>
             <ButtonLink href="/photo-reveal" variant="secondary">
-              Открыть Photo Reveal
+              Показать фото
             </ButtonLink>
           </div>
         </Panel>
       </Section>
 
-      <Section title="Безопасность">
+      <Section title="Если что-то пошло не так">
         <Panel tone="warning">
           <div className="corens-stack corens-gap-sm">
             <div className="corens-inline-head">
               <Unlink2 size={18} />
-              <strong className="corens-card-title">Разорвать или пожаловаться</strong>
+              <strong className="corens-card-title">Выйти из этой связи</strong>
             </div>
             <p className="corens-copy corens-copy-muted">
-              Жалоба и блокировка сразу закрывают активную связь и останавливают открытые consent flow.
+              После этого связь закроется, все открытые процессы остановятся.
             </p>
             <form action={reportConnectionAction} className="corens-stack corens-gap-sm">
               <Field
                 name="note"
-                label="Комментарий к жалобе"
-                placeholder="Коротко опишите причину"
+                label="Что случилось?"
+                placeholder="Опишите кратко"
               />
-              <Button type="submit" variant="secondary">Пожаловаться</Button>
+              <Button type="submit" variant="secondary">Пожаловаться на этого человека</Button>
             </form>
             <form action={blockConnectionAction} className="corens-stack corens-gap-sm">
               <Field
                 name="note"
-                label="Причина блокировки"
-                placeholder="Коротко опишите причину"
+                label="Почему вы хотите заблокировать?"
+                placeholder="Опишите кратко"
               />
-              <Button type="submit" variant="danger">Заблокировать и закрыть связь</Button>
+              <Button type="submit" variant="danger">Заблокировать</Button>
             </form>
           </div>
         </Panel>

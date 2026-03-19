@@ -43,10 +43,10 @@ export default async function PhotoRevealPage() {
           <div className="corens-sheet-icon">
             <Camera size={28} />
           </div>
-          <span className="corens-eyebrow">Separate reveal</span>
-          <h1 className="corens-section-title">Показать фото</h1>
+          <span className="corens-eyebrow">Взаимный шаг</span>
+          <h1 className="corens-section-title">Увидеть друг друга?</h1>
           <p className="corens-copy corens-copy-muted">
-            Фото раскрывается отдельно от контактов. Это независимый consent channel со своим статусом.
+            Фотографии открываются только когда оба захотят. Это отдельный шаг — не связанный с контактами.
           </p>
           <div className="corens-status-lock">
             <Lock size={26} />
@@ -54,20 +54,20 @@ export default async function PhotoRevealPage() {
         </div>
 
         <NoticeCard
-          title="Состояние reveal"
-          description="Пока один из участников не одобрит reveal, фото остается скрытым и визуально отделенным."
+          title="Пока здесь"
+          description="Фото откроется только если вы оба нажмёте «да»."
         />
 
         <div className="corens-action-stack" style={{ marginTop: 16 }}>
           <StatusBadge tone="warning">{resolution?.status ?? "pending"}</StatusBadge>
           <form action={approveConsentAction.bind(null, "photo")}>
-            <Button>Запросить раскрытие</Button>
+            <Button>Да, хочу видеть</Button>
           </form>
           <form action={declineConsentAction.bind(null, "photo")}>
-            <Button variant="danger">Не показывать</Button>
+            <Button variant="danger">Пока не хочу</Button>
           </form>
           <ButtonLink href="/connection" variant="ghost">
-            Вернуться к связи
+            Вернуться
           </ButtonLink>
         </div>
       </div>

@@ -47,11 +47,11 @@ export default async function DeletePage() {
       <NoticeCard
         icon={AlertTriangle}
         title="Это действие необратимо"
-        description="Все связи, настройки приватности и связанные артефакты будут удалены согласно privacy workflow."
+        description="Все ваши данные, связи и настройки будут удалены без возможности восстановления."
         tone="danger"
       />
 
-      <Section title="Что выполнит backend">
+      <Section title="Что произойдёт">
         <Panel>
           <ol className="corens-delete-steps">
             {snapshot.privacy.deletionPlan.stages.map((stage) => (
@@ -67,7 +67,7 @@ export default async function DeletePage() {
             name="confirmation"
             label='Введите "удалить"'
             placeholder="удалить"
-            hint="После подтверждения профиль будет скрыт, связи закрыты, а данные отправлены в deletion workflow."
+            hint="После подтверждения профиль исчезнет, все связи закроются, данные будут удалены."
           />
         </Section>
 
