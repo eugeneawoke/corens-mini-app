@@ -29,4 +29,9 @@ export class PrivacyController {
   ) {
     return this.privacy.requestDeletion(user, body.confirmation);
   }
+
+  @Post("dev-reset")
+  devReset(@AuthenticatedUser() user: AuthenticatedUserContext) {
+    return this.privacy.devReset(user);
+  }
 }

@@ -157,6 +157,48 @@ export default async function ConnectionPage() {
     );
   }
 
+  if (connection.kind === "peer_deleted") {
+    return (
+      <AppSurface
+        bottomBar={
+          <ButtonLink href="/beacon" variant="beacon">
+            {connection.primaryActionLabel}
+          </ButtonLink>
+        }
+      >
+        <TopBar
+          title="Ваша связь"
+          action={
+            <a className="corens-icon-button" href="/profile" aria-label="Профиль">
+              <CircleUserRound size={18} />
+            </a>
+          }
+        />
+
+        <Panel className="corens-stack corens-gap-sm">
+          <span className="corens-eyebrow">Системное сообщение</span>
+          <h2 className="corens-section-title">{connection.title}</h2>
+          <p className="corens-copy corens-copy-muted">{connection.description}</p>
+        </Panel>
+
+        <Section title="Что произошло">
+          <Panel tone="warning">
+            <div className="corens-stack corens-gap-sm">
+              <div className="corens-inline-head">
+                <Unlink2 size={18} />
+                <strong className="corens-card-title">Связь закрыта</strong>
+              </div>
+              <p className="corens-copy corens-copy-muted">{connection.statusCopy}</p>
+              <ButtonLink href="/beacon" variant="secondary">
+                {connection.primaryActionLabel}
+              </ButtonLink>
+            </div>
+          </Panel>
+        </Section>
+      </AppSurface>
+    );
+  }
+
   return (
     <AppSurface>
       <TopBar

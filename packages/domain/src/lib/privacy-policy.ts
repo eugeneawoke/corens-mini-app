@@ -55,7 +55,8 @@ export function planDeletion(
 
   sideEffects.push("delete_media_bytes");
   sideEffects.push("purge_profile_data");
-  sideEffects.push("retain_minimal_tombstone");
+  sideEffects.push("close_peer_connections_with_system_notice");
+  sideEffects.push("record_aggregate_deletion_analytics");
 
   return {
     nextVisibility: hideProfile(current),

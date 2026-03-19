@@ -11,6 +11,9 @@ import type { AuthenticatedUserContext } from "../auth/service";
 import { ConsentRuntimeService } from "../consents/runtime.service";
 import { ProfilesService } from "../profiles";
 
+type ActiveConnectionSummary = Extract<ConnectionSummary, { kind: "active" }>;
+type PeerDeletedConnectionSummary = Extract<ConnectionSummary, { kind: "peer_deleted" }>;
+
 @Injectable()
 export class MatchingRuntimeService {
   constructor(
@@ -24,7 +27,7 @@ export class MatchingRuntimeService {
     const record = await this.profiles.getCurrentProfileRecord(user);
     await this.ensureCurrentMatch(record.user.id);
 
-    const session = await this.prisma.clientInstance.matchSession.findFirst({
+    const activeSession = await this.prisma.clientInstance.matchSession.findFirst({
       where: {
         status: "active",
         OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
@@ -32,45 +35,23 @@ export class MatchingRuntimeService {
       orderBy: { createdAt: "desc" }
     });
 
-    if (!session) {
-      return null;
+    if (activeSession) {
+      return this.buildActiveConnectionSummary(record.user.id, record.profile, activeSession);
     }
 
-    const peerUserId = session.userAId === record.user.id ? session.userBId : session.userAId;
-    const peer = await this.prisma.clientInstance.profile.findUnique({
-      where: { userId: peerUserId },
-      include: { user: true }
+    const peerDeletedSession = await this.prisma.clientInstance.matchSession.findFirst({
+      where: {
+        status: "closed_peer_deleted",
+        OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
+      },
+      orderBy: { expiresAt: "desc" }
     });
 
-    if (!peer) {
-      return null;
+    if (peerDeletedSession) {
+      return this.buildPeerDeletedSummary();
     }
 
-    const sharedKeys = record.profile.trustKeys.filter((item) => peer.trustKeys.includes(item));
-    const consentStatus = await this.consents.buildStatusForMatch(
-      session.id,
-      record.user.id,
-      peer.userId,
-      {
-        telegramUsername: peer.user.telegramUsername,
-        telegramUserId: peer.user.telegramUserId
-      }
-    );
-
-    return {
-      displayName: peer.displayName,
-      matchScore: session.score ?? 0,
-      trustLevel: Math.max(1, Math.min(5, sharedKeys.length + 1)),
-      sharedKeys,
-      sharedState:
-        record.profile.stateKey === peer.stateKey ? "Общий ритм состояния" : "Разный, но совместимый ритм",
-      statusCopy:
-        session.origin === "beacon"
-          ? "Связь найдена через Beacon fallback по тем же параметрам матрицы."
-          : "Связь найдена автоматическим matching pipeline.",
-      contactConsent: consentStatus.contact,
-      photoConsent: consentStatus.photo
-    };
+    return null;
   }
 
   async sweep(): Promise<void> {
@@ -89,6 +70,68 @@ export class MatchingRuntimeService {
     for (const user of users) {
       await this.ensureCurrentMatch(user.id);
     }
+  }
+
+  private async buildActiveConnectionSummary(
+    userId: string,
+    profile: {
+      stateKey: string;
+      trustKeys: string[];
+    },
+    session: {
+      id: string;
+      userAId: string;
+      userBId: string;
+      origin: string;
+      score: number | null;
+    }
+  ): Promise<ActiveConnectionSummary | PeerDeletedConnectionSummary> {
+    const peerUserId = session.userAId === userId ? session.userBId : session.userAId;
+    const peer = await this.prisma.clientInstance.profile.findUnique({
+      where: { userId: peerUserId },
+      include: { user: true }
+    });
+
+    if (!peer) {
+      return this.buildPeerDeletedSummary();
+    }
+
+    const sharedKeys = profile.trustKeys.filter((item) => peer.trustKeys.includes(item));
+    const consentStatus = await this.consents.buildStatusForMatch(
+      session.id,
+      userId,
+      peer.userId,
+      {
+        telegramUsername: peer.user.telegramUsername,
+        telegramUserId: peer.user.telegramUserId
+      }
+    );
+
+    return {
+      kind: "active",
+      displayName: peer.displayName,
+      matchScore: session.score ?? 0,
+      trustLevel: Math.max(1, Math.min(5, sharedKeys.length + 1)),
+      sharedKeys,
+      sharedState:
+        profile.stateKey === peer.stateKey ? "Общий ритм состояния" : "Разный, но совместимый ритм",
+      statusCopy:
+        session.origin === "beacon"
+          ? "Связь найдена через Beacon fallback по тем же параметрам матрицы."
+          : "Связь найдена автоматическим matching pipeline.",
+      contactConsent: consentStatus.contact,
+      photoConsent: consentStatus.photo
+    };
+  }
+
+  private buildPeerDeletedSummary(): PeerDeletedConnectionSummary {
+    return {
+      kind: "peer_deleted",
+      title: "Пользователь больше недоступен",
+      description: "Эта связь закрылась, потому что другой человек полностью удалил аккаунт.",
+      statusCopy: "Мы остановили открытые шаги и вернули вас к обычному поиску.",
+      primaryActionLabel: "Вернуться к поиску"
+    };
   }
 
   private async ensureCurrentMatch(userId: string): Promise<void> {

@@ -26,6 +26,7 @@ describe("MatchingController", () => {
 
   it("serializes an active connection as JSON", async () => {
     const connection: ConnectionSummary = {
+      kind: "active",
       displayName: "Alex",
       matchScore: 87,
       trustLevel: 3,

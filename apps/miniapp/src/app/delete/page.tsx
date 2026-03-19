@@ -47,7 +47,7 @@ export default async function DeletePage() {
       <NoticeCard
         icon={AlertTriangle}
         title="Это действие необратимо"
-        description="Все ваши данные, связи и настройки будут удалены без возможности восстановления."
+        description="Все ваши данные будут удалены навсегда, а открытые связи закроются для второй стороны с системным уведомлением."
         tone="danger"
       />
 
@@ -67,7 +67,7 @@ export default async function DeletePage() {
             name="confirmation"
             label='Введите "удалить"'
             placeholder="удалить"
-            hint="После подтверждения профиль исчезнет, все связи закроются, данные будут удалены."
+            hint="После подтверждения аккаунт будет удалён полностью, а следующий вход начнётся с чистого onboarding."
           />
         </Section>
 

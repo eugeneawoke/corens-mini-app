@@ -82,7 +82,7 @@ export default async function PrivacyPage() {
               <strong className="corens-card-title">Удаление аккаунта</strong>
             </div>
             <p className="corens-copy corens-copy-muted">
-              Перед удалением мы покажем, что именно будет очищено.
+              Перед удалением мы покажем, что именно исчезнет навсегда и что увидит второй человек.
             </p>
             <ButtonLink href="/delete" variant="ghost">
               Удалить аккаунт

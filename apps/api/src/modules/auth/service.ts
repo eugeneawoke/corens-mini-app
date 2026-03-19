@@ -9,6 +9,7 @@ import { readAppEnv } from "@corens/config";
 import { validateTelegramInitData } from "@corens/telegram";
 import type { Profile, User } from "@corens/db";
 import { PrismaService } from "../../prisma.service";
+import { PrivacyRuntimeService } from "../privacy/runtime.service";
 import { ProfilesService } from "../profiles";
 
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
@@ -24,7 +25,8 @@ export interface AuthenticatedUserContext {
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly profiles: ProfilesService
+    private readonly profiles: ProfilesService,
+    private readonly privacy: PrivacyRuntimeService
   ) {}
 
   async bootstrap(rawInitData: string): Promise<AuthBootstrapResponse> {
@@ -41,15 +43,24 @@ export class AuthService {
       where: { telegramUserId: validation.userId }
     });
 
-    if (existingUser && existingUser.status !== "active") {
+    if (existingUser?.status === "pending_deletion") {
+      await this.privacy.hardDeleteByUserId(existingUser.id, {
+        trackAggregateAnalytics: false
+      });
+    } else if (existingUser && existingUser.status !== "active") {
       throw new ForbiddenException("user_not_available");
     }
 
-    const user = existingUser
+    const activeUser =
+      existingUser?.status === "pending_deletion"
+        ? null
+        : existingUser;
+
+    const user = activeUser
       ? await this.prisma.clientInstance.user.update({
-          where: { id: existingUser.id },
+          where: { id: activeUser.id },
           data: {
-            telegramUsername: validation.username ?? existingUser.telegramUsername,
+            telegramUsername: validation.username ?? activeUser.telegramUsername,
             status: "active"
           }
         })

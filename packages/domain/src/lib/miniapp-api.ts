@@ -52,7 +52,8 @@ export interface ConsentStatusView {
   artifactValue?: string;
 }
 
-export interface ConnectionSummary {
+export interface ActiveConnectionSummary {
+  kind: "active";
   displayName: string;
   matchScore: number;
   trustLevel: number;
@@ -62,6 +63,16 @@ export interface ConnectionSummary {
   contactConsent: ConsentStatusView;
   photoConsent: ConsentStatusView;
 }
+
+export interface PeerDeletedConnectionSummary {
+  kind: "peer_deleted";
+  title: string;
+  description: string;
+  statusCopy: string;
+  primaryActionLabel: string;
+}
+
+export type ConnectionSummary = ActiveConnectionSummary | PeerDeletedConnectionSummary;
 
 export interface BeaconSummary {
   status: BeaconStatus;

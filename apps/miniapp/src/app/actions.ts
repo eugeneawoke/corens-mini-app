@@ -168,6 +168,19 @@ export async function requestDeletionAction(formData: FormData): Promise<void> {
   redirect("/");
 }
 
+export async function devResetAction(): Promise<void> {
+  await sendApiMutation("/api/privacy/dev-reset", {
+    method: "POST"
+  });
+
+  const cookieStore = await cookies();
+  cookieStore.delete(MINIAPP_SESSION_COOKIE);
+  revalidatePath("/");
+  revalidatePath("/profile");
+  revalidatePath("/connection");
+  redirect("/");
+}
+
 export async function reportConnectionAction(formData: FormData): Promise<void> {
   const note = String(formData.get("note") ?? "");
 

@@ -53,16 +53,20 @@ export default async function ContactConsentPage() {
         <NoticeCard
           title="Пока здесь"
           description={
-            resolution?.warnings.includes("telegram_handoff_warning_required")
-              ? "Прежде чем продолжить, убедитесь, что вы готовы к этому шагу."
-              : "Ждём, пока другой человек примет решение."
+            resolution?.warnings.includes("peer_deleted")
+              ? "Другой человек удалил аккаунт. Эта связь закрыта, и написать уже не получится."
+              : resolution?.warnings.includes("telegram_handoff_warning_required")
+                ? "Прежде чем продолжить, убедитесь, что вы готовы к этому шагу."
+                : "Ждём, пока другой человек примет решение."
           }
-          tone="warning"
+          tone={resolution?.warnings.includes("peer_deleted") ? "danger" : "warning"}
         />
 
         <div className="corens-action-stack" style={{ marginTop: 16 }}>
-          <StatusBadge tone="warning">{resolution?.status ?? "pending"}</StatusBadge>
-          {resolution?.status === "approved" && resolution.artifactValue ? (
+          <StatusBadge tone={resolution?.warnings.includes("peer_deleted") ? "danger" : "warning"}>
+            {resolution?.status ?? "pending"}
+          </StatusBadge>
+          {resolution?.warnings.includes("peer_deleted") ? null : resolution?.status === "approved" && resolution.artifactValue ? (
             <ButtonLink href={resolution.artifactValue} variant="success">
               Открыть Telegram
             </ButtonLink>

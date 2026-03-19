@@ -55,17 +55,28 @@ export default async function PhotoRevealPage() {
 
         <NoticeCard
           title="Пока здесь"
-          description="Фото откроется только если вы оба нажмёте «да»."
+          description={
+            resolution?.warnings.includes("peer_deleted")
+              ? "Другой человек удалил аккаунт. Эта связь закрыта, поэтому фото больше недоступно."
+              : "Фото откроется только если вы оба нажмёте «да»."
+          }
+          tone={resolution?.warnings.includes("peer_deleted") ? "danger" : "warning"}
         />
 
         <div className="corens-action-stack" style={{ marginTop: 16 }}>
-          <StatusBadge tone="warning">{resolution?.status ?? "pending"}</StatusBadge>
-          <form action={approveConsentAction.bind(null, "photo")}>
-            <Button>Да, хочу видеть</Button>
-          </form>
-          <form action={declineConsentAction.bind(null, "photo")}>
-            <Button variant="danger">Пока не хочу</Button>
-          </form>
+          <StatusBadge tone={resolution?.warnings.includes("peer_deleted") ? "danger" : "warning"}>
+            {resolution?.status ?? "pending"}
+          </StatusBadge>
+          {resolution?.warnings.includes("peer_deleted") ? null : (
+            <>
+              <form action={approveConsentAction.bind(null, "photo")}>
+                <Button>Да, хочу видеть</Button>
+              </form>
+              <form action={declineConsentAction.bind(null, "photo")}>
+                <Button variant="danger">Пока не хочу</Button>
+              </form>
+            </>
+          )}
           <ButtonLink href="/connection" variant="ghost">
             Вернуться
           </ButtonLink>

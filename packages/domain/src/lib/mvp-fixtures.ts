@@ -161,6 +161,7 @@ export function createConnectionSummary(state: DemoMvpState): ConnectionSummary 
   }
 
   return {
+    kind: "active",
     displayName: state.connection.displayName,
     matchScore: evaluation.score,
     trustLevel: state.connection.trustLevel,

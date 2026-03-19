@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import type { Profile, Session, User } from "@corens/db";
 import { AuthService } from "../../apps/api/src/modules/auth/service";
+import type { PrivacyRuntimeService } from "../../apps/api/src/modules/privacy/runtime.service";
 import type { ProfilesService } from "../../apps/api/src/modules/profiles";
 import type { PrismaService } from "../../apps/api/src/prisma.service";
 import { createTelegramInitData } from "../helpers/telegram-init-data";
@@ -140,8 +141,12 @@ function createAuthServiceFixture() {
     })
   } as unknown as ProfilesService;
 
+  const privacyRuntime = {
+    hardDeleteByUserId: async () => undefined
+  } as unknown as PrivacyRuntimeService;
+
   return {
-    auth: new AuthService(prisma, profilesService),
+    auth: new AuthService(prisma, profilesService, privacyRuntime),
     sessions,
     users
   };

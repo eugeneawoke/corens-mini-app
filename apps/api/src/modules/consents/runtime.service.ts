@@ -19,6 +19,11 @@ export class ConsentRuntimeService {
     channel: ConsentChannel
   ): Promise<ConsentStatusView> {
     const match = await this.getCurrentMatch(user);
+
+    if (match.status === "closed_peer_deleted") {
+      return this.buildPeerDeletedStatus(channel);
+    }
+
     return this.resolveStatus(match.id, match.selfUserId, match.peerUserId, channel);
   }
 
@@ -28,6 +33,11 @@ export class ConsentRuntimeService {
     decision: ConsentDecision
   ): Promise<ConsentStatusView> {
     const match = await this.getCurrentMatch(user);
+
+    if (match.status === "closed_peer_deleted") {
+      return this.buildPeerDeletedStatus(channel);
+    }
+
     const recordId = `${match.id}:${match.selfUserId}:${channel}`;
 
     if (channel === "contact") {
@@ -143,15 +153,16 @@ export class ConsentRuntimeService {
     id: string;
     selfUserId: string;
     peerUserId: string;
-    peerTelegram: { telegramUsername: string | null; telegramUserId: string };
+    peerTelegram?: { telegramUsername: string | null; telegramUserId: string };
+    status: string;
   }> {
     const record = await this.profiles.getCurrentProfileRecord(user);
     const match = await this.prisma.clientInstance.matchSession.findFirst({
       where: {
-        status: "active",
+        status: { in: ["active", "closed_peer_deleted"] },
         OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
       },
-      orderBy: { createdAt: "desc" }
+      orderBy: [{ status: "asc" }, { createdAt: "desc" }]
     });
 
     if (!match) {
@@ -159,6 +170,16 @@ export class ConsentRuntimeService {
     }
 
     const peerUserId = match.userAId === record.user.id ? match.userBId : match.userAId;
+
+    if (match.status === "closed_peer_deleted") {
+      return {
+        id: match.id,
+        selfUserId: record.user.id,
+        peerUserId,
+        status: match.status
+      };
+    }
+
     const peerUser = await this.prisma.clientInstance.user.findUnique({
       where: { id: peerUserId }
     });
@@ -171,10 +192,19 @@ export class ConsentRuntimeService {
       id: match.id,
       selfUserId: record.user.id,
       peerUserId,
+      status: match.status,
       peerTelegram: {
         telegramUsername: peerUser.telegramUsername,
         telegramUserId: peerUser.telegramUserId
       }
+    };
+  }
+
+  private buildPeerDeletedStatus(channel: ConsentChannel): ConsentStatusView {
+    return {
+      channel,
+      status: "declined",
+      warnings: ["peer_deleted"]
     };
   }
 

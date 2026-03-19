@@ -14,6 +14,7 @@ _Keep one active task at a time._
 
 - Phase C - Deterministic Matching & Consent Hardening: broaden pair-safety, retention cleanup semantics, and moderation/deletion coverage
 - Phase E - Release Readiness & Documentation: release checklist, documentation refresh, no-demo verification
+- Remove the temporary dev reset button from `Профиль -> Дополнительно` before live launch
 
 ## Done
 

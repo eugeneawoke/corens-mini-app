@@ -1,14 +1,18 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
+import type { PrismaClient } from "@corens/db";
 import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
 import type { AuthenticatedUserContext } from "../auth/service";
-import { ProfilesService } from "../profiles";
+
+const AGGREGATE_DELETION_ANALYTICS_USER_ID = "__aggregate__";
+const PEER_DELETED_PREFIX = "deleted:";
+
+type TransactionClient = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
 
 @Injectable()
 export class PrivacyRuntimeService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly profiles: ProfilesService,
     private readonly policyConfig: PolicyConfigService
   ) {}
 
@@ -17,113 +21,84 @@ export class PrivacyRuntimeService {
       throw new BadRequestException("Deletion confirmation is invalid");
     }
 
-    const record = await this.profiles.getCurrentProfileRecord(user);
-    const rules = await this.policyConfig.getPrivacyRules();
-    const now = new Date();
-    const activeMatchIds = await this.activeMatchIds(record.user.id);
+    await this.hardDeleteByUserId(user.id);
+  }
 
-    if (record.user.status === "pending_deletion") {
+  async devReset(user: AuthenticatedUserContext): Promise<void> {
+    await this.hardDeleteByUserId(user.id);
+  }
+
+  async hardDeleteByUserId(
+    userId: string,
+    options?: {
+      trackAggregateAnalytics?: boolean;
+    }
+  ): Promise<void> {
+    const record = await this.prisma.clientInstance.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!record) {
       return;
     }
 
+    const now = new Date();
+    const trackAggregateAnalytics = options?.trackAggregateAnalytics ?? true;
+
+    await this.policyConfig.getPrivacyRules();
+
     await this.prisma.clientInstance.$transaction(async (tx) => {
-      await tx.user.update({
-        where: { id: record.user.id },
-        data: {
-          status: "pending_deletion"
-        }
-      });
+      const matchIds = await this.matchIdsForUser(tx, userId);
 
-      await tx.profile.update({
-        where: { userId: record.user.id },
-        data: {
-          displayName: "Удаленный профиль",
-          about: null,
-          trustKeys: [],
-          visibilityStatus: "hidden",
-          matchingEnabled: false,
-          onboardingCompleted: false
-        }
-      });
+      await this.closeMatchesForDeletedUser(tx, userId, now, matchIds);
 
-      await tx.session.updateMany({
+      await tx.contactConsent.deleteMany({
         where: {
-          userId: record.user.id,
-          revokedAt: null
-        },
-        data: {
-          revokedAt: now
+          OR: [{ matchSessionId: { in: matchIds } }, { requestedBy: userId }]
         }
       });
 
-      if (rules.deletion.revokeSessionsImmediately) {
-        await tx.matchSession.updateMany({
-          where: {
-            status: "active",
-            OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
-          },
-          data: {
-            status: "closed_due_to_deletion",
-            expiresAt: now
-          }
-        });
-      }
+      await tx.photoRevealConsent.deleteMany({
+        where: {
+          OR: [{ matchSessionId: { in: matchIds } }, { requestedBy: userId }]
+        }
+      });
 
-      if (rules.deletion.expireBeaconImmediately) {
-        await tx.beaconSession.updateMany({
-          where: {
-            userId: record.user.id,
-            status: "active"
-          },
-          data: {
-            status: "expired",
-            expiresAt: now
-          }
-        });
-      }
+      await tx.moderationEvent.deleteMany({
+        where: {
+          OR: [
+            { actorUserId: userId },
+            { targetUserId: userId },
+            { matchSessionId: { in: matchIds } }
+          ]
+        }
+      });
 
-      if (rules.deletion.closeOpenConsentsImmediately) {
-        await tx.contactConsent.updateMany({
-          where: {
-            matchSessionId: {
-              in: activeMatchIds
-            },
-            requestStatus: "pending"
-          },
-          data: {
-            requestStatus: "declined",
-            resolvedAt: now
-          }
-        });
+      await tx.beaconSession.deleteMany({
+        where: { userId }
+      });
 
-        await tx.photoRevealConsent.updateMany({
-          where: {
-            matchSessionId: {
-              in: activeMatchIds
-            },
-            requestStatus: "pending"
-          },
-          data: {
-            requestStatus: "declined",
-            resolvedAt: now
-          }
-        });
-      }
+      await tx.deletionEvent.deleteMany({
+        where: { userId }
+      });
 
-      const stages = [
-        "pending",
-        "sessions_revoked",
-        "consents_closed",
-        "assets_deleted",
-        "purged",
-        "completed"
-      ] as const;
+      await tx.session.deleteMany({
+        where: { userId }
+      });
 
-      for (const stage of stages) {
+      await tx.profile.deleteMany({
+        where: { userId }
+      });
+
+      await tx.user.delete({
+        where: { id: userId }
+      });
+
+      if (trackAggregateAnalytics) {
         await tx.deletionEvent.create({
           data: {
-            userId: record.user.id,
-            stage,
+            userId: AGGREGATE_DELETION_ANALYTICS_USER_ID,
+            stage: "hard_delete_completed",
             completedAt: now
           }
         });
@@ -171,8 +146,47 @@ export class PrivacyRuntimeService {
     });
   }
 
-  private async activeMatchIds(userId: string): Promise<string[]> {
-    const matches = await this.prisma.clientInstance.matchSession.findMany({
+  private async closeMatchesForDeletedUser(
+    tx: TransactionClient,
+    userId: string,
+    now: Date,
+    matchIds: string[]
+  ): Promise<void> {
+    const matches = await tx.matchSession.findMany({
+      where: {
+        id: { in: matchIds }
+      }
+    });
+
+    for (const match of matches) {
+      const peerUserId = match.userAId === userId ? match.userBId : match.userAId;
+      const peerUser = await tx.user.findUnique({
+        where: { id: peerUserId }
+      });
+
+      if (peerUser?.status === "active") {
+        await tx.matchSession.update({
+          where: { id: match.id },
+          data: {
+            pairKey: `peer-deleted:${match.id}`,
+            userAId: peerUser.id,
+            userBId: `${PEER_DELETED_PREFIX}${match.id}`,
+            status: "closed_peer_deleted",
+            score: null,
+            expiresAt: now
+          }
+        });
+        continue;
+      }
+
+      await tx.matchSession.delete({
+        where: { id: match.id }
+      });
+    }
+  }
+
+  private async matchIdsForUser(tx: TransactionClient, userId: string): Promise<string[]> {
+    const matches = await tx.matchSession.findMany({
       where: {
         OR: [{ userAId: userId }, { userBId: userId }]
       },

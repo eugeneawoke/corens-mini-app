@@ -1,7 +1,8 @@
-import { BadgeInfo, HeartHandshake, KeyRound, LifeBuoy, Lock, Trash2 } from "lucide-react";
+import { BadgeInfo, HeartHandshake, KeyRound, LifeBuoy, Lock, RotateCcw, Trash2 } from "lucide-react";
 import { redirect } from "next/navigation";
-import { AppSurface, ListRow, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
+import { AppSurface, Button, ListRow, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
 
+import { devResetAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import {
@@ -89,6 +90,20 @@ export default async function ProfilePage() {
             description="Безвозвратное действие"
             icon={Trash2}
           />
+          <div className="corens-stack corens-gap-sm" style={{ marginTop: 12 }}>
+            <div className="corens-inline-head">
+              <RotateCcw size={18} />
+              <strong className="corens-card-title">DEV: сбросить мои данные</strong>
+            </div>
+            <p className="corens-copy corens-copy-muted">
+              Временный инструмент для тестов. Удалить перед live запуском.
+            </p>
+            <form action={devResetAction}>
+              <Button type="submit" variant="secondary">
+                Сбросить и пройти onboarding заново
+              </Button>
+            </form>
+          </div>
         </Panel>
       </Section>
     </AppSurface>
