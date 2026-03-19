@@ -1,4 +1,4 @@
-import { BadgeInfo, HeartHandshake, KeyRound, Lock, Trash2 } from "lucide-react";
+import { BadgeInfo, HeartHandshake, KeyRound, LifeBuoy, Lock, Trash2 } from "lucide-react";
 import { redirect } from "next/navigation";
 import { AppSurface, ListRow, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
 
@@ -76,6 +76,12 @@ export default async function ProfilePage() {
             title="Текущая связь"
             description="Кто сейчас рядом с вами"
             icon={BadgeInfo}
+          />
+          <ListRow
+            href="https://t.me/eugenegusakov"
+            title="Саппорт"
+            description="Написать напрямую в Telegram"
+            icon={LifeBuoy}
           />
           <ListRow
             href="/delete"
