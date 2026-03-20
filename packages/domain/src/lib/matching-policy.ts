@@ -49,6 +49,10 @@ export function evaluateMatchingCandidate(
     reasons.push("missing_trust_overlap");
   }
 
+  if (input.moodScore < 0) {
+    reasons.push("mood_incompatible");
+  }
+
   if (input.hasPairExclusion) {
     reasons.push("pair_exclusion_active");
   }
@@ -66,8 +70,8 @@ export function evaluateMatchingCandidate(
   }
 
   const breakdown: MatchingScoreBreakdown = {
-    moodScore: input.moodScore * config.weights.mood,
-    intentScore: input.intentScore * config.weights.intent,
+    moodScore: Math.max(input.moodScore, 0) * config.weights.mood,
+    intentScore: Math.max(input.intentScore, 0) * config.weights.intent,
     trustOverlapCount: overlapCount * config.weights.trustOverlap,
     noConnectionsBonus:
       input.candidate.activeConnectionsCount === 0 ? config.weights.noConnectionsBonus : 0,

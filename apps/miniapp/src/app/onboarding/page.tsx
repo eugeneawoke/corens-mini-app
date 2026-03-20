@@ -1,6 +1,8 @@
 import { Compass, Heart, MoonStar, Orbit, Sparkle } from "lucide-react";
 import { redirect } from "next/navigation";
+import type { SelectOption } from "@corens/domain";
 import { AppSurface, Button, Field, KeyChip, NoticeCard, Panel, Section, TopBar } from "@corens/ui";
+import { lightStateKeys, shadowStateKeys } from "@corens/domain/profile-options";
 
 import { completeOnboardingAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
@@ -12,6 +14,13 @@ import {
 } from "../../lib/api";
 
 const optionIcons = [Heart, MoonStar, Sparkle, Orbit];
+
+function splitStateOptions(options: ReadonlyArray<SelectOption>) {
+  return {
+    light: options.filter((option) => lightStateKeys.has(option.key)),
+    shadow: options.filter((option) => shadowStateKeys.has(option.key))
+  };
+}
 
 export default async function OnboardingPage() {
   let snapshot;
@@ -33,6 +42,8 @@ export default async function OnboardingPage() {
   if (snapshot.onboardingCompleted) {
     redirect("/");
   }
+
+  const stateGroups = splitStateOptions(snapshot.state.options);
 
   return (
     <AppSurface>
@@ -70,31 +81,66 @@ export default async function OnboardingPage() {
         </Section>
 
         <Section title="Как вы сейчас?">
-          <div className="corens-choice-grid">
-            {snapshot.state.options.map((option, index) => {
-              const Icon = optionIcons[index % optionIcons.length];
+          <div className="corens-stack corens-gap-sm">
+            <div className="corens-choice-section">
+              <span className="corens-eyebrow">Светлые состояния</span>
+              <div className="corens-choice-grid corens-choice-grid-bento">
+                {stateGroups.light.map((option, index) => {
+                  const Icon = optionIcons[index % optionIcons.length];
 
-              return (
-                <label key={option.key} className="corens-choice-label">
-                  <input
-                    className="corens-choice-input"
-                    type="radio"
-                    name="stateKey"
-                    value={option.key}
-                    defaultChecked={option.key === snapshot.state.current.key}
-                  />
-                  <span className="corens-choice-card">
-                    <span className="corens-choice-header">
-                      <span className="corens-choice-icon">
-                        <Icon size={20} />
+                  return (
+                    <label key={option.key} className="corens-choice-label">
+                      <input
+                        className="corens-choice-input"
+                        type="radio"
+                        name="stateKey"
+                        value={option.key}
+                        defaultChecked={option.key === snapshot.state.current.key}
+                      />
+                      <span className="corens-choice-card corens-choice-card-bento">
+                        <span className="corens-choice-header">
+                          <span className="corens-choice-icon">
+                            <Icon size={18} />
+                          </span>
+                        </span>
+                        <strong className="corens-choice-title">{option.label}</strong>
+                        <span className="corens-choice-description">{option.description}</span>
                       </span>
-                    </span>
-                    <strong className="corens-choice-title">{option.label}</strong>
-                    <span className="corens-choice-description">{option.description}</span>
-                  </span>
-                </label>
-              );
-            })}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="corens-choice-section">
+              <span className="corens-eyebrow">Теневые состояния</span>
+              <div className="corens-choice-grid corens-choice-grid-bento">
+                {stateGroups.shadow.map((option, index) => {
+                  const Icon = optionIcons[(index + 2) % optionIcons.length];
+
+                  return (
+                    <label key={option.key} className="corens-choice-label">
+                      <input
+                        className="corens-choice-input"
+                        type="radio"
+                        name="stateKey"
+                        value={option.key}
+                        defaultChecked={option.key === snapshot.state.current.key}
+                      />
+                      <span className="corens-choice-card corens-choice-card-bento corens-choice-card-shadow">
+                        <span className="corens-choice-header">
+                          <span className="corens-choice-icon">
+                            <Icon size={18} />
+                          </span>
+                        </span>
+                        <strong className="corens-choice-title">{option.label}</strong>
+                        <span className="corens-choice-description">{option.description}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </Section>
 
@@ -152,7 +198,7 @@ export default async function OnboardingPage() {
 
         <NoticeCard
           title="После этого"
-          description="Мы начнём искать человека, созвучного вам. Когда найдём — напишем вам в бот."
+          description="Мы начнём искать человека с совместимым состоянием, хотя бы одним общим ключом и подходящим ритмом контакта."
         />
 
         <Button type="submit">Начать</Button>

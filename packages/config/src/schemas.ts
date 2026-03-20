@@ -10,6 +10,24 @@ export interface MatchingScoringConfig {
   limits: {
     activeConnections: number;
   };
+  cooldowns: {
+    trustKeysDays: number;
+    intentHours: number;
+  };
+  freshness: {
+    moodHours: number;
+  };
+}
+
+export interface MatchingStateMatrixConfig {
+  version: string;
+  categories: Record<string, "light" | "shadow">;
+  compatibility: Record<string, number>;
+}
+
+export interface MatchingIntentMatrixConfig {
+  version: string;
+  compatibility: Record<string, number>;
 }
 
 export interface BeaconRulesConfig {

@@ -169,7 +169,7 @@ export class AuthService {
         visibilityStatus: "active",
         matchingEnabled: true,
         stateKey: "calm",
-        intentKey: "slow-dialogue",
+        intentKey: "",
         trustKeys: [],
         onboardingCompleted: false
       }

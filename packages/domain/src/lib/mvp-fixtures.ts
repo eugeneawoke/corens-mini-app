@@ -4,7 +4,7 @@ import type { VisibilityState } from "./privacy";
 import { type MatchingEvaluation, evaluateMatchingCandidate } from "./matching-policy";
 import { planDeletion } from "./privacy-policy";
 import { resolveConsentRequest } from "./consent-policy";
-import { intentOptions, stateOptions, trustKeyGroups } from "./profile-options";
+import { intentOptions, optionalIntentOption, stateOptions, trustKeyGroups } from "./profile-options";
 import type {
   BeaconSummary,
   ConnectionSummary,
@@ -23,6 +23,13 @@ const matchingConfig = {
   },
   limits: {
     activeConnections: 1
+  },
+  cooldowns: {
+    trustKeysDays: 14,
+    intentHours: 6
+  },
+  freshness: {
+    moodHours: 2
   }
 } as const;
 
@@ -86,7 +93,7 @@ export function createDemoMvpState(): DemoMvpState {
       displayName: "Новый профиль",
       handle: "@corens_user",
       stateKey: "calm",
-      intentKey: "slow-dialogue",
+      intentKey: "",
       trustKeys: [],
       visibility: {
         userId: "user-self",
@@ -105,7 +112,7 @@ export function createDemoMvpState(): DemoMvpState {
 
 export function createProfileSummary(state: DemoMvpState): ProfileSummary {
   const selectedState = findOption(stateOptions, state.profile.stateKey);
-  const selectedIntent = findOption(intentOptions, state.profile.intentKey);
+  const selectedIntent = findOption([optionalIntentOption, ...intentOptions], state.profile.intentKey);
 
   return {
     onboardingCompleted: state.profile.onboardingCompleted,
@@ -117,20 +124,20 @@ export function createProfileSummary(state: DemoMvpState): ProfileSummary {
       hasPhoto: false,
       statusLabel: "Фото не добавлено"
     },
-    state: {
-      current: selectedState,
-      options: stateOptions,
-      cooldownLabel: "Изменение станет доступно через 12:00"
-    },
-    intent: {
-      current: selectedIntent,
-      options: intentOptions
-    },
-    trustKeys: {
-      selected: state.profile.trustKeys,
-      groups: trustKeyGroups,
-      limitLabel: `Выбрано ${state.profile.trustKeys.length} из 5`,
-      cooldownLabel: "Следующее изменение через 13 дней"
+      state: {
+        current: selectedState,
+        options: stateOptions,
+        cooldownLabel: "Состояние можно пересматривать по ходу дня, свежесть учитывается 2 часа"
+      },
+      intent: {
+        current: selectedIntent,
+        options: [optionalIntentOption, ...intentOptions]
+      },
+      trustKeys: {
+        selected: state.profile.trustKeys,
+        groups: trustKeyGroups,
+        limitLabel: `Выбрано ${state.profile.trustKeys.length} из 3`,
+        cooldownLabel: "Следующее изменение ключей через 14 дней"
     },
     privacy: {
       visibility: state.profile.visibility,
@@ -169,8 +176,8 @@ export function createConnectionSummary(state: DemoMvpState): ConnectionSummary 
     displayName: state.connection.displayName,
     matchScore: evaluation.score,
     trustLevel: state.connection.trustLevel,
-    sharedKeys: ["Тишина", "Честность", "Чай"],
-    sharedState: "Спокойный ритм",
+    sharedKeys: ["Тихий разговор", "Честность", "Мягкий темп"],
+    sharedState: "Общее состояние по матрице",
     statusCopy: "Совпадение подтверждено backend matching policy.",
     contactConsent: createConsentStatus(
       "contact",

@@ -1,5 +1,19 @@
 version: v1
 description: >
-  Placeholder intent compatibility matrix or bonus lookup.
-intents:
-  []
+  Canonical intent compatibility matrix from matching-spec.md.
+compatibility:
+  - support|support=2
+  - support|talk=2
+  - support|walk=1
+  - support|light_contact=2
+  - support|share=1
+  - talk|talk=2
+  - talk|walk=1
+  - talk|light_contact=1
+  - talk|share=2
+  - walk|walk=2
+  - walk|light_contact=1
+  - walk|share=1
+  - light_contact|light_contact=2
+  - light_contact|share=1
+  - share|share=2

@@ -114,7 +114,7 @@ export class MatchingRuntimeService {
       trustLevel: Math.max(1, Math.min(5, sharedKeys.length + 1)),
       sharedKeys,
       sharedState:
-        profile.stateKey === peer.stateKey ? "Общий ритм состояния" : "Разный, но совместимый ритм",
+        profile.stateKey === peer.stateKey ? "Общее состояние по матрице" : "Разные, но совместимые состояния",
       statusCopy:
         session.origin === "beacon"
           ? "Связь найдена через Beacon fallback по тем же параметрам матрицы."
@@ -168,7 +168,11 @@ export class MatchingRuntimeService {
       return;
     }
 
-    const scoring = await this.policyConfig.getMatchingScoring();
+    const [scoring, stateMatrix, intentMatrix] = await Promise.all([
+      this.policyConfig.getMatchingScoring(),
+      this.policyConfig.getMatchingStateMatrix(),
+      this.policyConfig.getMatchingIntentMatrix()
+    ]);
     const activeSessions = await this.prisma.clientInstance.matchSession.findMany({
       where: { status: "active" }
     });
@@ -214,9 +218,14 @@ export class MatchingRuntimeService {
         {
           self: selfCandidate,
           candidate,
-          moodScore: self.stateKey === candidateProfile.stateKey ? 1 : 0,
-          intentScore: self.intentKey === candidateProfile.intentKey ? 1 : 0,
-          moodUpdatedRecently: false,
+          moodScore: this.getCompatibilityScore(stateMatrix.compatibility, self.stateKey, candidateProfile.stateKey),
+          intentScore: this.resolveIntentScore(
+            intentMatrix.compatibility,
+            this.normalizeOptionalIntent(self.intentKey),
+            this.normalizeOptionalIntent(candidateProfile.intentKey)
+          ),
+          moodUpdatedRecently:
+            Date.now() - self.updatedAt.getTime() < scoring.freshness.moodHours * 3_600_000,
           hasPairExclusion: false,
           hasActivePairMatch
         },
@@ -237,7 +246,7 @@ export class MatchingRuntimeService {
       if (!bestMatch || totalScore > bestMatch.score) {
         bestMatch = {
           candidateUserId: candidateProfile.userId,
-          score: evaluation.score,
+          score: totalScore,
           origin
         };
       }
@@ -289,21 +298,48 @@ export class MatchingRuntimeService {
     profile: {
       userId: string;
       stateKey: string;
-      intentKey: string;
+      intentKey: string | null;
       trustKeys: string[];
       matchingEnabled: boolean;
       visibilityStatus: string;
+      updatedAt: Date;
     },
     activeConnectionsCount: number
-  ): MatchingCandidate {
+  ): MatchingCandidate & { updatedAt: Date } {
     return {
       userId: profile.userId,
       stateKey: profile.stateKey,
-      intentKey: profile.intentKey,
+      intentKey: this.normalizeOptionalIntent(profile.intentKey),
       trustKeys: profile.trustKeys.map((item) => item.toLowerCase()),
       activeConnectionsCount,
       matchingEnabled: profile.matchingEnabled,
-      isHidden: profile.visibilityStatus === "hidden"
+      isHidden: profile.visibilityStatus === "hidden",
+      updatedAt: profile.updatedAt
     };
+  }
+
+  private normalizeOptionalIntent(intentKey: string | null): string | null {
+    const normalized = intentKey?.trim() ?? "";
+    return normalized.length > 0 ? normalized : null;
+  }
+
+  private resolveIntentScore(
+    compatibility: Record<string, number>,
+    left: string | null,
+    right: string | null
+  ): number {
+    if (!left || !right) {
+      return 0;
+    }
+
+    return this.getCompatibilityScore(compatibility, left, right);
+  }
+
+  private getCompatibilityScore(
+    compatibility: Record<string, number>,
+    left: string,
+    right: string
+  ): number {
+    return compatibility[`${left}::${right}`] ?? -1;
   }
 }

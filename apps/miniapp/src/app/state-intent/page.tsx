@@ -1,6 +1,8 @@
 import { Heart, MoonStar, Orbit, Sparkle } from "lucide-react";
 import { redirect } from "next/navigation";
+import type { SelectOption } from "@corens/domain";
 import { AppSurface, Button, NoticeCard, Panel, Section, TopBar } from "@corens/ui";
+import { lightStateKeys, shadowStateKeys } from "@corens/domain/profile-options";
 
 import { updateStateIntentAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
@@ -12,6 +14,13 @@ import {
 } from "../../lib/api";
 
 const stateIcons = [Heart, MoonStar, Sparkle, Orbit];
+
+function splitStateOptions(options: ReadonlyArray<SelectOption>) {
+  return {
+    light: options.filter((option) => lightStateKeys.has(option.key)),
+    shadow: options.filter((option) => shadowStateKeys.has(option.key))
+  };
+}
 
 export default async function StateIntentPage() {
   let snapshot;
@@ -34,6 +43,8 @@ export default async function StateIntentPage() {
     redirect("/onboarding");
   }
 
+  const stateGroups = splitStateOptions(snapshot.state.options);
+
   return (
     <AppSurface>
       <TopBar title="Настроение и формат" backHref="/profile" />
@@ -43,31 +54,66 @@ export default async function StateIntentPage() {
           title="Как вы сейчас?"
           description="Это помогает нам искать тех, кто сейчас чувствует похожее."
         >
-          <div className="corens-choice-grid">
-            {snapshot.state.options.map((option, index) => {
-              const Icon = stateIcons[index % stateIcons.length];
+          <div className="corens-stack corens-gap-sm">
+            <div className="corens-choice-section">
+              <span className="corens-eyebrow">Светлые состояния</span>
+              <div className="corens-choice-grid corens-choice-grid-bento">
+                {stateGroups.light.map((option, index) => {
+                  const Icon = stateIcons[index % stateIcons.length];
 
-              return (
-                <label key={option.key} className="corens-choice-label">
-                  <input
-                    className="corens-choice-input"
-                    type="radio"
-                    name="stateKey"
-                    value={option.key}
-                    defaultChecked={option.key === snapshot.state.current.key}
-                  />
-                  <span className="corens-choice-card">
-                    <span className="corens-choice-header">
-                      <span className="corens-choice-icon">
-                        <Icon size={20} />
+                  return (
+                    <label key={option.key} className="corens-choice-label">
+                      <input
+                        className="corens-choice-input"
+                        type="radio"
+                        name="stateKey"
+                        value={option.key}
+                        defaultChecked={option.key === snapshot.state.current.key}
+                      />
+                      <span className="corens-choice-card corens-choice-card-bento">
+                        <span className="corens-choice-header">
+                          <span className="corens-choice-icon">
+                            <Icon size={18} />
+                          </span>
+                        </span>
+                        <strong className="corens-choice-title">{option.label}</strong>
+                        <span className="corens-choice-description">{option.description}</span>
                       </span>
-                    </span>
-                    <strong className="corens-choice-title">{option.label}</strong>
-                    <span className="corens-choice-description">{option.description}</span>
-                  </span>
-                </label>
-              );
-            })}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="corens-choice-section">
+              <span className="corens-eyebrow">Теневые состояния</span>
+              <div className="corens-choice-grid corens-choice-grid-bento">
+                {stateGroups.shadow.map((option, index) => {
+                  const Icon = stateIcons[(index + 2) % stateIcons.length];
+
+                  return (
+                    <label key={option.key} className="corens-choice-label">
+                      <input
+                        className="corens-choice-input"
+                        type="radio"
+                        name="stateKey"
+                        value={option.key}
+                        defaultChecked={option.key === snapshot.state.current.key}
+                      />
+                      <span className="corens-choice-card corens-choice-card-bento corens-choice-card-shadow">
+                        <span className="corens-choice-header">
+                          <span className="corens-choice-icon">
+                            <Icon size={18} />
+                          </span>
+                        </span>
+                        <strong className="corens-choice-title">{option.label}</strong>
+                        <span className="corens-choice-description">{option.description}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </Section>
 
@@ -83,7 +129,7 @@ export default async function StateIntentPage() {
 
         <Section
           title="Как вам комфортно общаться?"
-          description="Это помогает встретить человека с похожим ожиданием."
+          description="Намерение не блокирует мэтчинг: если его не указывать, этот слой просто не добавляет вес."
         >
           <div className="corens-choice-grid">
             {snapshot.intent.options.map((option, index) => {

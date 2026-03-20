@@ -41,7 +41,7 @@ export default async function TrustKeysPage() {
             <span className="corens-eyebrow">Важно знать</span>
             <h2 className="corens-section-title">{snapshot.trustKeys.limitLabel}</h2>
             <p className="corens-copy corens-copy-muted">
-              Мы ищем тех, у кого хотя бы один ключ доверия совпадает с вашим. Менять их можно, но не слишком часто.
+              Для совпадения нужен хотя бы один общий ключ, но выбрать нужно ровно три.
             </p>
           </div>
         </Panel>

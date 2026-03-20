@@ -1,5 +1,82 @@
 version: v1
 description: >
-  Placeholder state compatibility matrix. Keep compatibility rules config-backed.
-states:
-  []
+  Canonical mood compatibility matrix from matching-spec.md.
+state_categories:
+  - calm=light
+  - lively=light
+  - playful=light
+  - thoughtful=light
+  - open=light
+  - fragile=light
+  - foggy=shadow
+  - after_heavy=shadow
+  - tight_inside=shadow
+  - anxious_quiet=shadow
+  - lost=shadow
+compatibility:
+  - calm|calm=2
+  - calm|lively=1
+  - calm|playful=-1
+  - calm|thoughtful=2
+  - calm|open=2
+  - calm|fragile=1
+  - lively|lively=2
+  - lively|playful=2
+  - lively|thoughtful=1
+  - lively|open=2
+  - lively|fragile=-1
+  - playful|playful=2
+  - playful|thoughtful=-1
+  - playful|open=1
+  - playful|fragile=-1
+  - thoughtful|thoughtful=2
+  - thoughtful|open=2
+  - thoughtful|fragile=1
+  - open|open=2
+  - open|fragile=2
+  - fragile|fragile=2
+  - foggy|foggy=2
+  - foggy|after_heavy=1
+  - foggy|tight_inside=1
+  - foggy|anxious_quiet=2
+  - foggy|lost=2
+  - after_heavy|after_heavy=2
+  - after_heavy|tight_inside=2
+  - after_heavy|anxious_quiet=1
+  - after_heavy|lost=1
+  - tight_inside|tight_inside=2
+  - tight_inside|anxious_quiet=2
+  - tight_inside|lost=2
+  - anxious_quiet|anxious_quiet=2
+  - anxious_quiet|lost=2
+  - lost|lost=2
+  - foggy|calm=2
+  - foggy|lively=-1
+  - foggy|playful=-1
+  - foggy|thoughtful=1
+  - foggy|open=2
+  - foggy|fragile=1
+  - after_heavy|calm=1
+  - after_heavy|lively=-1
+  - after_heavy|playful=-1
+  - after_heavy|thoughtful=1
+  - after_heavy|open=2
+  - after_heavy|fragile=-1
+  - tight_inside|calm=1
+  - tight_inside|lively=-1
+  - tight_inside|playful=-1
+  - tight_inside|thoughtful=2
+  - tight_inside|open=2
+  - tight_inside|fragile=1
+  - anxious_quiet|calm=2
+  - anxious_quiet|lively=-1
+  - anxious_quiet|playful=-1
+  - anxious_quiet|thoughtful=2
+  - anxious_quiet|open=2
+  - anxious_quiet|fragile=1
+  - lost|calm=1
+  - lost|lively=-1
+  - lost|playful=-1
+  - lost|thoughtful=1
+  - lost|open=2
+  - lost|fragile=1

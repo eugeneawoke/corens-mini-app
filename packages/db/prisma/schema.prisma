@@ -26,7 +26,7 @@ model Profile {
   displayName       String
   about             String?
   stateKey          String   @default("calm")
-  intentKey         String   @default("slow-dialogue")
+  intentKey         String   @default("")
   trustKeys         String[] @default([])
   photoCount        Int      @default(0)
   visibilityStatus  String

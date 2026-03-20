@@ -9,7 +9,9 @@ limits:
   active_connections: 10
 cooldowns:
   state_days: 3
-  trust_keys_days: 10
+  trust_keys_days: 14
   intent_hours: 6
+freshness:
+  mood_hours: 2
 notes:
   - runtime services must load these values instead of hardcoding them

@@ -13,11 +13,13 @@ import {
 } from "@corens/domain";
 import {
   intentOptions,
+  optionalIntentOption,
   stateOptions,
   trustKeyGroups
 } from "@corens/domain/profile-options";
 import type { Profile, User } from "@corens/db";
 import { PrismaService } from "../../prisma.service";
+import { PolicyConfigService } from "../../policy-config.service";
 import type { AuthenticatedUserContext } from "../auth/service";
 const privacyRules = {
   hiddenProfileClosesPendingConnection: false,
@@ -30,7 +32,10 @@ const privacyRules = {
 
 @Injectable()
 export class ProfilesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly policyConfig: PolicyConfigService
+  ) {}
 
   async getSummary(user: AuthenticatedUserContext): Promise<ProfileSummary> {
     const record = await this.ensureProfileRecord(user);
@@ -45,7 +50,7 @@ export class ProfilesService {
       throw new BadRequestException("Unknown state key");
     }
 
-    if (!intentOptions.some((option) => option.key === input.intentKey)) {
+    if (input.intentKey.trim().length > 0 && !intentOptions.some((option) => option.key === input.intentKey)) {
       throw new BadRequestException("Unknown intent key");
     }
 
@@ -54,7 +59,7 @@ export class ProfilesService {
       where: { userId: record.user.id },
       data: {
         stateKey: input.stateKey,
-        intentKey: input.intentKey
+        intentKey: input.intentKey.trim()
       }
     });
 
@@ -67,8 +72,8 @@ export class ProfilesService {
   ): Promise<ProfileSummary> {
     const sanitized = this.sanitizeTrustKeys(input.trustKeys);
 
-    if (sanitized.length === 0) {
-      throw new BadRequestException("At least one trust key is required");
+    if (sanitized.length !== 3) {
+      throw new BadRequestException("Exactly three trust keys are required");
     }
 
     const record = await this.ensureProfileRecord(user);
@@ -96,14 +101,14 @@ export class ProfilesService {
       throw new BadRequestException("Unknown state key");
     }
 
-    if (!intentOptions.some((option) => option.key === input.intentKey)) {
+    if (input.intentKey.trim().length > 0 && !intentOptions.some((option) => option.key === input.intentKey)) {
       throw new BadRequestException("Unknown intent key");
     }
 
     const trustKeys = this.sanitizeTrustKeys(input.trustKeys);
 
-    if (trustKeys.length === 0) {
-      throw new BadRequestException("At least one trust key is required");
+    if (trustKeys.length !== 3) {
+      throw new BadRequestException("Exactly three trust keys are required");
     }
 
     const record = await this.ensureProfileRecord(user);
@@ -112,7 +117,7 @@ export class ProfilesService {
       data: {
         displayName,
         stateKey: input.stateKey,
-        intentKey: input.intentKey,
+        intentKey: input.intentKey.trim(),
         trustKeys,
         onboardingCompleted: true
       }
@@ -162,7 +167,7 @@ export class ProfilesService {
           .map((item) => item.trim())
           .filter((item) => item.length > 0 && allowedTrustKeys.has(item))
       )
-    ).slice(0, 5);
+    ).slice(0, 3);
   }
 
   private async ensureProfileRecord(
@@ -185,7 +190,7 @@ export class ProfilesService {
         visibilityStatus: "active",
         matchingEnabled: true,
         stateKey: "calm",
-        intentKey: "slow-dialogue",
+        intentKey: "",
         trustKeys: [],
         onboardingCompleted: false
       }
@@ -202,7 +207,8 @@ export class ProfilesService {
     return Boolean(photo && photo.status === "ready");
   }
 
-  private buildSummary(user: User, profile: Profile, hasPhoto: boolean): ProfileSummary {
+  private async buildSummary(user: User, profile: Profile, hasPhoto: boolean): Promise<ProfileSummary> {
+    const matchingScoring = await this.policyConfig.getMatchingScoring();
     const visibility = {
       userId: profile.userId,
       isHidden: profile.visibilityStatus === "hidden",
@@ -212,7 +218,7 @@ export class ProfilesService {
     const selectedState =
       stateOptions.find((option) => option.key === profile.stateKey) ?? stateOptions[0];
     const selectedIntent =
-      intentOptions.find((option) => option.key === profile.intentKey) ?? intentOptions[0];
+      intentOptions.find((option) => option.key === profile.intentKey) ?? optionalIntentOption;
 
     return {
       onboardingCompleted: profile.onboardingCompleted,
@@ -227,17 +233,17 @@ export class ProfilesService {
       state: {
         current: selectedState,
         options: stateOptions,
-        cooldownLabel: "Изменение станет доступно через 12:00"
+        cooldownLabel: `Состояние можно пересматривать по ходу дня, свежесть учитывается ${matchingScoring.freshness.moodHours} часа`
       },
       intent: {
         current: selectedIntent,
-        options: intentOptions
+        options: [optionalIntentOption, ...intentOptions]
       },
       trustKeys: {
         selected: profile.trustKeys,
         groups: trustKeyGroups,
-        limitLabel: `Выбрано ${profile.trustKeys.length} из 5`,
-        cooldownLabel: "Следующее изменение через 13 дней"
+        limitLabel: `Выбрано ${profile.trustKeys.length} из 3`,
+        cooldownLabel: `Следующее изменение ключей через ${matchingScoring.cooldowns.trustKeysDays} дней`
       },
       privacy: {
         visibility,

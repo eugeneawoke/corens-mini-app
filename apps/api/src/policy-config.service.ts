@@ -3,7 +3,9 @@ import { resolve } from "node:path";
 import { Injectable } from "@nestjs/common";
 import type {
   BeaconRulesConfig,
+  MatchingIntentMatrixConfig,
   MatchingScoringConfig,
+  MatchingStateMatrixConfig,
   PrivacyRulesConfig,
   RevealRulesConfig,
   RetentionPoliciesConfig
@@ -13,6 +15,8 @@ import type {
 export class PolicyConfigService {
   private readonly configRoot = this.resolveConfigRoot();
   private matchingScoringPromise: Promise<MatchingScoringConfig> | undefined;
+  private matchingStateMatrixPromise: Promise<MatchingStateMatrixConfig> | undefined;
+  private matchingIntentMatrixPromise: Promise<MatchingIntentMatrixConfig> | undefined;
   private beaconRulesPromise: Promise<BeaconRulesConfig> | undefined;
   private privacyRulesPromise: Promise<PrivacyRulesConfig> | undefined;
   private revealRulesPromise: Promise<RevealRulesConfig> | undefined;
@@ -27,6 +31,26 @@ export class PolicyConfigService {
       }
     );
     return this.matchingScoringPromise;
+  }
+
+  getMatchingStateMatrix(): Promise<MatchingStateMatrixConfig> {
+    this.matchingStateMatrixPromise ??= this.memoizeWithRetry(
+      () => this.loadMatchingStateMatrix(),
+      () => {
+        this.matchingStateMatrixPromise = undefined;
+      }
+    );
+    return this.matchingStateMatrixPromise;
+  }
+
+  getMatchingIntentMatrix(): Promise<MatchingIntentMatrixConfig> {
+    this.matchingIntentMatrixPromise ??= this.memoizeWithRetry(
+      () => this.loadMatchingIntentMatrix(),
+      () => {
+        this.matchingIntentMatrixPromise = undefined;
+      }
+    );
+    return this.matchingIntentMatrixPromise;
   }
 
   getBeaconRules(): Promise<BeaconRulesConfig> {
@@ -103,7 +127,44 @@ export class PolicyConfigService {
       },
       limits: {
         activeConnections: this.readNumber(raw, "limits.active_connections", 1)
+      },
+      cooldowns: {
+        trustKeysDays: this.readNumber(raw, "cooldowns.trust_keys_days"),
+        intentHours: this.readNumber(raw, "cooldowns.intent_hours")
+      },
+      freshness: {
+        moodHours: this.readNumber(raw, "freshness.mood_hours")
       }
+    };
+  }
+
+  private async loadMatchingStateMatrix(): Promise<MatchingStateMatrixConfig> {
+    const raw = await this.readLines("config/matching/state-matrix.v1.yaml");
+
+    return {
+      version: this.readScalar(raw, "version") ?? "v1",
+      categories: this.readKeyValueList(raw, "state_categories").reduce<Record<string, "light" | "shadow">>(
+        (acc, item) => {
+          const [key, value] = item.split("=");
+
+          if (key && (value === "light" || value === "shadow")) {
+            acc[key.trim()] = value;
+          }
+
+          return acc;
+        },
+        {}
+      ),
+      compatibility: this.readCompatibilityMap(raw, "compatibility")
+    };
+  }
+
+  private async loadMatchingIntentMatrix(): Promise<MatchingIntentMatrixConfig> {
+    const raw = await this.readLines("config/matching/intent-matrix.v1.yaml");
+
+    return {
+      version: this.readScalar(raw, "version") ?? "v1",
+      compatibility: this.readCompatibilityMap(raw, "compatibility")
     };
   }
 
@@ -234,5 +295,33 @@ export class PolicyConfigService {
     }
 
     return result;
+  }
+
+  private readKeyValueList(lines: string[], key: string): string[] {
+    return this.readList(lines, key);
+  }
+
+  private readCompatibilityMap(lines: string[], key: string): Record<string, number> {
+    return this.readList(lines, key).reduce<Record<string, number>>((acc, item) => {
+      const [pair, score] = item.split("=");
+
+      if (!pair || !score) {
+        return acc;
+      }
+
+      const [left, right] = pair.split("|").map((value) => value.trim());
+
+      if (!left || !right) {
+        return acc;
+      }
+
+      acc[this.makePairKey(left, right)] = Number(score.trim());
+      acc[this.makePairKey(right, left)] = Number(score.trim());
+      return acc;
+    }, {});
+  }
+
+  private makePairKey(left: string, right: string): string {
+    return `${left}::${right}`;
   }
 }
