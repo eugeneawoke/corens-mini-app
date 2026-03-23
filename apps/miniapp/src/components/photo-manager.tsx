@@ -21,36 +21,41 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
     setPending("upload");
 
     try {
+      // iOS WebKit sometimes delivers empty MIME type — normalise to JPEG
+      const contentType = file.type && file.type !== "" ? file.type : "image/jpeg";
+
       const intentResponse = await fetch("/api/media/photo/upload-intent", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ contentType: file.type })
+        body: JSON.stringify({ contentType })
       });
 
       if (!intentResponse.ok) {
-        throw new Error("Не получилось подготовить загрузку.");
+        const err = await intentResponse.json().catch(() => ({})) as { message?: string };
+        throw new Error(err.message ?? `Не получилось подготовить загрузку (${intentResponse.status}).`);
       }
 
       const intent = (await intentResponse.json()) as PhotoUploadIntent;
 
       if (file.size > intent.maxBytes) {
-        throw new Error("Файл слишком большой.");
+        throw new Error("Файл слишком большой. Максимальный размер — 5 МБ.");
       }
 
-      const fileHash = await sha1Hex(file);
-      const uploadResponse = await fetch(intent.uploadUrl, {
+      // Upload via Next.js proxy (avoids CORS issues with direct browser→B2 upload)
+      const proxyForm = new FormData();
+      proxyForm.append("file", file);
+      proxyForm.append("uploadUrl", intent.uploadUrl);
+      proxyForm.append("authorizationToken", intent.authorizationToken);
+      proxyForm.append("objectKey", intent.objectKey);
+
+      const uploadResponse = await fetch("/api/media/photo/upload-proxy", {
         method: "POST",
-        headers: {
-          Authorization: intent.authorizationToken,
-          "Content-Type": file.type,
-          "X-Bz-File-Name": encodeURIComponent(intent.objectKey),
-          "X-Bz-Content-Sha1": fileHash
-        },
-        body: file
+        body: proxyForm
       });
 
       if (!uploadResponse.ok) {
-        throw new Error("Загрузка в хранилище не удалась.");
+        const err = await uploadResponse.json().catch(() => ({})) as { message?: string };
+        throw new Error(err.message ?? `Загрузка в хранилище не удалась (${uploadResponse.status}).`);
       }
 
       const uploadPayload = (await uploadResponse.json()) as { fileId?: string };
@@ -65,13 +70,14 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
         body: JSON.stringify({
           intentToken: intent.intentToken,
           fileId: uploadPayload.fileId,
-          contentType: file.type,
+          contentType,
           sizeBytes: file.size
         })
       });
 
       if (!confirmResponse.ok) {
-        throw new Error("Не получилось подтвердить загрузку.");
+        const err = await confirmResponse.json().catch(() => ({})) as { message?: string };
+        throw new Error(err.message ?? `Не получилось подтвердить загрузку (${confirmResponse.status}).`);
       }
 
       startTransition(() => {
@@ -200,10 +206,3 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
   );
 }
 
-async function sha1Hex(file: File): Promise<string> {
-  const buffer = await file.arrayBuffer();
-  const digest = await crypto.subtle.digest("SHA-1", buffer);
-  return Array.from(new Uint8Array(digest))
-    .map((value) => value.toString(16).padStart(2, "0"))
-    .join("");
-}

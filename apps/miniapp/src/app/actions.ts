@@ -161,6 +161,19 @@ export async function updateVisibilityAction(formData: FormData): Promise<void> 
   redirect("/privacy");
 }
 
+// Same mutation but without redirect — used by the client-side toggle component
+// so the page updates in-place via router.refresh() rather than doing a full navigation.
+export async function toggleVisibilityAction(isHidden: boolean): Promise<void> {
+  await sendApiMutation("/api/privacy/visibility", {
+    method: "PATCH",
+    body: JSON.stringify({ isHidden })
+  });
+
+  revalidatePath("/privacy");
+  revalidatePath("/profile");
+  revalidatePath("/connection");
+}
+
 export async function requestDeletionAction(formData: FormData): Promise<void> {
   const confirmation = String(formData.get("confirmation") ?? "");
 
