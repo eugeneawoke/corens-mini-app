@@ -2,31 +2,26 @@
 
 import { useEffect } from "react";
 
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: {
-        contentSafeAreaInset?: { top: number; bottom: number; left: number; right: number };
-        safeAreaInset?: { top: number; bottom: number; left: number; right: number };
-        onEvent?: (event: string, callback: () => void) => void;
-      };
-    };
-  }
-}
+// Local type — avoids conflicting with auth-bootstrap.tsx's Window.Telegram declaration
+type TelegramWebApp = {
+  contentSafeAreaInset?: { top: number; bottom: number; left: number; right: number };
+  safeAreaInset?: { top: number; bottom: number; left: number; right: number };
+  onEvent?: (event: string, callback: () => void) => void;
+};
+
+type TelegramWindow = Window & {
+  Telegram?: { WebApp?: TelegramWebApp };
+};
 
 /**
- * Reads Telegram.WebApp.contentSafeAreaInset (available since Bot API 7.7) and
- * sets --tg-content-safe-area-inset-top on the document root so the TopBar can
- * push its content below Telegram's fullscreen overlay buttons.
- *
- * Falls back to safeAreaInset.top if contentSafeAreaInset is unavailable.
- * Newer Telegram versions set the CSS variable themselves; this component only
- * writes a value when the JS API reports a non-zero top inset.
+ * Reads Telegram.WebApp.contentSafeAreaInset (Bot API 7.7+) and sets
+ * --tg-content-safe-area-inset-top on the root element so the TopBar sits
+ * below Telegram's fullscreen overlay buttons.
  */
 export function TelegramSafeArea() {
   useEffect(() => {
     function apply() {
-      const tg = window.Telegram?.WebApp;
+      const tg = (window as TelegramWindow).Telegram?.WebApp;
       if (!tg) return;
 
       const top =
@@ -42,14 +37,9 @@ export function TelegramSafeArea() {
       }
     }
 
-    // Run immediately and again after a short delay
-    // (Telegram WebApp may not be fully initialised on first tick)
     apply();
     const t = setTimeout(apply, 300);
-
-    // Re-apply if Telegram fires a viewport-change event
-    window.Telegram?.WebApp?.onEvent?.("viewportChanged", apply);
-
+    (window as TelegramWindow).Telegram?.WebApp?.onEvent?.("viewportChanged", apply);
     return () => clearTimeout(t);
   }, []);
 
