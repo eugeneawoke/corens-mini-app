@@ -1,8 +1,15 @@
 import type { ReactNode } from "react";
+import type { Viewport } from "next";
 import Script from "next/script";
 
 import "./globals.css";
 import { TelegramSafeArea } from "../components/telegram-safe-area";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover"
+};
 
 type RootLayoutProps = {
   children: ReactNode;

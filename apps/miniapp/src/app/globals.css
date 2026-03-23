@@ -766,6 +766,9 @@ select.corens-field {
   padding: 3px;
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
+  border: none;
+  cursor: pointer;
   border-radius: 999px;
   background: #d9d8d3;
   transition: background 150ms ease;

@@ -33,6 +33,7 @@ export async function POST(request: Request): Promise<Response> {
       headers: {
         Authorization: authorizationToken,
         "Content-Type": contentType,
+        "Content-Length": String(buffer.byteLength),
         "X-Bz-File-Name": encodeURIComponent(objectKey),
         "X-Bz-Content-Sha1": sha1Hex
       },
