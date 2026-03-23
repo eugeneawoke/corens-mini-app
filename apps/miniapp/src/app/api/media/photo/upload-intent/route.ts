@@ -13,8 +13,9 @@ export async function POST(request: Request): Promise<Response> {
   });
 
   if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({})) as { message?: string };
     return NextResponse.json(
-      { message: "Unable to create photo upload intent" },
+      { message: errorBody.message ?? "Unable to create photo upload intent" },
       { status: response.status }
     );
   }

@@ -94,17 +94,7 @@ export default async function ConnectionPage() {
 
   if (!connection) {
     return (
-      <AppSurface
-        bottomBar={
-          beacon.status === "active" ? (
-            <form action={deactivateBeaconAction}>
-              <Button type="submit" variant="beacon">Потушить маяк</Button>
-            </form>
-          ) : (
-            <ButtonLink href="/beacon" variant="beacon">Зажечь маяк</ButtonLink>
-          )
-        }
-      >
+      <AppSurface>
         <TopBar
           title="Рядом"
           action={
@@ -127,35 +117,34 @@ export default async function ConnectionPage() {
         <EmptyState
           icon={Compass}
           title="Пока тихо"
-          description="Поиск идёт сам, без вашего участия. Если хотите ускорить — можно зажечь маяк."
-          action={
-            <div className="corens-action-stack">
-              <ButtonLink href="/beacon" variant="secondary">
-                Зажечь маяк
-              </ButtonLink>
-              <ButtonLink href="/profile" variant="ghost">
-                Мой профиль
-              </ButtonLink>
-            </div>
-          }
+          description="Поиск идёт в фоне сам по себе. Включите маяк — и вас смогут найти быстрее."
         />
 
         <Section title="Маяк">
           <Panel tone={beacon.status === "active" ? "beacon" : "muted"}>
-            <div className="corens-row corens-row-between">
-              <div className="corens-stack corens-gap-xs">
-                <div className="corens-inline-head">
-                  <Radio size={18} />
-                  <h3 className="corens-card-title">
-                    {beacon.status === "active" ? "Маяк горит" : "Маяк не горит"}
-                  </h3>
+            <div className="corens-stack corens-gap-sm">
+              <div className="corens-row corens-row-between">
+                <div className="corens-stack corens-gap-xs">
+                  <div className="corens-inline-head">
+                    <Radio size={18} />
+                    <h3 className="corens-card-title">
+                      {beacon.status === "active" ? "Маяк горит" : "Маяк не горит"}
+                    </h3>
+                  </div>
+                  <p className="corens-copy corens-copy-muted">{beacon.description}</p>
                 </div>
-                <p className="corens-copy corens-copy-muted">{beacon.description}</p>
+                {beacon.status === "active" ? (
+                  <BeaconCountdown expiresAt={beacon.expiresAt} fallbackLabel={beacon.remainingLabel} />
+                ) : (
+                  <StatusBadge tone="neutral">Можно включить</StatusBadge>
+                )}
               </div>
               {beacon.status === "active" ? (
-                <BeaconCountdown expiresAt={beacon.expiresAt} fallbackLabel={beacon.remainingLabel} />
+                <form action={deactivateBeaconAction}>
+                  <Button type="submit" variant="beacon">Потушить маяк</Button>
+                </form>
               ) : (
-                <StatusBadge tone="neutral">Можно включить</StatusBadge>
+                <ButtonLink href="/beacon" variant="beacon">Зажечь маяк</ButtonLink>
               )}
             </div>
           </Panel>
