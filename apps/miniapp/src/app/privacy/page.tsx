@@ -2,7 +2,6 @@ import { ShieldAlert, Trash2 } from "lucide-react";
 import { redirect } from "next/navigation";
 import {
   AppSurface,
-  Button,
   ButtonLink,
   NoticeCard,
   Panel,
@@ -10,9 +9,9 @@ import {
   TopBar
 } from "@corens/ui";
 
-import { updateVisibilityAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
+import { VisibilityToggle } from "../../components/privacy-toggle";
 import {
   getProfileSummary,
   MiniAppBackendUnavailableError,
@@ -51,18 +50,12 @@ export default async function PrivacyPage() {
         <Panel>
           <div className="corens-stack corens-gap-sm">
             {snapshot.privacy.switches.map((item) => (
-              <div key={item.title} className="corens-switch-row">
-                <div className="corens-switch-copy">
-                  <strong className="corens-list-title">{item.title}</strong>
-                  <span className="corens-list-description">{item.description}</span>
-                </div>
-                <form action={updateVisibilityAction}>
-                  <input type="hidden" name="isHidden" value={item.checked ? "false" : "true"} />
-                  <Button variant={item.checked ? "secondary" : "primary"} type="submit">
-                    {item.checked ? "Снова быть видимым" : "Скрыться из поиска"}
-                  </Button>
-                </form>
-              </div>
+              <VisibilityToggle
+                key={item.title}
+                title={item.title}
+                description={item.description}
+                isHidden={item.checked}
+              />
             ))}
           </div>
         </Panel>

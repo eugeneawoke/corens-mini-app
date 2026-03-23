@@ -53,11 +53,11 @@ export default async function DeletePage() {
 
       <Section title="Что произойдёт">
         <Panel>
-          <ol className="corens-delete-steps">
-            {snapshot.privacy.deletionPlan.stages.map((stage) => (
-              <li key={stage}>{stage}</li>
-            ))}
-          </ol>
+          <p className="corens-copy corens-copy-muted">
+            Мы завершим все активные сессии и закроем открытые договорённости с другим человеком.
+            Ваши фото и данные профиля будут удалены навсегда. Если у вас была активная связь —
+            второй человек получит системное уведомление о её закрытии. Отменить это действие невозможно.
+          </p>
         </Panel>
       </Section>
 

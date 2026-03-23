@@ -2,9 +2,10 @@ import { Radio, TimerReset } from "lucide-react";
 import { redirect } from "next/navigation";
 import { AppSurface, Button, NoticeCard, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
 
-import { activateBeaconAction } from "../actions";
+import { activateBeaconAction, deactivateBeaconAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
+import { BeaconCountdown } from "../../components/beacon-countdown";
 import {
   getBeaconSummary,
   getProfileSummary,
@@ -35,29 +36,48 @@ export default async function BeaconPage() {
     redirect("/onboarding");
   }
 
+  const isActive = snapshot.status === "active";
+
   return (
-    <AppSurface
-      bottomBar={
-        <form action={activateBeaconAction}>
-          <Button variant="beacon">Зажечь маяк</Button>
-        </form>
-      }
-    >
+    <AppSurface>
       <TopBar title="Маяк" backHref="/" />
 
-      <Panel className="corens-stack corens-gap-sm" tone="beacon">
-        <div className="corens-row corens-row-between">
+      <Panel
+        className="corens-stack corens-gap-sm"
+        tone="beacon"
+        style={isActive ? { boxShadow: "0 8px 32px rgba(155, 107, 196, 0.35)" } : undefined}
+      >
+        <div className="corens-stack corens-gap-xs">
           <div className="corens-inline-head">
             <Radio size={18} />
-            <div className="corens-stack corens-gap-xs">
-              <h2 className="corens-section-title">Побыть заметнее</h2>
-              <p className="corens-copy corens-copy-muted">
-                {snapshot.description}
-              </p>
-            </div>
+            <h2 className="corens-section-title">{isActive ? "Маяк горит" : "Побыть заметнее"}</h2>
           </div>
-          <StatusBadge tone="accent">{snapshot.durationLabel}</StatusBadge>
+          <p className="corens-copy corens-copy-muted">{snapshot.description}</p>
         </div>
+
+        {isActive ? (
+          <div className="corens-stack corens-gap-sm">
+            <BeaconCountdown expiresAt={snapshot.expiresAt} fallbackLabel={snapshot.remainingLabel} />
+            <form action={deactivateBeaconAction}>
+              <Button type="submit" variant="beacon">Потушить маяк</Button>
+            </form>
+          </div>
+        ) : (
+          <form action={activateBeaconAction} className="corens-stack corens-gap-sm">
+            <div className="corens-field-wrap">
+              <label className="corens-field-label" htmlFor="beacon-duration">
+                Время маяка
+              </label>
+              <select id="beacon-duration" name="durationMinutes" className="corens-field">
+                <option value="15">15 минут</option>
+                <option value="30">30 минут</option>
+                <option value="45">45 минут</option>
+                <option value="60">1 час</option>
+              </select>
+            </div>
+            <Button type="submit" variant="beacon">Зажечь маяк</Button>
+          </form>
+        )}
       </Panel>
 
       <Section title="Как это работает">
@@ -75,11 +95,21 @@ export default async function BeaconPage() {
         </Panel>
       </Section>
 
-      <NoticeCard
-        icon={TimerReset}
-        title="Пауза между включениями"
-        description="После отключения маяка нужно немного подождать, прежде чем зажечь его снова."
-      />
+      {snapshot.status === "cooldown" && snapshot.cooldownLabel && (
+        <NoticeCard
+          icon={TimerReset}
+          title="Пауза между включениями"
+          description={`После отключения маяка нужно немного подождать. Можно включить через: ${snapshot.cooldownLabel}`}
+        />
+      )}
+
+      {snapshot.status === "inactive" && (
+        <NoticeCard
+          icon={TimerReset}
+          title="Пауза между включениями"
+          description="После отключения маяка нужно немного подождать, прежде чем зажечь его снова."
+        />
+      )}
     </AppSurface>
   );
 }

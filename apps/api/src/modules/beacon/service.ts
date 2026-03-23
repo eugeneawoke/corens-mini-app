@@ -33,7 +33,8 @@ export class BeaconService {
         remainingLabel: this.formatRemaining(activeSession.expiresAt, now),
         description:
           "Режим ручного поиска включается на фиксированное время и не заменяет автоматический matching.",
-        durationLabel: this.formatMinutes(activeSession.durationMinutes)
+        durationLabel: this.formatMinutes(activeSession.durationMinutes),
+        expiresAt: activeSession.expiresAt.toISOString()
       };
     }
 
@@ -57,7 +58,7 @@ export class BeaconService {
     };
   }
 
-  async activate(user: AuthenticatedUserContext): Promise<BeaconSummary> {
+  async activate(user: AuthenticatedUserContext, requestedDuration?: number): Promise<BeaconSummary> {
     const record = await this.profiles.getCurrentProfileRecord(user);
     const rules = await this.policyConfig.getBeaconRules();
 
@@ -66,7 +67,7 @@ export class BeaconService {
     }
 
     const now = new Date();
-    const durationMinutes = this.defaultDurationMinutes(rules);
+    const durationMinutes = this.selectDuration(rules, requestedDuration);
     const expiresAt = new Date(now.getTime() + durationMinutes * 60_000);
     const cooldownUntil = new Date(expiresAt.getTime() + rules.cooldownMinutes * 60_000);
     const activationsToday = await this.prisma.clientInstance.beaconSession.count({
@@ -123,6 +124,21 @@ export class BeaconService {
         status: "expired"
       }
     });
+  }
+
+  async deactivate(user: AuthenticatedUserContext): Promise<void> {
+    const record = await this.profiles.getCurrentProfileRecord(user);
+    await this.prisma.clientInstance.beaconSession.updateMany({
+      where: { userId: record.user.id, status: "active" },
+      data: { status: "expired" }
+    });
+  }
+
+  private selectDuration(rules: { intervalsMinutes: number[] }, requested?: number): number {
+    if (requested !== undefined && rules.intervalsMinutes.includes(requested)) {
+      return requested;
+    }
+    return this.defaultDurationMinutes(rules);
   }
 
   private defaultDurationMinutes(rules: { intervalsMinutes: number[] }): number {

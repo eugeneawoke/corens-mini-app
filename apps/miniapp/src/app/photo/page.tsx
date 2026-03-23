@@ -1,6 +1,6 @@
 import { Camera } from "lucide-react";
 import { redirect } from "next/navigation";
-import { AppSurface, NoticeCard, Panel, Section, TopBar } from "@corens/ui";
+import { AppSurface, NoticeCard, TopBar } from "@corens/ui";
 
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
@@ -39,22 +39,15 @@ export default async function PhotoPage() {
     <AppSurface>
       <TopBar title="Моё фото" backHref="/profile" />
 
-      <NoticeCard
-        icon={Camera}
-        title={photo.hasPhoto ? "Фото готово" : "Добавьте одно фото"}
-        description={
-          photo.hasPhoto
-            ? "Фото хранится приватно и раскроется только после взаимного photo consent."
-            : "Загрузите одно фото заранее, чтобы его можно было открыть после взаимного согласия."
-        }
-      />
+      {photo.hasPhoto && (
+        <NoticeCard
+          icon={Camera}
+          title="Фото готово"
+          description="Фото хранится приватно и раскроется только после взаимного photo consent."
+        />
+      )}
 
-      <Section title="Ваш снимок">
-        <Panel className="corens-stack corens-gap-sm">
-          <p className="corens-copy corens-copy-muted">{photo.statusCopy}</p>
-          <PhotoManager summary={photo} />
-        </Panel>
-      </Section>
+      <PhotoManager summary={photo} />
     </AppSurface>
   );
 }

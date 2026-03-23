@@ -30,8 +30,22 @@ async function sendApiMutation(path: string, init: RequestInit): Promise<void> {
   }
 }
 
-export async function activateBeaconAction(): Promise<void> {
+export async function activateBeaconAction(formData: FormData): Promise<void> {
+  const durationMinutesRaw = formData.get("durationMinutes");
+  const durationMinutes = durationMinutesRaw ? Number(durationMinutesRaw) : undefined;
+
   await sendApiMutation("/api/beacon/activate", {
+    method: "POST",
+    body: JSON.stringify({ durationMinutes })
+  });
+
+  revalidatePath("/");
+  revalidatePath("/beacon");
+  redirect("/beacon");
+}
+
+export async function deactivateBeaconAction(): Promise<void> {
+  await sendApiMutation("/api/beacon/deactivate", {
     method: "POST"
   });
 

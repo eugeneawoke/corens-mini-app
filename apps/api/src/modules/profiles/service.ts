@@ -254,7 +254,7 @@ export class ProfilesService {
       state: {
         current: selectedState,
         options: stateOptions,
-        cooldownLabel: `Состояние можно пересматривать по ходу дня, свежесть учитывается ${matchingScoring.freshness.moodHours} часа`
+        cooldownLabel: `Настроение влияет на поиск в течение ${matchingScoring.freshness.moodHours} ч после изменения`
       },
       intent: {
         current: selectedIntent,
@@ -263,7 +263,9 @@ export class ProfilesService {
       trustKeys: {
         selected: profile.trustKeys,
         groups: trustKeyGroups,
-        limitLabel: `Выбрано ${profile.trustKeys.length} из 3`,
+        limitLabel: profile.trustKeys.length >= 5
+          ? "Все ключи выбраны"
+          : `Выбрано ${profile.trustKeys.length} из 5`,
         cooldownLabel: `Следующее изменение ключей через ${matchingScoring.cooldowns.trustKeysDays} дней`
       },
       privacy: {
@@ -272,8 +274,8 @@ export class ProfilesService {
           "Скрытый профиль исключается из новых подборов, но не ломает уже найденную pending-связь.",
         switches: [
           {
-            title: "Скрыть профиль из новых подборов",
-            description: "Алгоритм и Beacon продолжают работать только когда профиль видим для новых подборов.",
+            title: "Скрыть из поиска",
+            description: "Когда профиль скрыт, вы не появляетесь в новых подборах. Уже найденная связь при этом не закрывается.",
             checked: visibility.isHidden
           }
         ],

@@ -737,6 +737,11 @@ textarea:focus-visible,
   color: var(--corens-text-tertiary);
 }
 
+select.corens-field {
+  appearance: auto;
+  cursor: pointer;
+}
+
 .corens-switch-row {
   display: flex;
   align-items: center;
@@ -769,6 +774,11 @@ textarea:focus-visible,
 .corens-switch-checked {
   justify-content: flex-end;
   background: var(--corens-success);
+}
+
+.corens-switch-warning {
+  justify-content: flex-end;
+  background: var(--corens-warning);
 }
 
 .corens-switch-thumb {

@@ -17,6 +17,7 @@ import {
 import { blockConnectionAction, reportConnectionAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
+import { BeaconCountdown } from "../../components/beacon-countdown";
 import {
   formatMiniAppBackendError,
   getBeaconSummary,
@@ -147,9 +148,11 @@ export default async function ConnectionPage() {
                 </div>
                 <p className="corens-copy corens-copy-muted">{beacon.description}</p>
               </div>
-              <StatusBadge tone={beacon.status === "active" ? "accent" : "neutral"}>
-                {beacon.status === "active" ? beacon.remainingLabel : "Можно включить"}
-              </StatusBadge>
+              {beacon.status === "active" ? (
+                <BeaconCountdown expiresAt={beacon.expiresAt} fallbackLabel={beacon.remainingLabel} />
+              ) : (
+                <StatusBadge tone="neutral">Можно включить</StatusBadge>
+              )}
             </div>
           </Panel>
         </Section>

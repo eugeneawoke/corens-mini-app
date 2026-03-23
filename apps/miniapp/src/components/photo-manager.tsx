@@ -1,8 +1,9 @@
 "use client";
 
+import { Camera } from "lucide-react";
 import { startTransition, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, NoticeCard, Panel } from "@corens/ui";
+import { Button, NoticeCard } from "@corens/ui";
 import type { PhotoSummary, PhotoUploadIntent } from "@corens/domain";
 
 type PhotoManagerProps = {
@@ -15,38 +16,25 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<"upload" | "delete" | null>(null);
 
-  async function handleUpload(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function uploadFile(file: File) {
     setError(null);
-
-    const file = fileInputRef.current?.files?.[0];
-
-    if (!file) {
-      setError("Сначала выберите файл.");
-      return;
-    }
-
     setPending("upload");
 
     try {
       const intentResponse = await fetch("/api/media/photo/upload-intent", {
         method: "POST",
-        headers: {
-          "content-type": "application/json"
-        },
-        body: JSON.stringify({
-          contentType: file.type
-        })
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ contentType: file.type })
       });
 
       if (!intentResponse.ok) {
-        throw new Error("Не получилось подготовить загрузку фото.");
+        throw new Error("Не получилось подготовить загрузку.");
       }
 
       const intent = (await intentResponse.json()) as PhotoUploadIntent;
 
       if (file.size > intent.maxBytes) {
-        throw new Error("Файл слишком большой для загрузки.");
+        throw new Error("Файл слишком большой.");
       }
 
       const fileHash = await sha1Hex(file);
@@ -73,9 +61,7 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
 
       const confirmResponse = await fetch("/api/media/photo/confirm", {
         method: "POST",
-        headers: {
-          "content-type": "application/json"
-        },
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({
           intentToken: intent.intentToken,
           fileId: uploadPayload.fileId,
@@ -85,7 +71,7 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
       });
 
       if (!confirmResponse.ok) {
-        throw new Error("Не получилось подтвердить загрузку фото.");
+        throw new Error("Не получилось подтвердить загрузку.");
       }
 
       startTransition(() => {
@@ -103,9 +89,7 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
     setPending("delete");
 
     try {
-      const response = await fetch("/api/media/photo", {
-        method: "DELETE"
-      });
+      const response = await fetch("/api/media/photo", { method: "DELETE" });
 
       if (!response.ok) {
         throw new Error("Не получилось удалить фото.");
@@ -121,49 +105,97 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
     }
   }
 
-  return (
-    <div className="corens-stack corens-gap-sm">
-      {summary.hasPhoto && summary.previewUrl ? (
-        <Panel>
-          <img
-            src={summary.previewUrl}
-            alt="Ваше фото"
-            style={{ width: "100%", borderRadius: 24, objectFit: "cover" }}
-          />
-        </Panel>
-      ) : null}
-
-      <form onSubmit={handleUpload} className="corens-stack corens-gap-sm">
-        <label className="corens-field-wrap">
-          <span className="corens-field-label">
-            {summary.hasPhoto ? "Заменить фото" : "Загрузить фото"}
+  if (!summary.hasPhoto) {
+    return (
+      <div className="corens-stack corens-gap-sm">
+        <label
+          className="corens-photo-upload-area"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            padding: "36px 24px",
+            borderRadius: "var(--corens-radius-card)",
+            border: "2px dashed var(--corens-border)",
+            background: "rgba(255,255,255,0.7)",
+            cursor: pending ? "default" : "pointer",
+            opacity: pending ? 0.6 : 1,
+            transition: "border-color 150ms ease"
+          }}
+        >
+          <Camera size={32} color="var(--corens-text-secondary)" />
+          <span className="corens-card-title" style={{ color: "var(--corens-text-secondary)" }}>
+            {pending === "upload" ? "Загружаем..." : "Добавить фото"}
+          </span>
+          <span style={{ fontSize: "13px", color: "var(--corens-text-tertiary)", textAlign: "center" }}>
+            JPG, PNG или WEBP · до 5 МБ
           </span>
           <input
             ref={fileInputRef}
-            className="corens-field"
             type="file"
             accept="image/png,image/jpeg,image/webp"
+            disabled={pending !== null}
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) void uploadFile(file);
+            }}
           />
-          <span className="corens-field-hint">Один файл до 5 МБ. Форматы: JPG, PNG, WEBP.</span>
         </label>
-        <Button type="submit" disabled={pending !== null}>
-          {pending === "upload"
-            ? "Загружаем..."
-            : summary.hasPhoto
-              ? "Заменить фото"
-              : "Загрузить фото"}
-        </Button>
-      </form>
 
-      {summary.hasPhoto ? (
-        <Button type="button" variant="danger" onClick={handleDelete} disabled={pending !== null}>
-          {pending === "delete" ? "Удаляем..." : "Удалить фото"}
-        </Button>
-      ) : null}
+        {error && (
+          <NoticeCard
+            title="Не получилось загрузить фото"
+            description={`${error} Используйте JPG, PNG или WEBP не тяжелее 5 МБ.`}
+            tone="danger"
+          />
+        )}
+      </div>
+    );
+  }
 
-      {error ? (
-        <NoticeCard title="Не получилось обработать фото" description={error} tone="danger" />
-      ) : null}
+  return (
+    <div className="corens-stack corens-gap-sm">
+      {summary.previewUrl && (
+        <img
+          src={summary.previewUrl}
+          alt="Ваше фото"
+          style={{ width: "100%", borderRadius: "var(--corens-radius-card)", objectFit: "cover" }}
+        />
+      )}
+
+      <label
+        className="corens-field-wrap"
+        style={{ cursor: pending ? "default" : "pointer" }}
+      >
+        <span className="corens-field-label">Заменить фото</span>
+        <input
+          ref={fileInputRef}
+          className="corens-field"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          disabled={pending !== null}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) void uploadFile(file);
+          }}
+        />
+        <span className="corens-field-hint">JPG, PNG или WEBP · до 5 МБ</span>
+      </label>
+
+      <Button type="button" variant="danger" onClick={handleDelete} disabled={pending !== null}>
+        {pending === "delete" ? "Удаляем..." : "Удалить фото"}
+      </Button>
+
+      {error && (
+        <NoticeCard
+          title="Не получилось обработать фото"
+          description={`${error} Используйте JPG, PNG или WEBP не тяжелее 5 МБ.`}
+          tone="danger"
+        />
+      )}
     </div>
   );
 }
