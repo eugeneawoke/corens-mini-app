@@ -131,7 +131,7 @@ export default async function StateIntentPage() {
           title="Как вам комфортно общаться?"
           description="Намерение не блокирует мэтчинг: если его не указывать, этот слой просто не добавляет вес."
         >
-          <div className="corens-choice-grid">
+          <div className="corens-choice-grid corens-choice-grid-bento">
             {snapshot.intent.options.map((option, index) => {
               const Icon = stateIcons[(index + 1) % stateIcons.length];
 

@@ -1,12 +1,14 @@
 import { Compass, Heart, MoonStar, Orbit, Sparkle } from "lucide-react";
 import { redirect } from "next/navigation";
 import type { SelectOption } from "@corens/domain";
-import { AppSurface, Button, Field, KeyChip, NoticeCard, Panel, Section, TopBar } from "@corens/ui";
+import { AppSurface, Field, NoticeCard, Panel, Section, TopBar } from "@corens/ui";
 import { lightStateKeys, shadowStateKeys } from "@corens/domain/profile-options";
 
 import { completeOnboardingAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
+import { TrustKeysSelector } from "../../components/trust-keys-selector";
+import { OnboardingSubmitButton } from "../../components/onboarding-submit-button";
 import {
   getProfileSummary,
   MiniAppBackendUnavailableError,
@@ -145,7 +147,7 @@ export default async function OnboardingPage() {
         </Section>
 
         <Section title="Какое общение вам близко?">
-          <div className="corens-choice-grid">
+          <div className="corens-choice-grid corens-choice-grid-bento">
             {snapshot.intent.options.map((option, index) => {
               const Icon = optionIcons[(index + 1) % optionIcons.length];
 
@@ -174,25 +176,12 @@ export default async function OnboardingPage() {
         </Section>
 
         <Section title="Ключи доверия">
-          <Panel className="corens-stack corens-gap-sm">
-            {snapshot.trustKeys.groups.map((group) => (
-              <div key={group.title} className="corens-stack corens-gap-xs">
-                <strong className="corens-card-title">{group.title}</strong>
-                <div className="corens-chip-row">
-                  {group.items.map((item) => (
-                    <label key={item} className="corens-chip-checkbox">
-                      <input
-                        type="checkbox"
-                        name="trustKeys"
-                        value={item}
-                        defaultChecked={snapshot.trustKeys.selected.includes(item)}
-                      />
-                      <KeyChip active={snapshot.trustKeys.selected.includes(item)}>{item}</KeyChip>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
+          <Panel>
+            <TrustKeysSelector
+              groups={snapshot.trustKeys.groups}
+              selected={snapshot.trustKeys.selected}
+              showHint
+            />
           </Panel>
         </Section>
 
@@ -201,7 +190,7 @@ export default async function OnboardingPage() {
           description="Мы начнём искать человека с совместимым состоянием, хотя бы одним общим ключом и подходящим ритмом контакта."
         />
 
-        <Button type="submit">Начать</Button>
+        <OnboardingSubmitButton />
       </form>
     </AppSurface>
   );

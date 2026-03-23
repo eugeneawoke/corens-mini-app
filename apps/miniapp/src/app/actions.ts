@@ -87,6 +87,7 @@ export async function completeOnboardingAction(formData: FormData): Promise<void
 
   revalidatePath("/");
   revalidatePath("/profile");
+  revalidatePath("/connection");
   redirect("/");
 }
 
