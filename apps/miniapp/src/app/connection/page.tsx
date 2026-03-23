@@ -14,7 +14,7 @@ import {
   TopBar
 } from "@corens/ui";
 
-import { blockConnectionAction, reportConnectionAction } from "../actions";
+import { blockConnectionAction, deactivateBeaconAction, reportConnectionAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import { BeaconCountdown } from "../../components/beacon-countdown";
@@ -96,9 +96,13 @@ export default async function ConnectionPage() {
     return (
       <AppSurface
         bottomBar={
-          <ButtonLink href="/beacon" variant="beacon">
-            {beacon.status === "active" ? "Маяк горит" : "Зажечь маяк"}
-          </ButtonLink>
+          beacon.status === "active" ? (
+            <form action={deactivateBeaconAction}>
+              <Button type="submit" variant="beacon">Потушить маяк</Button>
+            </form>
+          ) : (
+            <ButtonLink href="/beacon" variant="beacon">Зажечь маяк</ButtonLink>
+          )
         }
       >
         <TopBar

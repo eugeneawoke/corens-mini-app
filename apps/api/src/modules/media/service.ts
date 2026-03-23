@@ -21,7 +21,7 @@ import type { AuthenticatedUserContext } from "../auth/service";
 import { ConsentRuntimeService } from "../consents/runtime.service";
 import { ProfilesService } from "../profiles";
 
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"] as const;
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 const UPLOAD_INTENT_TTL_SECONDS = 10 * 60;
 const ACCESS_TOKEN_TTL_SECONDS = 5 * 60;
@@ -406,6 +406,10 @@ export class MediaService {
         return "png";
       case "image/webp":
         return "webp";
+      case "image/heic":
+        return "heic";
+      case "image/heif":
+        return "heif";
       default:
         return "jpg";
     }

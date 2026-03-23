@@ -130,12 +130,12 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
             {pending === "upload" ? "Загружаем..." : "Добавить фото"}
           </span>
           <span style={{ fontSize: "13px", color: "var(--corens-text-tertiary)", textAlign: "center" }}>
-            JPG, PNG или WEBP · до 5 МБ
+            JPG, PNG, WEBP или HEIC · до 5 МБ
           </span>
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/png,image/jpeg,image/webp"
+            accept="image/png,image/jpeg,image/webp,image/heic,image/heif"
             disabled={pending !== null}
             style={{ display: "none" }}
             onChange={(e) => {
@@ -148,7 +148,7 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
         {error && (
           <NoticeCard
             title="Не получилось загрузить фото"
-            description={`${error} Используйте JPG, PNG или WEBP не тяжелее 5 МБ.`}
+            description={`${error} Используйте JPG, PNG, WEBP или HEIC не тяжелее 5 МБ.`}
             tone="danger"
           />
         )}
@@ -175,7 +175,7 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
           ref={fileInputRef}
           className="corens-field"
           type="file"
-          accept="image/png,image/jpeg,image/webp"
+          accept="image/png,image/jpeg,image/webp,image/heic,image/heif"
           disabled={pending !== null}
           onChange={(e) => {
             const file = e.target.files?.[0];
@@ -192,7 +192,7 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
       {error && (
         <NoticeCard
           title="Не получилось обработать фото"
-          description={`${error} Используйте JPG, PNG или WEBP не тяжелее 5 МБ.`}
+          description={`${error} Используйте JPG, PNG, WEBP или HEIC не тяжелее 5 МБ.`}
           tone="danger"
         />
       )}

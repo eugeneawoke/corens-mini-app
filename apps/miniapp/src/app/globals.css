@@ -109,7 +109,7 @@ textarea:focus-visible,
   grid-template-columns: 44px 1fr 44px;
   align-items: center;
   gap: 12px;
-  padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  padding-top: calc(8px + env(safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px));
 }
 
 .corens-topbar-copy {
