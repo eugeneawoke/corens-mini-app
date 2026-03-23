@@ -71,10 +71,7 @@ export class ProfilesService {
     input: UpdateTrustKeysRequest
   ): Promise<ProfileSummary> {
     const sanitized = this.sanitizeTrustKeys(input.trustKeys);
-
-    if (sanitized.length !== 3) {
-      throw new BadRequestException("Exactly three trust keys are required");
-    }
+    this.assertTrustKeyGroupLimits(sanitized);
 
     const record = await this.ensureProfileRecord(user);
     const updated = await this.prisma.clientInstance.profile.update({
@@ -106,10 +103,7 @@ export class ProfilesService {
     }
 
     const trustKeys = this.sanitizeTrustKeys(input.trustKeys);
-
-    if (trustKeys.length !== 3) {
-      throw new BadRequestException("Exactly three trust keys are required");
-    }
+    this.assertTrustKeyGroupLimits(trustKeys);
 
     const record = await this.ensureProfileRecord(user);
     const updated = await this.prisma.clientInstance.profile.update({
@@ -159,15 +153,42 @@ export class ProfilesService {
   }
 
   private sanitizeTrustKeys(values: string[]): string[] {
-    const allowedTrustKeys = new Set<string>(trustKeyGroups.flatMap((group) => group.items));
+    const group0Items = new Set<string>(trustKeyGroups[0]?.items ?? []);
+    const group1Items = new Set<string>(trustKeyGroups[1]?.items ?? []);
+    const allAllowed = new Set<string>([...group0Items, ...group1Items]);
 
-    return Array.from(
+    const unique = Array.from(
       new Set(
         values
           .map((item) => item.trim())
-          .filter((item) => item.length > 0 && allowedTrustKeys.has(item))
+          .filter((item) => item.length > 0 && allAllowed.has(item))
       )
-    ).slice(0, 3);
+    );
+
+    const group0 = unique.filter((k) => group0Items.has(k)).slice(0, 3);
+    const group1 = unique.filter((k) => group1Items.has(k)).slice(0, 2);
+
+    return [...group0, ...group1];
+  }
+
+  private assertTrustKeyGroupLimits(keys: string[]): void {
+    const group0Items = new Set<string>(trustKeyGroups[0]?.items ?? []);
+    const group1Items = new Set<string>(trustKeyGroups[1]?.items ?? []);
+
+    const group0Count = keys.filter((k) => group0Items.has(k)).length;
+    const group1Count = keys.filter((k) => group1Items.has(k)).length;
+
+    if (group0Count < 1 || group0Count > 3) {
+      throw new BadRequestException(
+        `"${trustKeyGroups[0]?.title}" requires 1–3 keys, got ${group0Count}`
+      );
+    }
+
+    if (group1Count < 1 || group1Count > 2) {
+      throw new BadRequestException(
+        `"${trustKeyGroups[1]?.title}" requires 1–2 keys, got ${group1Count}`
+      );
+    }
   }
 
   private async ensureProfileRecord(

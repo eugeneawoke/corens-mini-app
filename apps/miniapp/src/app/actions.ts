@@ -72,8 +72,7 @@ export async function completeOnboardingAction(formData: FormData): Promise<void
     .map((value) => String(value))
     .filter((value): value is (typeof trustKeyGroups)[number]["items"][number] =>
       allowedTrustKeys.has(value as (typeof trustKeyGroups)[number]["items"][number])
-    )
-    .slice(0, 3);
+    );
 
   await sendApiMutation("/api/profile/onboarding", {
     method: "POST",
@@ -121,12 +120,7 @@ export async function updateTrustKeysAction(formData: FormData): Promise<void> {
     .map((value) => String(value))
     .filter((value): value is (typeof trustKeyGroups)[number]["items"][number] =>
       allowedTrustKeys.has(value as (typeof trustKeyGroups)[number]["items"][number])
-    )
-    .slice(0, 3);
-
-  if (trustKeys.length !== 3) {
-    return;
-  }
+    );
 
   await sendApiMutation("/api/profile/trust-keys", {
     method: "PATCH",

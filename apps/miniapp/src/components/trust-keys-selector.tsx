@@ -13,65 +13,62 @@ type Props = {
   showHint?: boolean;
 };
 
-// The second group ("Качество контакта") has a lower per-group limit
-const TOTAL_LIMIT = 3;
-const QUALITY_GROUP_LIMIT = 2;
+// Per-group limits: group[0] max 3, group[1] max 2
+const GROUP_LIMITS = [3, 2];
 
 export function TrustKeysSelector({ groups, selected, showHint = false }: Props) {
   const [checked, setChecked] = useState<string[]>(selected);
 
-  const qualityGroupTitle = groups[1]?.title ?? "";
+  function getGroupIndex(item: string): number {
+    return groups.findIndex((g) => g.items.includes(item));
+  }
 
-  const totalSelected = checked.length;
-  const qualitySelected = checked.filter((k) =>
-    groups[1]?.items.includes(k)
-  ).length;
+  function countForGroup(gi: number): number {
+    return checked.filter((k) => groups[gi]?.items.includes(k)).length;
+  }
 
-  function toggle(item: string, groupTitle: string) {
+  function toggle(item: string) {
     setChecked((prev) => {
       if (prev.includes(item)) {
         return prev.filter((k) => k !== item);
       }
-
-      if (prev.length >= TOTAL_LIMIT) return prev;
-
-      const isQualityGroup = groupTitle === qualityGroupTitle;
-      if (isQualityGroup && qualitySelected >= QUALITY_GROUP_LIMIT) return prev;
-
+      const gi = getGroupIndex(item);
+      const limit = GROUP_LIMITS[gi] ?? 3;
+      if (countForGroup(gi) >= limit) return prev;
       return [...prev, item];
     });
   }
 
-  function isDisabled(item: string, groupTitle: string): boolean {
+  function isDisabled(item: string): boolean {
     if (checked.includes(item)) return false;
-    if (totalSelected >= TOTAL_LIMIT) return true;
-    if (groupTitle === qualityGroupTitle && qualitySelected >= QUALITY_GROUP_LIMIT) return true;
-    return false;
+    const gi = getGroupIndex(item);
+    const limit = GROUP_LIMITS[gi] ?? 3;
+    return countForGroup(gi) >= limit;
   }
 
   return (
     <div className="corens-stack corens-gap-sm">
       {showHint && (
-        <p className="corens-field-hint" style={{ fontSize: "13px", color: "var(--corens-text-tertiary)" }}>
-          Выберите до 3 ключей — они помогут найти близкого по духу человека
+        <p style={{ margin: 0, fontSize: "13px", color: "var(--corens-text-tertiary)", lineHeight: 1.4 }}>
+          Выберите ключи в каждой группе — они помогут найти близкого человека
         </p>
       )}
       {groups.map((group, gi) => {
-        const groupLimit = gi === 1 ? QUALITY_GROUP_LIMIT : TOTAL_LIMIT;
-        const groupSelected = checked.filter((k) => group.items.includes(k)).length;
+        const limit = GROUP_LIMITS[gi] ?? 3;
+        const groupCount = countForGroup(gi);
 
         return (
           <div key={group.title} className="corens-stack corens-gap-xs">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <strong className="corens-card-title">{group.title}</strong>
               <span className="corens-eyebrow">
-                {groupSelected}/{groupLimit}
+                {groupCount}/{limit}
               </span>
             </div>
             <div className="corens-chip-row">
               {group.items.map((item) => {
                 const active = checked.includes(item);
-                const disabled = isDisabled(item, group.title);
+                const disabled = isDisabled(item);
 
                 return (
                   <label
@@ -85,7 +82,7 @@ export function TrustKeysSelector({ groups, selected, showHint = false }: Props)
                       value={item}
                       checked={active}
                       disabled={disabled}
-                      onChange={() => toggle(item, group.title)}
+                      onChange={() => toggle(item)}
                     />
                     <span
                       className={["corens-chip", active ? "corens-chip-active" : ""].filter(Boolean).join(" ")}

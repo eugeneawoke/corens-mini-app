@@ -718,6 +718,7 @@ textarea:focus-visible,
   color: var(--corens-text);
   padding: 14px 16px;
   cursor: text;
+  caret-color: var(--corens-accent);
 }
 
 .corens-field:focus,

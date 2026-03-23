@@ -1,14 +1,13 @@
 import { Compass, Heart, MoonStar, Orbit, Sparkle } from "lucide-react";
 import { redirect } from "next/navigation";
 import type { SelectOption } from "@corens/domain";
-import { AppSurface, Field, NoticeCard, Panel, Section, TopBar } from "@corens/ui";
+import { AppSurface, Field, Panel, Section, TopBar } from "@corens/ui";
 import { lightStateKeys, shadowStateKeys } from "@corens/domain/profile-options";
 
 import { completeOnboardingAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
-import { TrustKeysSelector } from "../../components/trust-keys-selector";
-import { OnboardingSubmitButton } from "../../components/onboarding-submit-button";
+import { OnboardingFormActions } from "../../components/onboarding-form-actions";
 import {
   getProfileSummary,
   MiniAppBackendUnavailableError,
@@ -175,22 +174,10 @@ export default async function OnboardingPage() {
           </div>
         </Section>
 
-        <Section title="Ключи доверия">
-          <Panel>
-            <TrustKeysSelector
-              groups={snapshot.trustKeys.groups}
-              selected={snapshot.trustKeys.selected}
-              showHint
-            />
-          </Panel>
-        </Section>
-
-        <NoticeCard
-          title="После этого"
-          description="Мы начнём искать человека с совместимым состоянием, хотя бы одним общим ключом и подходящим ритмом контакта."
+        <OnboardingFormActions
+          groups={snapshot.trustKeys.groups}
+          selected={snapshot.trustKeys.selected}
         />
-
-        <OnboardingSubmitButton />
       </form>
     </AppSurface>
   );
