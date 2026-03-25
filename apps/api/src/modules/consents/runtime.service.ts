@@ -18,9 +18,10 @@ export class ConsentRuntimeService {
 
   async getStatus(
     user: AuthenticatedUserContext,
-    channel: ConsentChannel
+    channel: ConsentChannel,
+    connectionId: string
   ): Promise<ConsentStatusView> {
-    const match = await this.getCurrentMatch(user);
+    const match = await this.getMatchById(user, connectionId);
 
     if (match.status === "closed_peer_deleted") {
       return this.buildPeerDeletedStatus(channel);
@@ -32,9 +33,10 @@ export class ConsentRuntimeService {
   async updateStatus(
     user: AuthenticatedUserContext,
     channel: ConsentChannel,
-    decision: ConsentDecision
+    decision: ConsentDecision,
+    connectionId: string
   ): Promise<ConsentStatusView> {
-    const match = await this.getCurrentMatch(user);
+    const match = await this.getMatchById(user, connectionId);
 
     if (match.status === "closed_peer_deleted") {
       return this.buildPeerDeletedStatus(channel);
@@ -159,7 +161,10 @@ export class ConsentRuntimeService {
     };
   }
 
-  private async getCurrentMatch(user: AuthenticatedUserContext): Promise<{
+  private async getMatchById(
+    user: AuthenticatedUserContext,
+    connectionId: string
+  ): Promise<{
     id: string;
     selfUserId: string;
     peerUserId: string;
@@ -169,14 +174,13 @@ export class ConsentRuntimeService {
     const record = await this.profiles.getCurrentProfileRecord(user);
     const match = await this.prisma.clientInstance.matchSession.findFirst({
       where: {
-        status: { in: ["active", "closed_peer_deleted"] },
+        id: connectionId,
         OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
-      },
-      orderBy: [{ status: "asc" }, { createdAt: "desc" }]
+      }
     });
 
     if (!match) {
-      throw new NotFoundException("Consent status is unavailable");
+      throw new NotFoundException("Connection not found");
     }
 
     const peerUserId = match.userAId === record.user.id ? match.userBId : match.userAId;
@@ -195,7 +199,7 @@ export class ConsentRuntimeService {
     });
 
     if (!peerUser) {
-      throw new NotFoundException("Consent status is unavailable");
+      throw new NotFoundException("Connection not found");
     }
 
     return {

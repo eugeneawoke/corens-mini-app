@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import {
   evaluateMatchingCandidate,
   type ConnectionSummary,
@@ -15,6 +15,8 @@ import { BotNotificationService } from "../../telegram/bot-notification.service"
 type ActiveConnectionSummary = Extract<ConnectionSummary, { kind: "active" }>;
 type PeerDeletedConnectionSummary = Extract<ConnectionSummary, { kind: "peer_deleted" }>;
 
+type RawSession = { id: string; userAId: string; userBId: string; origin: string; score: number | null; pairKey: string };
+
 @Injectable()
 export class MatchingRuntimeService {
   constructor(
@@ -25,27 +27,72 @@ export class MatchingRuntimeService {
     private readonly notifications: BotNotificationService
   ) {}
 
-  async getCurrentConnection(user: AuthenticatedUserContext): Promise<ConnectionSummary | null> {
+  // Returns the full list of connections (active + one peer_deleted if any)
+  async getConnections(user: AuthenticatedUserContext): Promise<ConnectionSummary[]> {
     const record = await this.profiles.getCurrentProfileRecord(user);
-    const activeSession = await this.ensureCurrentMatch(record.user.id);
 
-    if (activeSession) {
-      return this.buildActiveConnectionSummary(record.user.id, record.profile, activeSession);
-    }
+    // Try to fill slots before building the response
+    await this.ensureMatchFill(record.user.id);
 
-    const peerDeletedSession = await this.prisma.clientInstance.matchSession.findFirst({
+    const activeSessions = await this.prisma.clientInstance.matchSession.findMany({
       where: {
-        status: "closed_peer_deleted",
+        status: "active",
         OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
       },
-      orderBy: { expiresAt: "desc" }
+      orderBy: { createdAt: "desc" }
     });
 
-    if (peerDeletedSession) {
+    const results: ConnectionSummary[] = [];
+
+    for (const session of activeSessions) {
+      const summary = await this.buildActiveConnectionSummary(
+        record.user.id,
+        record.profile,
+        session
+      );
+      results.push(summary);
+    }
+
+    // Show one peer_deleted notice if no active connections
+    if (results.length === 0) {
+      const peerDeletedSession = await this.prisma.clientInstance.matchSession.findFirst({
+        where: {
+          status: "closed_peer_deleted",
+          OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
+        },
+        orderBy: { expiresAt: "desc" }
+      });
+
+      if (peerDeletedSession) {
+        results.push(this.buildPeerDeletedSummary());
+      }
+    }
+
+    return results;
+  }
+
+  // Returns a single connection by session ID (no match creation side-effect)
+  async getConnectionById(
+    user: AuthenticatedUserContext,
+    sessionId: string
+  ): Promise<ConnectionSummary | null> {
+    const record = await this.profiles.getCurrentProfileRecord(user);
+    const session = await this.prisma.clientInstance.matchSession.findFirst({
+      where: {
+        id: sessionId,
+        OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
+      }
+    });
+
+    if (!session) {
+      return null;
+    }
+
+    if (session.status === "closed_peer_deleted") {
       return this.buildPeerDeletedSummary();
     }
 
-    return null;
+    return this.buildActiveConnectionSummary(record.user.id, record.profile, session);
   }
 
   async sweep(): Promise<void> {
@@ -62,7 +109,7 @@ export class MatchingRuntimeService {
     });
 
     for (const user of users) {
-      await this.ensureCurrentMatch(user.id);
+      await this.ensureMatchFill(user.id);
     }
   }
 
@@ -72,13 +119,7 @@ export class MatchingRuntimeService {
       stateKey: string;
       trustKeys: string[];
     },
-    session: {
-      id: string;
-      userAId: string;
-      userBId: string;
-      origin: string;
-      score: number | null;
-    }
+    session: RawSession
   ): Promise<ActiveConnectionSummary | PeerDeletedConnectionSummary> {
     const peerUserId = session.userAId === userId ? session.userBId : session.userAId;
     const peer = await this.prisma.clientInstance.profile.findUnique({
@@ -103,6 +144,7 @@ export class MatchingRuntimeService {
 
     return {
       kind: "active",
+      id: session.id,
       displayName: peer.displayName,
       matchScore: session.score ?? 0,
       trustLevel: Math.max(1, Math.min(5, sharedKeys.length + 1)),
@@ -130,16 +172,20 @@ export class MatchingRuntimeService {
     };
   }
 
-  private async ensureCurrentMatch(userId: string): Promise<{ id: string; userAId: string; userBId: string; origin: string; score: number | null } | null> {
-    const existing = await this.prisma.clientInstance.matchSession.findFirst({
+  // Fills connection slots up to the limit (one new match per call — sweep runs this periodically)
+  private async ensureMatchFill(userId: string): Promise<void> {
+    const scoring = await this.policyConfig.getMatchingScoring();
+    const limit = scoring.limits.activeConnections;
+
+    const existingActiveSessions = await this.prisma.clientInstance.matchSession.findMany({
       where: {
         status: "active",
         OR: [{ userAId: userId }, { userBId: userId }]
       }
     });
 
-    if (existing) {
-      return existing;
+    if (existingActiveSessions.length >= limit) {
+      return;
     }
 
     const self = await this.prisma.clientInstance.profile.findUnique({
@@ -148,7 +194,7 @@ export class MatchingRuntimeService {
     });
 
     if (!self || !self.onboardingCompleted || self.visibilityStatus === "hidden") {
-      return null;
+      return;
     }
 
     const allProfiles = await this.prisma.clientInstance.profile.findMany({
@@ -161,17 +207,19 @@ export class MatchingRuntimeService {
     });
 
     if (allProfiles.length === 0) {
-      return null;
+      return;
     }
 
-    const [scoring, stateMatrix, intentMatrix] = await Promise.all([
-      this.policyConfig.getMatchingScoring(),
+    const [stateMatrix, intentMatrix] = await Promise.all([
       this.policyConfig.getMatchingStateMatrix(),
       this.policyConfig.getMatchingIntentMatrix()
     ]);
-    const activeSessions = await this.prisma.clientInstance.matchSession.findMany({
+
+    // Load all active sessions globally (to compute per-user counts and check pair exclusions)
+    const allActiveSessions = await this.prisma.clientInstance.matchSession.findMany({
       where: { status: "active" }
     });
+
     const activeBeaconUserIds = new Set(
       (
         await this.prisma.clientInstance.beaconSession.findMany({
@@ -186,10 +234,13 @@ export class MatchingRuntimeService {
 
     const activeCountByUser = new Map<string, number>();
 
-    for (const session of activeSessions) {
+    for (const session of allActiveSessions) {
       activeCountByUser.set(session.userAId, (activeCountByUser.get(session.userAId) ?? 0) + 1);
       activeCountByUser.set(session.userBId, (activeCountByUser.get(session.userBId) ?? 0) + 1);
     }
+
+    // Build the set of pairKeys already active for this user (to exclude)
+    const myActivePairKeys = new Set(existingActiveSessions.map((s) => s.pairKey));
 
     const selfCandidate = this.toCandidate(self, activeCountByUser.get(self.userId) ?? 0);
     let bestMatch:
@@ -201,14 +252,12 @@ export class MatchingRuntimeService {
       | undefined;
 
     for (const candidateProfile of allProfiles) {
+      const pairKey = [self.userId, candidateProfile.userId].sort().join(":");
+      const hasActivePairMatch = myActivePairKeys.has(pairKey);
+
       const candidate = this.toCandidate(
         candidateProfile,
         activeCountByUser.get(candidateProfile.userId) ?? 0
-      );
-      const hasActivePairMatch = activeSessions.some(
-        (session) =>
-          (session.userAId === self.userId && session.userBId === candidateProfile.userId) ||
-          (session.userAId === candidateProfile.userId && session.userBId === self.userId)
       );
       const evaluation = evaluateMatchingCandidate(
         {
@@ -249,12 +298,11 @@ export class MatchingRuntimeService {
     }
 
     if (!bestMatch) {
-      return null;
+      return;
     }
 
     const [userAId, userBId] = [self.userId, bestMatch.candidateUserId].sort();
 
-    let activeSession: { id: string; userAId: string; userBId: string; origin: string; score: number | null } | null = null;
     let isNewMatch = false;
 
     await this.prisma.clientInstance.$transaction(async (tx) => {
@@ -266,19 +314,18 @@ export class MatchingRuntimeService {
       });
 
       if (activePair) {
-        activeSession = activePair;
         return;
       }
 
       try {
-        activeSession = await tx.matchSession.create({
+        await tx.matchSession.create({
           data: {
             pairKey: `${userAId}:${userBId}`,
             userAId,
             userBId,
-            origin: bestMatch.origin,
+            origin: bestMatch!.origin,
             status: "active",
-            score: bestMatch.score
+            score: bestMatch!.score
           }
         });
         isNewMatch = true;
@@ -304,8 +351,6 @@ export class MatchingRuntimeService {
         userB ? this.notifications.notifyConnectionCreated(userB.telegramUserId) : undefined
       ]);
     }
-
-    return activeSession;
   }
 
   private toCandidate(

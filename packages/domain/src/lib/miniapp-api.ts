@@ -59,6 +59,7 @@ export interface ConsentStatusView {
 
 export interface ActiveConnectionSummary {
   kind: "active";
+  id: string;
   displayName: string;
   matchScore: number;
   trustLevel: number;
@@ -114,6 +115,7 @@ export interface DeleteAccountRequest {
 
 export interface ModerationActionRequest {
   note?: string;
+  connectionId: string;
 }
 
 export interface ConsentDecisionRequest {

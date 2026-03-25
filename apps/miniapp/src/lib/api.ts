@@ -83,14 +83,26 @@ export async function getBeaconSummary(): Promise<BeaconSummary> {
   return fetchFromApi("/api/beacon/status");
 }
 
-export async function getCurrentConnection(): Promise<ConnectionSummary | null> {
-  return fetchFromApi("/api/matching/current-connection");
+export async function getConnections(): Promise<ConnectionSummary[]> {
+  return fetchFromApi("/api/matching/connections");
+}
+
+export async function getConnectionById(id: string): Promise<ConnectionSummary | null> {
+  try {
+    return await fetchFromApi(`/api/matching/connections/${id}`);
+  } catch (error) {
+    if (error instanceof MiniAppBackendUnavailableError && error.status === 404) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function getConsentStatus(
-  channel: "contact" | "photo"
+  channel: "contact" | "photo",
+  connectionId: string
 ): Promise<ConsentStatusView | null> {
-  return fetchFromApi(`/api/consents/${channel}`);
+  return fetchFromApi(`/api/consents/${channel}?connectionId=${connectionId}`);
 }
 
 export async function getPhotoSummary(): Promise<PhotoSummary> {

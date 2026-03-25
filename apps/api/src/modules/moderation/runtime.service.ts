@@ -1,4 +1,4 @@
-import { HttpException, Injectable, HttpStatus } from "@nestjs/common";
+import { HttpException, Injectable, HttpStatus, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
 import type { AuthenticatedUserContext } from "../auth/service";
@@ -14,30 +14,31 @@ export class ModerationRuntimeService {
     private readonly notifications: BotNotificationService
   ) {}
 
-  async report(user: AuthenticatedUserContext, note?: string): Promise<void> {
-    await this.capture(user, "report", note);
+  async report(user: AuthenticatedUserContext, connectionId: string, note?: string): Promise<void> {
+    await this.capture(user, "report", connectionId, note);
   }
 
-  async block(user: AuthenticatedUserContext, note?: string): Promise<void> {
-    await this.capture(user, "block", note);
+  async block(user: AuthenticatedUserContext, connectionId: string, note?: string): Promise<void> {
+    await this.capture(user, "block", connectionId, note);
   }
 
   private async capture(
     user: AuthenticatedUserContext,
     eventType: "report" | "block",
+    connectionId: string,
     note?: string
   ): Promise<void> {
     const record = await this.profiles.getCurrentProfileRecord(user);
     const match = await this.prisma.clientInstance.matchSession.findFirst({
       where: {
+        id: connectionId,
         status: "active",
         OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
-      },
-      orderBy: { createdAt: "desc" }
+      }
     });
 
     if (!match) {
-      return;
+      throw new NotFoundException("Connection not found");
     }
 
     const todayStart = new Date();

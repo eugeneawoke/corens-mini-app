@@ -13,14 +13,24 @@ import {
   MiniAppSessionRequiredError
 } from "../../lib/api";
 
-export default async function PhotoRevealPage() {
+export default async function PhotoRevealPage({
+  searchParams
+}: {
+  searchParams: Promise<{ id?: string }>;
+}) {
+  const { id: connectionId } = await searchParams;
+
+  if (!connectionId) {
+    redirect("/connection");
+  }
+
   let profile;
   let resolution;
   let reveal;
 
   try {
     profile = await getProfileSummary();
-    resolution = await getConsentStatus("photo");
+    resolution = await getConsentStatus("photo", connectionId);
     reveal = await getPhotoRevealSummary();
   } catch (error) {
     if (error instanceof MiniAppSessionRequiredError) {
@@ -82,15 +92,15 @@ export default async function PhotoRevealPage() {
           </StatusBadge>
           {resolution?.warnings.includes("peer_deleted") ? null : (
             <>
-              <form action={approveConsentAction.bind(null, "photo")}>
+              <form action={approveConsentAction.bind(null, "photo", connectionId)}>
                 <Button>Да, хочу видеть</Button>
               </form>
-              <form action={declineConsentAction.bind(null, "photo")}>
+              <form action={declineConsentAction.bind(null, "photo", connectionId)}>
                 <Button variant="danger">Пока не хочу</Button>
               </form>
             </>
           )}
-          <ButtonLink href="/connection" variant="ghost">
+          <ButtonLink href={`/connection/${connectionId}`} variant="ghost">
             Вернуться
           </ButtonLink>
         </div>

@@ -55,26 +55,26 @@ export async function deactivateBeaconAction(): Promise<void> {
   redirect("/connection");
 }
 
-export async function approveConsentAction(channel: "contact" | "photo"): Promise<void> {
-  await sendApiMutation(`/api/consents/${channel}`, {
+export async function approveConsentAction(channel: "contact" | "photo", connectionId: string): Promise<void> {
+  await sendApiMutation(`/api/consents/${channel}?connectionId=${connectionId}`, {
     method: "POST",
     body: JSON.stringify({ decision: "approved" })
   });
 
   revalidatePath("/connection");
-  revalidatePath(`/${channel === "contact" ? "contact-consent" : "photo-reveal"}`);
-  redirect("/connection");
+  revalidatePath(`/connection/${connectionId}`);
+  redirect(`/connection/${connectionId}`);
 }
 
-export async function declineConsentAction(channel: "contact" | "photo"): Promise<void> {
-  await sendApiMutation(`/api/consents/${channel}`, {
+export async function declineConsentAction(channel: "contact" | "photo", connectionId: string): Promise<void> {
+  await sendApiMutation(`/api/consents/${channel}?connectionId=${connectionId}`, {
     method: "POST",
     body: JSON.stringify({ decision: "declined" })
   });
 
   revalidatePath("/connection");
-  revalidatePath(`/${channel === "contact" ? "contact-consent" : "photo-reveal"}`);
-  redirect("/connection");
+  revalidatePath(`/connection/${connectionId}`);
+  redirect(`/connection/${connectionId}`);
 }
 
 export async function completeOnboardingAction(formData: FormData): Promise<void> {
@@ -211,24 +211,24 @@ export async function devResetAction(): Promise<void> {
   redirect("/");
 }
 
-export async function reportConnectionAction(formData: FormData): Promise<void> {
+export async function reportConnectionAction(connectionId: string, formData: FormData): Promise<void> {
   const note = String(formData.get("note") ?? "");
 
   await sendApiMutation("/api/moderation/report", {
     method: "POST",
-    body: JSON.stringify({ note })
+    body: JSON.stringify({ note, connectionId })
   });
 
   revalidatePath("/connection");
   redirect("/connection");
 }
 
-export async function blockConnectionAction(formData: FormData): Promise<void> {
+export async function blockConnectionAction(connectionId: string, formData: FormData): Promise<void> {
   const note = String(formData.get("note") ?? "");
 
   await sendApiMutation("/api/moderation/block", {
     method: "POST",
-    body: JSON.stringify({ note })
+    body: JSON.stringify({ note, connectionId })
   });
 
   revalidatePath("/connection");

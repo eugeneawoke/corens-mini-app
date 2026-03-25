@@ -6,7 +6,7 @@ weights:
   no_connections_bonus: 2
   recent_mood_bonus: 1
 limits:
-  active_connections: 10
+  active_connections: 5
 cooldowns:
   state_days: 3
   trust_keys_days: 14

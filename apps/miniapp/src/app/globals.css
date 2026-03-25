@@ -997,8 +997,80 @@ select.corens-field {
   margin-bottom: 16px;
 }
 
+/* ─── Bento connection cards ─────────────────────────── */
+
+@keyframes corens-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-7px); }
+}
+
+.corens-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* Single card or odd last card → full width */
+.corens-bento-grid .corens-connection-card:only-child,
+.corens-bento-grid .corens-connection-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.corens-connection-card {
+  display: block;
+  text-decoration: none;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0 4px 16px rgba(28, 28, 30, 0.08),
+    0 1px 4px rgba(28, 28, 30, 0.04);
+  animation: corens-float 4s ease-in-out infinite;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  will-change: transform;
+}
+
+.corens-connection-card:active {
+  transform: scale(0.97);
+  box-shadow:
+    0 2px 8px rgba(28, 28, 30, 0.06),
+    0 1px 2px rgba(28, 28, 30, 0.04);
+}
+
+.corens-connection-card-inner {
+  padding: 18px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.corens-connection-card-score {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.corens-connection-card-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1c1c1e;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.corens-connection-card-state {
+  font-size: 13px;
+  color: #8e8e93;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ─── Reduced motion ─────────────────────────────────── */
+
 @media (prefers-reduced-motion: reduce) {
   .corens-skeleton::after {
+    animation: none;
+  }
+
+  .corens-connection-card {
     animation: none;
   }
 }

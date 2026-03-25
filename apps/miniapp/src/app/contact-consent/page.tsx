@@ -12,13 +12,23 @@ import {
   MiniAppSessionRequiredError
 } from "../../lib/api";
 
-export default async function ContactConsentPage() {
+export default async function ContactConsentPage({
+  searchParams
+}: {
+  searchParams: Promise<{ id?: string }>;
+}) {
+  const { id: connectionId } = await searchParams;
+
+  if (!connectionId) {
+    redirect("/connection");
+  }
+
   let profile;
   let resolution;
 
   try {
     profile = await getProfileSummary();
-    resolution = await getConsentStatus("contact");
+    resolution = await getConsentStatus("contact", connectionId);
   } catch (error) {
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;
@@ -72,15 +82,15 @@ export default async function ContactConsentPage() {
             </ButtonLink>
           ) : (
             <>
-              <form action={approveConsentAction.bind(null, "contact")}>
+              <form action={approveConsentAction.bind(null, "contact", connectionId)}>
                 <Button variant="success">Да, хочу написать</Button>
               </form>
-              <form action={declineConsentAction.bind(null, "contact")}>
+              <form action={declineConsentAction.bind(null, "contact", connectionId)}>
                 <Button variant="danger">Пока нет</Button>
               </form>
             </>
           )}
-          <ButtonLink href="/connection" variant="ghost">
+          <ButtonLink href={`/connection/${connectionId}`} variant="ghost">
             Вернуться
           </ButtonLink>
         </div>

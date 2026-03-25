@@ -1,5 +1,4 @@
-import { Controller, Get, Res, UseGuards } from "@nestjs/common";
-import type { Response } from "express";
+import { Controller, Get, NotFoundException, Param, UseGuards } from "@nestjs/common";
 import type { ConnectionSummary } from "@corens/domain";
 import { AuthenticatedUser } from "./modules/auth/authenticated-user.decorator";
 import type { AuthenticatedUserContext } from "./modules/auth/service";
@@ -11,18 +10,24 @@ import { MatchingRuntimeService } from "./modules/matching/runtime.service";
 export class MatchingController {
   constructor(private readonly matching: MatchingRuntimeService) {}
 
-  @Get("current-connection")
-  async getCurrentConnection(
-    @AuthenticatedUser() user: AuthenticatedUserContext,
-    @Res() response: Response
-  ): Promise<void> {
-    const connection = await this.matching.getCurrentConnection(user);
-
-    this.sendJson(response, connection);
+  @Get("connections")
+  async getConnections(
+    @AuthenticatedUser() user: AuthenticatedUserContext
+  ): Promise<ConnectionSummary[]> {
+    return this.matching.getConnections(user);
   }
 
-  private sendJson(response: Response, payload: ConnectionSummary | null): void {
-    response.type("application/json");
-    response.send(JSON.stringify(payload));
+  @Get("connections/:id")
+  async getConnectionById(
+    @AuthenticatedUser() user: AuthenticatedUserContext,
+    @Param("id") id: string
+  ): Promise<ConnectionSummary> {
+    const connection = await this.matching.getConnectionById(user, id);
+
+    if (!connection) {
+      throw new NotFoundException("Connection not found");
+    }
+
+    return connection;
   }
 }
