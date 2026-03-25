@@ -122,7 +122,7 @@ export default async function ConnectionPage() {
                   <div className="corens-inline-head">
                     <Radio size={18} />
                     <h3 className="corens-card-title">
-                      {beacon.status === "active" ? "Маяк горит" : "Маяк не горит"}
+                      {beacon.status === "active" ? "Маяк светит" : "Маяк не горит"}
                     </h3>
                   </div>
                   <p className="corens-copy corens-copy-muted">{beacon.description}</p>
