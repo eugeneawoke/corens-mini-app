@@ -51,7 +51,8 @@ export async function deactivateBeaconAction(): Promise<void> {
 
   revalidatePath("/");
   revalidatePath("/beacon");
-  redirect("/beacon");
+  revalidatePath("/connection");
+  redirect("/connection");
 }
 
 export async function approveConsentAction(channel: "contact" | "photo"): Promise<void> {

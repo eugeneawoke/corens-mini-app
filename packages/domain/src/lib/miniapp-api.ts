@@ -35,6 +35,7 @@ export interface ProfileSummary {
     }>;
     limitLabel: string;
     cooldownLabel: string;
+    isOnCooldown: boolean;
   };
   privacy: {
     visibility: VisibilityState;

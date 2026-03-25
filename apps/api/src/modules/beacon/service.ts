@@ -32,7 +32,7 @@ export class BeaconService {
         status: "active",
         remainingLabel: this.formatRemaining(activeSession.expiresAt, now),
         description:
-          "Режим ручного поиска включается на фиксированное время и не заменяет автоматический matching.",
+          "Режим ручного поиска включается на фиксированное время и не заменяет автоматический подбор.",
         durationLabel: this.formatMinutes(activeSession.durationMinutes),
         expiresAt: activeSession.expiresAt.toISOString()
       };
@@ -50,7 +50,7 @@ export class BeaconService {
       status: cooldownSession ? "cooldown" : "inactive",
       remainingLabel: this.formatMinutes(this.defaultDurationMinutes(rules)),
       description:
-        "Режим ручного поиска включается на фиксированное время и не заменяет автоматический matching.",
+        "Режим ручного поиска включается на фиксированное время и не заменяет автоматический подбор.",
       durationLabel: this.formatMinutes(this.defaultDurationMinutes(rules)),
       cooldownLabel: cooldownSession?.cooldownUntil
         ? this.formatRemaining(cooldownSession.cooldownUntil, now)

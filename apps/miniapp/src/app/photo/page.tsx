@@ -46,7 +46,7 @@ export default async function PhotoPage() {
         <NoticeCard
           icon={Camera}
           title="Фото готово"
-          description="Фото хранится приватно и раскроется только после взаимного photo consent."
+          description="Фото хранится приватно и раскроется только после взаимного согласия."
         />
       )}
 

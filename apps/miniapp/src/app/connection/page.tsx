@@ -128,10 +128,8 @@ export default async function ConnectionPage() {
                   </div>
                   <p className="corens-copy corens-copy-muted">{beacon.description}</p>
                 </div>
-                {beacon.status === "active" ? (
+                {beacon.status === "active" && (
                   <BeaconCountdown expiresAt={beacon.expiresAt} fallbackLabel={beacon.remainingLabel} />
-                ) : (
-                  <StatusBadge tone="neutral">Можно включить</StatusBadge>
                 )}
               </div>
               {beacon.status === "active" ? (

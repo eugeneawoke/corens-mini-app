@@ -137,8 +137,9 @@ export function createProfileSummary(state: DemoMvpState): ProfileSummary {
         selected: state.profile.trustKeys,
         groups: trustKeyGroups,
         limitLabel: `Выбрано ${state.profile.trustKeys.length} из 3`,
-        cooldownLabel: "Следующее изменение ключей через 14 дней"
-    },
+        cooldownLabel: "Следующее изменение ключей через 14 дней",
+        isOnCooldown: false
+      },
     privacy: {
       visibility: state.profile.visibility,
       privacyCopy:

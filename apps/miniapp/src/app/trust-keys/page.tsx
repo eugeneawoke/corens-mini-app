@@ -45,12 +45,12 @@ export default async function TrustKeysPage() {
         </Panel>
 
         <NoticeCard
-          title="Следующее изменение"
+          title={snapshot.trustKeys.isOnCooldown ? "Пауза между изменениями" : "Ключи доверия"}
           description={snapshot.trustKeys.cooldownLabel}
-          tone="warning"
+          tone={snapshot.trustKeys.isOnCooldown ? "warning" : "default"}
         />
 
-        <Button type="submit">Сохранить</Button>
+        <Button type="submit" disabled={snapshot.trustKeys.isOnCooldown}>Сохранить</Button>
       </form>
     </AppSurface>
   );

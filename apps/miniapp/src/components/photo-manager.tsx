@@ -10,6 +10,51 @@ type PhotoManagerProps = {
   summary: PhotoSummary;
 };
 
+function PhotoPreview({ previewUrl }: { previewUrl?: string }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!previewUrl || failed) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "10px",
+          minHeight: "160px",
+          borderRadius: "var(--corens-radius-card)",
+          background: "linear-gradient(135deg, rgba(108, 106, 196, 0.08), rgba(155, 107, 196, 0.06))",
+          border: "1px solid rgba(108, 106, 196, 0.16)"
+        }}
+      >
+        <Camera size={32} color="var(--corens-accent)" />
+        <div style={{ textAlign: "center" }}>
+          <strong style={{ display: "block", fontSize: "15px", color: "var(--corens-text)" }}>Фото сохранено</strong>
+          <span style={{ fontSize: "13px", color: "var(--corens-text-secondary)" }}>
+            Оно раскроется только после взаимного согласия
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={previewUrl}
+      alt="Ваше фото"
+      onError={() => setFailed(true)}
+      style={{
+        width: "100%",
+        maxHeight: "320px",
+        borderRadius: "var(--corens-radius-card)",
+        objectFit: "cover",
+        display: "block"
+      }}
+    />
+  );
+}
+
 export function PhotoManager({ summary }: PhotoManagerProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -115,7 +160,6 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
     return (
       <div className="corens-stack corens-gap-sm">
         <label
-          className="corens-photo-upload-area"
           style={{
             display: "flex",
             flexDirection: "column",
@@ -151,6 +195,8 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
           />
         </label>
 
+        {pending === "upload" && <div className="corens-upload-progress" />}
+
         {error && (
           <NoticeCard
             title="Не получилось загрузить фото"
@@ -164,32 +210,27 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
 
   return (
     <div className="corens-stack corens-gap-sm">
-      {summary.previewUrl && (
-        <img
-          src={summary.previewUrl}
-          alt="Ваше фото"
-          style={{ width: "100%", borderRadius: "var(--corens-radius-card)", objectFit: "cover" }}
-        />
-      )}
+      <PhotoPreview previewUrl={summary.previewUrl} />
 
       <label
-        className="corens-field-wrap"
-        style={{ cursor: pending ? "default" : "pointer" }}
+        className="corens-button corens-button-secondary"
+        style={{ cursor: pending ? "default" : "pointer", opacity: pending ? 0.6 : 1 }}
       >
-        <span className="corens-field-label">Заменить фото</span>
         <input
           ref={fileInputRef}
-          className="corens-field"
           type="file"
           accept="image/png,image/jpeg,image/webp,image/heic,image/heif"
           disabled={pending !== null}
+          style={{ display: "none" }}
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) void uploadFile(file);
           }}
         />
-        <span className="corens-field-hint">JPG, PNG или WEBP · до 5 МБ</span>
+        {pending === "upload" ? "Загружаем..." : "Заменить фото"}
       </label>
+
+      {pending === "upload" && <div className="corens-upload-progress" />}
 
       <Button type="button" variant="danger" onClick={handleDelete} disabled={pending !== null}>
         {pending === "delete" ? "Удаляем..." : "Удалить фото"}

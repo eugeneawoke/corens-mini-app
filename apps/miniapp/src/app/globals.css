@@ -91,7 +91,7 @@ textarea:focus-visible,
   width: min(100vw, var(--corens-page-width));
   min-height: 100vh;
   position: relative;
-  padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   background:
     radial-gradient(circle at top center, rgba(108, 106, 196, 0.06), transparent 30%),
     linear-gradient(180deg, #fbfbf9 0%, var(--corens-bg) 100%);
@@ -163,7 +163,7 @@ textarea:focus-visible,
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--corens-text-tertiary);
+  color: var(--corens-text-secondary);
 }
 
 .corens-section {
@@ -879,11 +879,42 @@ select.corens-field {
     monospace;
 }
 
+/* When page has a fixed bottom bar, add enough padding to avoid overlap */
+.corens-app:has(.corens-bottom-bar) {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+}
+
 @media (max-width: 420px) {
   .corens-hero-card,
   .corens-metrics {
     grid-template-columns: 1fr;
   }
+}
+
+/* Upload progress bar */
+@keyframes corens-progress-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.corens-upload-progress {
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(108, 106, 196, 0.15);
+  overflow: hidden;
+  position: relative;
+}
+
+.corens-upload-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: var(--corens-accent);
+  border-radius: 999px;
+  animation: corens-progress-slide 1.2s ease-in-out infinite;
 }
 
 @keyframes corens-spin {

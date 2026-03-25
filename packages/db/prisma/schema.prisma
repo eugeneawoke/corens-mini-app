@@ -28,6 +28,7 @@ model Profile {
   stateKey          String   @default("calm")
   intentKey         String   @default("")
   trustKeys         String[] @default([])
+  trustKeysUpdatedAt DateTime?
   photoCount        Int      @default(0)
   visibilityStatus  String
   matchingEnabled   Boolean  @default(true)
