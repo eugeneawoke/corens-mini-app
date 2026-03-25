@@ -67,30 +67,25 @@ export default async function ConnectionPage() {
     redirect("/onboarding");
   }
 
-  let connection;
-  let beacon = FALLBACK_BEACON;
+  // Fetch connection and beacon in parallel — they don't depend on each other
+  const [connectionResult, beaconResult] = await Promise.allSettled([
+    getCurrentConnection(),
+    getBeaconSummary()
+  ]);
 
-  try {
-    connection = await getCurrentConnection();
-  } catch (error) {
+  if (connectionResult.status === "rejected") {
+    const error = connectionResult.reason;
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;
     }
-
     if (error instanceof MiniAppBackendUnavailableError) {
       return <BackendUnavailableScreen details={formatMiniAppBackendError(error)} />;
     }
-
     throw error;
   }
 
-  try {
-    beacon = await getBeaconSummary();
-  } catch (error) {
-    if (!(error instanceof MiniAppBackendUnavailableError)) {
-      throw error;
-    }
-  }
+  const connection = connectionResult.value;
+  const beacon = beaconResult.status === "fulfilled" ? beaconResult.value : FALLBACK_BEACON;
 
   if (!connection) {
     return (

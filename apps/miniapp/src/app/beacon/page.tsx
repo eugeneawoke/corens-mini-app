@@ -14,23 +14,26 @@ import {
 } from "../../lib/api";
 
 export default async function BeaconPage() {
-  let profile;
-  let snapshot;
+  // Fetch profile and beacon status in parallel
+  const [profileResult, snapshotResult] = await Promise.allSettled([
+    getProfileSummary(),
+    getBeaconSummary()
+  ]);
 
-  try {
-    profile = await getProfileSummary();
-    snapshot = await getBeaconSummary();
-  } catch (error) {
+  if (profileResult.status === "rejected" || snapshotResult.status === "rejected") {
+    const failed = (profileResult.status === "rejected" ? profileResult : snapshotResult) as PromiseRejectedResult;
+    const error = failed.reason;
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;
     }
-
     if (error instanceof MiniAppBackendUnavailableError) {
       return <BackendUnavailableScreen />;
     }
-
     throw error;
   }
+
+  const profile = profileResult.value;
+  const snapshot = snapshotResult.value;
 
   if (!profile.onboardingCompleted) {
     redirect("/onboarding");

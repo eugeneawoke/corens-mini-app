@@ -42,7 +42,7 @@ function getApiBaseUrl(): string | null {
   return baseUrl ? baseUrl.replace(/\/$/, "") : null;
 }
 
-async function fetchFromApi<T>(path: string): Promise<T> {
+async function fetchFromApi<T>(path: string, options?: { revalidate: number }): Promise<T> {
   const baseUrl = getApiBaseUrl();
   const sessionToken = await getMiniAppSessionToken();
 
@@ -54,7 +54,9 @@ async function fetchFromApi<T>(path: string): Promise<T> {
 
   try {
     response = await fetch(`${baseUrl}${path}`, {
-      cache: "no-store",
+      ...(options?.revalidate !== undefined
+        ? { next: { revalidate: options.revalidate } }
+        : { cache: "no-store" }),
       headers: {
         authorization: `Bearer ${sessionToken}`
       }
@@ -79,7 +81,8 @@ async function fetchFromApi<T>(path: string): Promise<T> {
 }
 
 export async function getProfileSummary(): Promise<ProfileSummary> {
-  return fetchFromApi("/api/profile/summary");
+  // Profile data changes rarely; server actions call revalidatePath() after mutations
+  return fetchFromApi("/api/profile/summary", { revalidate: 120 });
 }
 
 export async function getBeaconSummary(): Promise<BeaconSummary> {

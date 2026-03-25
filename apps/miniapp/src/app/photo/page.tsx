@@ -13,23 +13,26 @@ import {
 } from "../../lib/api";
 
 export default async function PhotoPage() {
-  let profile;
-  let photo;
+  // Fetch profile and photo status in parallel
+  const [profileResult, photoResult] = await Promise.allSettled([
+    getProfileSummary(),
+    getPhotoSummary()
+  ]);
 
-  try {
-    profile = await getProfileSummary();
-    photo = await getPhotoSummary();
-  } catch (error) {
+  if (profileResult.status === "rejected" || photoResult.status === "rejected") {
+    const failed = (profileResult.status === "rejected" ? profileResult : photoResult) as PromiseRejectedResult;
+    const error = failed.reason;
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;
     }
-
     if (error instanceof MiniAppBackendUnavailableError) {
       return <BackendUnavailableScreen />;
     }
-
     throw error;
   }
+
+  const profile = profileResult.value;
+  const photo = photoResult.value;
 
   if (!profile.onboardingCompleted) {
     redirect("/onboarding");

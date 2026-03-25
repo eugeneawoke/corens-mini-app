@@ -911,3 +911,64 @@ select.corens-field {
     animation: none;
   }
 }
+
+/* ─── Skeleton / loading states ─────────────────────────────────────── */
+
+@keyframes corens-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.corens-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--corens-border);
+  border-radius: 16px;
+}
+
+.corens-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 100%
+  );
+  animation: corens-shimmer 1.3s ease infinite;
+}
+
+.corens-skeleton-topbar {
+  height: 52px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.corens-skeleton-hero {
+  height: 110px;
+  margin-bottom: 12px;
+}
+
+.corens-skeleton-card {
+  height: 80px;
+  margin-bottom: 12px;
+}
+
+.corens-skeleton-card-sm {
+  height: 56px;
+  margin-bottom: 8px;
+}
+
+.corens-skeleton-label {
+  height: 14px;
+  width: 30%;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .corens-skeleton::after {
+    animation: none;
+  }
+}
