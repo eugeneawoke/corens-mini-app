@@ -1,4 +1,4 @@
-import { Camera, CircleUserRound, Lock, Shield, Unlink2 } from "lucide-react";
+import { Camera, Lock, Shield, Unlink2 } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import {
   AppSurface,
@@ -121,11 +121,7 @@ export default async function ConnectionDetailPage({
     <AppSurface>
       <TopBar
         title="Связь"
-        action={
-          <a className="corens-icon-button" href="/connection" aria-label="Профиль">
-            <CircleUserRound size={18} />
-          </a>
-        }
+        backHref="/connection"
       />
 
       <Panel className="corens-stack corens-gap-sm">

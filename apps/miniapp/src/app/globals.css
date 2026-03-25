@@ -997,6 +997,26 @@ select.corens-field {
   margin-bottom: 16px;
 }
 
+/* ─── Lighthouse empty state ─────────────────────────── */
+
+.corens-lighthouse-empty {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #c7c7cc;
+}
+
+.corens-lighthouse-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #c7c7cc;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+}
+
 /* ─── Bento connection cards ─────────────────────────── */
 
 @keyframes corens-float {

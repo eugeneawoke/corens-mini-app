@@ -1,11 +1,10 @@
 import type { BeaconSummary } from "@corens/domain";
-import { CircleUserRound, Compass, Radio } from "lucide-react";
+import { CircleUserRound } from "lucide-react";
 import { redirect } from "next/navigation";
 import {
   AppSurface,
   Button,
   ButtonLink,
-  EmptyState,
   Panel,
   Section,
   StatusBadge,
@@ -127,24 +126,36 @@ export default async function ConnectionPage() {
           </div>
         </Section>
       ) : (
-        <>
-          <Panel className="corens-hero-card">
-            <div className="corens-hero-copy">
-              <span className="corens-eyebrow">Прямо сейчас</span>
-              <h2 className="corens-hero-title">Мы ищем кого-то близкого вам</h2>
-              <p className="corens-copy corens-copy-muted">
-                Настроение: <strong>{profile.state.current.label}</strong> · Формат:{" "}
-                <strong>{profile.intent.current.label}</strong>.
-              </p>
-            </div>
-          </Panel>
-
-          <EmptyState
-            icon={Compass}
-            title="Пока тихо"
-            description="Поиск идёт в фоне сам по себе. Включите маяк — и вас смогут найти быстрее."
-          />
-        </>
+        <div className="corens-lighthouse-empty">
+          <svg
+            width="56"
+            height="56"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            {/* Base */}
+            <path d="M5 21h14" />
+            {/* Foundation */}
+            <path d="M8 21v-2h8v2" />
+            {/* Tower body */}
+            <path d="M9 19l-1-8h8l-1 8" />
+            {/* Stripe on tower */}
+            <path d="M8.6 14.5h6.8" />
+            {/* Lantern room */}
+            <rect x="7" y="7" width="10" height="4" rx="0.5" />
+            {/* Dome */}
+            <path d="M7.5 7 Q12 4 16.5 7" />
+            {/* Light beams */}
+            <path d="M4 9.5l3 0.5" opacity="0.5" />
+            <path d="M20 9.5l-3 0.5" opacity="0.5" />
+          </svg>
+          <span className="corens-lighthouse-label">маяк</span>
+        </div>
       )}
 
       <Section title="Маяк">
@@ -153,12 +164,35 @@ export default async function ConnectionPage() {
             <div className="corens-row corens-row-between">
               <div className="corens-stack corens-gap-xs">
                 <div className="corens-inline-head">
-                  <Radio size={18} />
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 21h14" />
+                    <path d="M8 21v-2h8v2" />
+                    <path d="M9 19l-1-8h8l-1 8" />
+                    <path d="M8.6 14.5h6.8" />
+                    <rect x="7" y="7" width="10" height="4" rx="0.5" />
+                    <path d="M7.5 7 Q12 4 16.5 7" />
+                    <path d="M4 9.5l3 0.5" opacity="0.5" />
+                    <path d="M20 9.5l-3 0.5" opacity="0.5" />
+                  </svg>
                   <h3 className="corens-card-title">
                     {beacon.status === "active" ? "Маяк светит" : "Маяк не горит"}
                   </h3>
                 </div>
-                <p className="corens-copy corens-copy-muted">{beacon.description}</p>
+                <p className="corens-copy corens-copy-muted">
+                  {beacon.status === "active"
+                    ? "Вы чуть заметнее для тех, кто сейчас рядом."
+                    : beacon.description}
+                </p>
               </div>
               {beacon.status === "active" && (
                 <BeaconCountdown expiresAt={beacon.expiresAt} fallbackLabel={beacon.remainingLabel} />
