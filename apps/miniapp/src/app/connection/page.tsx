@@ -19,7 +19,6 @@ import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import { BeaconCountdown } from "../../components/beacon-countdown";
 import {
-  formatMiniAppBackendError,
   getBeaconSummary,
   getCurrentConnection,
   getProfileSummary,
@@ -57,7 +56,7 @@ export default async function ConnectionPage() {
     }
 
     if (error instanceof MiniAppBackendUnavailableError) {
-      return <BackendUnavailableScreen details={formatMiniAppBackendError(error)} />;
+      return <BackendUnavailableScreen />;
     }
 
     throw error;
@@ -79,7 +78,7 @@ export default async function ConnectionPage() {
       return <AuthBootstrapScreen />;
     }
     if (error instanceof MiniAppBackendUnavailableError) {
-      return <BackendUnavailableScreen details={formatMiniAppBackendError(error)} />;
+      return <BackendUnavailableScreen />;
     }
     throw error;
   }
