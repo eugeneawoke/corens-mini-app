@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { intentOptions, stateOptions, trustKeyGroups } from "@corens/domain/profile-options";
@@ -98,6 +98,7 @@ export async function completeOnboardingAction(formData: FormData): Promise<void
     })
   });
 
+  revalidateTag("profile");
   revalidatePath("/");
   revalidatePath("/profile");
   revalidatePath("/connection");
@@ -121,6 +122,7 @@ export async function updateStateIntentAction(formData: FormData): Promise<void>
     body: JSON.stringify({ stateKey, intentKey })
   });
 
+  revalidateTag("profile");
   revalidatePath("/profile");
   revalidatePath("/state-intent");
   revalidatePath("/connection");
@@ -141,6 +143,7 @@ export async function updateTrustKeysAction(formData: FormData): Promise<void> {
     body: JSON.stringify({ trustKeys })
   });
 
+  revalidateTag("profile");
   revalidatePath("/profile");
   revalidatePath("/trust-keys");
   revalidatePath("/connection");
@@ -155,6 +158,7 @@ export async function updateVisibilityAction(formData: FormData): Promise<void> 
     body: JSON.stringify({ isHidden })
   });
 
+  revalidateTag("profile");
   revalidatePath("/privacy");
   revalidatePath("/profile");
   revalidatePath("/connection");
@@ -169,6 +173,7 @@ export async function toggleVisibilityAction(isHidden: boolean): Promise<void> {
     body: JSON.stringify({ isHidden })
   });
 
+  revalidateTag("profile");
   revalidatePath("/privacy");
   revalidatePath("/profile");
   revalidatePath("/connection");
@@ -184,6 +189,7 @@ export async function requestDeletionAction(formData: FormData): Promise<void> {
 
   const cookieStore = await cookies();
   cookieStore.delete(MINIAPP_SESSION_COOKIE);
+  revalidateTag("profile");
   revalidatePath("/connection");
   revalidatePath("/profile");
   revalidatePath("/privacy");
@@ -197,6 +203,7 @@ export async function devResetAction(): Promise<void> {
 
   const cookieStore = await cookies();
   cookieStore.delete(MINIAPP_SESSION_COOKIE);
+  revalidateTag("profile");
   revalidatePath("/");
   revalidatePath("/profile");
   revalidatePath("/connection");

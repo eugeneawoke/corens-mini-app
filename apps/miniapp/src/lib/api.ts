@@ -42,7 +42,7 @@ function getApiBaseUrl(): string | null {
   return baseUrl ? baseUrl.replace(/\/$/, "") : null;
 }
 
-async function fetchFromApi<T>(path: string, options?: { revalidate: number }): Promise<T> {
+async function fetchFromApi<T>(path: string, options?: { tags: string[] }): Promise<T> {
   const baseUrl = getApiBaseUrl();
   const sessionToken = await getMiniAppSessionToken();
 
@@ -54,8 +54,8 @@ async function fetchFromApi<T>(path: string, options?: { revalidate: number }): 
 
   try {
     response = await fetch(`${baseUrl}${path}`, {
-      ...(options?.revalidate !== undefined
-        ? { next: { revalidate: options.revalidate } }
+      ...(options?.tags
+        ? { next: { tags: options.tags, revalidate: false } }
         : { cache: "no-store" }),
       headers: {
         authorization: `Bearer ${sessionToken}`
@@ -81,8 +81,8 @@ async function fetchFromApi<T>(path: string, options?: { revalidate: number }): 
 }
 
 export async function getProfileSummary(): Promise<ProfileSummary> {
-  // Profile data changes rarely; server actions call revalidatePath() after mutations
-  return fetchFromApi("/api/profile/summary", { revalidate: 120 });
+  // Cached indefinitely — invalidated via revalidateTag("profile") in every mutating action
+  return fetchFromApi("/api/profile/summary", { tags: ["profile"] });
 }
 
 export async function getBeaconSummary(): Promise<BeaconSummary> {
