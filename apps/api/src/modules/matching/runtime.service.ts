@@ -10,6 +10,7 @@ import { PolicyConfigService } from "../../policy-config.service";
 import type { AuthenticatedUserContext } from "../auth/service";
 import { ConsentRuntimeService } from "../consents/runtime.service";
 import { ProfilesService } from "../profiles";
+import { BotNotificationService } from "../../telegram/bot-notification.service";
 
 type ActiveConnectionSummary = Extract<ConnectionSummary, { kind: "active" }>;
 type PeerDeletedConnectionSummary = Extract<ConnectionSummary, { kind: "peer_deleted" }>;
@@ -20,20 +21,13 @@ export class MatchingRuntimeService {
     private readonly prisma: PrismaService,
     private readonly profiles: ProfilesService,
     private readonly policyConfig: PolicyConfigService,
-    private readonly consents: ConsentRuntimeService
+    private readonly consents: ConsentRuntimeService,
+    private readonly notifications: BotNotificationService
   ) {}
 
   async getCurrentConnection(user: AuthenticatedUserContext): Promise<ConnectionSummary | null> {
     const record = await this.profiles.getCurrentProfileRecord(user);
-    await this.ensureCurrentMatch(record.user.id);
-
-    const activeSession = await this.prisma.clientInstance.matchSession.findFirst({
-      where: {
-        status: "active",
-        OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
-      },
-      orderBy: { createdAt: "desc" }
-    });
+    const activeSession = await this.ensureCurrentMatch(record.user.id);
 
     if (activeSession) {
       return this.buildActiveConnectionSummary(record.user.id, record.profile, activeSession);
@@ -114,11 +108,13 @@ export class MatchingRuntimeService {
       trustLevel: Math.max(1, Math.min(5, sharedKeys.length + 1)),
       sharedKeys,
       sharedState:
-        profile.stateKey === peer.stateKey ? "Общее состояние по матрице" : "Разные, но совместимые состояния",
+        profile.stateKey === peer.stateKey
+          ? "Вы в схожем настроении"
+          : "Разное настроение — вы можете дополнить друг друга",
       statusCopy:
         session.origin === "beacon"
-          ? "Связь найдена через Beacon fallback по тем же параметрам матрицы."
-          : "Связь найдена автоматическим matching pipeline.",
+          ? "Кто-то из вас зажёг маяк — и это помогло встрече состояться."
+          : "Поиск нашёл вас сам — тихо и без усилий.",
       contactConsent: consentStatus.contact,
       photoConsent: consentStatus.photo
     };
@@ -134,7 +130,7 @@ export class MatchingRuntimeService {
     };
   }
 
-  private async ensureCurrentMatch(userId: string): Promise<void> {
+  private async ensureCurrentMatch(userId: string): Promise<{ id: string; userAId: string; userBId: string; origin: string; score: number | null } | null> {
     const existing = await this.prisma.clientInstance.matchSession.findFirst({
       where: {
         status: "active",
@@ -143,7 +139,7 @@ export class MatchingRuntimeService {
     });
 
     if (existing) {
-      return;
+      return existing;
     }
 
     const self = await this.prisma.clientInstance.profile.findUnique({
@@ -152,7 +148,7 @@ export class MatchingRuntimeService {
     });
 
     if (!self || !self.onboardingCompleted || self.visibilityStatus === "hidden") {
-      return;
+      return null;
     }
 
     const allProfiles = await this.prisma.clientInstance.profile.findMany({
@@ -165,7 +161,7 @@ export class MatchingRuntimeService {
     });
 
     if (allProfiles.length === 0) {
-      return;
+      return null;
     }
 
     const [scoring, stateMatrix, intentMatrix] = await Promise.all([
@@ -253,10 +249,13 @@ export class MatchingRuntimeService {
     }
 
     if (!bestMatch) {
-      return;
+      return null;
     }
 
     const [userAId, userBId] = [self.userId, bestMatch.candidateUserId].sort();
+
+    let activeSession: { id: string; userAId: string; userBId: string; origin: string; score: number | null } | null = null;
+    let isNewMatch = false;
 
     await this.prisma.clientInstance.$transaction(async (tx) => {
       const activePair = await tx.matchSession.findFirst({
@@ -267,11 +266,12 @@ export class MatchingRuntimeService {
       });
 
       if (activePair) {
+        activeSession = activePair;
         return;
       }
 
       try {
-        await tx.matchSession.create({
+        activeSession = await tx.matchSession.create({
           data: {
             pairKey: `${userAId}:${userBId}`,
             userAId,
@@ -281,6 +281,7 @@ export class MatchingRuntimeService {
             score: bestMatch.score
           }
         });
+        isNewMatch = true;
       } catch (error) {
         if (
           error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -292,6 +293,19 @@ export class MatchingRuntimeService {
         throw error;
       }
     });
+
+    if (isNewMatch) {
+      const [userA, userB] = await Promise.all([
+        this.prisma.clientInstance.user.findUnique({ where: { id: userAId }, select: { telegramUserId: true } }),
+        this.prisma.clientInstance.user.findUnique({ where: { id: userBId }, select: { telegramUserId: true } })
+      ]);
+      await Promise.all([
+        userA ? this.notifications.notifyConnectionCreated(userA.telegramUserId) : undefined,
+        userB ? this.notifications.notifyConnectionCreated(userB.telegramUserId) : undefined
+      ]);
+    }
+
+    return activeSession;
   }
 
   private toCandidate(

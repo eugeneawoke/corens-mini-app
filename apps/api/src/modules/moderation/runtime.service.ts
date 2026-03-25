@@ -3,13 +3,15 @@ import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
 import type { AuthenticatedUserContext } from "../auth/service";
 import { ProfilesService } from "../profiles";
+import { BotNotificationService } from "../../telegram/bot-notification.service";
 
 @Injectable()
 export class ModerationRuntimeService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly profiles: ProfilesService,
-    private readonly policyConfig: PolicyConfigService
+    private readonly policyConfig: PolicyConfigService,
+    private readonly notifications: BotNotificationService
   ) {}
 
   async report(user: AuthenticatedUserContext, note?: string): Promise<void> {
@@ -102,5 +104,15 @@ export class ModerationRuntimeService {
         }
       });
     });
+
+    if (eventType === "block") {
+      const targetUser = await this.prisma.clientInstance.user.findUnique({
+        where: { id: targetUserId },
+        select: { telegramUserId: true }
+      });
+      if (targetUser) {
+        await this.notifications.notifyConnectionClosed(targetUser.telegramUserId);
+      }
+    }
   }
 }

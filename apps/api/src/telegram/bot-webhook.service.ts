@@ -23,6 +23,10 @@ export class BotWebhookService {
     });
   }
 
+  getBot(): Bot {
+    return this.bot;
+  }
+
   mount(app: INestApplication): void {
     if (this.mounted) {
       return;

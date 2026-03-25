@@ -793,20 +793,19 @@ select.corens-field {
 }
 
 .corens-sheet-layout {
-  min-height: 100vh;
-  padding: 24px 16px 32px;
+  height: 100dvh;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   justify-content: center;
-  background: rgba(28, 28, 30, 0.4);
+  background: rgba(255, 255, 255, 0.98);
 }
 
 .corens-sheet {
   width: min(100%, 408px);
-  border-radius: 24px 24px 0 0;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.98);
-  padding: 12px 18px calc(24px + env(safe-area-inset-bottom, 0px));
-  box-shadow: 0 -12px 36px rgba(28, 28, 30, 0.12);
+  padding: 24px 18px calc(32px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
 }
 
 .corens-sheet-handle {

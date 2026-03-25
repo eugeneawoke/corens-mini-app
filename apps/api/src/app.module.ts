@@ -4,6 +4,7 @@ import { AuthController } from "./auth.controller";
 import { HealthController } from "./health.controller";
 import { PrismaService } from "./prisma.service";
 import { BotWebhookService } from "./telegram/bot-webhook.service";
+import { BotNotificationService } from "./telegram/bot-notification.service";
 import { MaintenanceService } from "./maintenance/maintenance.service";
 import { ProfileController } from "./profile.controller";
 import { BeaconController } from "./beacon.controller";
@@ -44,6 +45,7 @@ import { SessionAuthGuard } from "./modules/auth/session.guard";
   providers: [
     PrismaService,
     BotWebhookService,
+    BotNotificationService,
     MaintenanceService,
     BeaconService,
     ConsentRuntimeService,
@@ -59,6 +61,7 @@ import { SessionAuthGuard } from "./modules/auth/session.guard";
   exports: [
     PrismaService,
     BotWebhookService,
+    BotNotificationService,
     MaintenanceService,
     BeaconService,
     ConsentRuntimeService,

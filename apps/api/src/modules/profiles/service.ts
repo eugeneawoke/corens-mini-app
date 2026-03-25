@@ -237,10 +237,16 @@ export class ProfilesService {
       throw new BadRequestException("Active user profile is unavailable");
     }
 
-    const profile = await this.prisma.clientInstance.profile.upsert({
-      where: { userId: user.id },
-      update: {},
-      create: {
+    const existing = await this.prisma.clientInstance.profile.findUnique({
+      where: { userId: user.id }
+    });
+
+    if (existing) {
+      return { user, profile: existing };
+    }
+
+    const profile = await this.prisma.clientInstance.profile.create({
+      data: {
         userId: user.id,
         displayName: user.telegramUsername ?? "Новый профиль",
         visibilityStatus: "active",

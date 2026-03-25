@@ -73,6 +73,8 @@ model ContactConsent {
   requestedBy       String
   requestStatus     String
   resolvedAt        DateTime?
+
+  @@index([matchSessionId])
 }
 
 model PhotoRevealConsent {
@@ -81,6 +83,8 @@ model PhotoRevealConsent {
   requestedBy       String
   requestStatus     String
   resolvedAt        DateTime?
+
+  @@index([matchSessionId])
 }
 
 model BeaconSession {
@@ -91,6 +95,9 @@ model BeaconSession {
   activatedAt       DateTime @default(now())
   expiresAt         DateTime
   cooldownUntil     DateTime?
+
+  @@index([userId])
+  @@index([status, expiresAt])
 }
 
 model DeletionEvent {
@@ -109,6 +116,8 @@ model ModerationEvent {
   eventType         String
   note              String?
   createdAt         DateTime @default(now())
+
+  @@index([actorUserId, eventType, createdAt])
 }
 
 model Session {

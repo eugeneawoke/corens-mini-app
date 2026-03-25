@@ -143,12 +143,17 @@ export class AuthService {
       throw new ForbiddenException("user_not_available");
     }
 
-    await this.prisma.clientInstance.session.update({
-      where: { id: session.id },
-      data: {
-        expiresAt: new Date(Date.now() + SESSION_TTL_MS)
-      }
-    });
+    // Only extend the session when less than half its TTL remains —
+    // avoids a write on every request for active users.
+    const halfTtl = SESSION_TTL_MS / 2;
+    if (session.expiresAt.getTime() - Date.now() < halfTtl) {
+      await this.prisma.clientInstance.session.update({
+        where: { id: session.id },
+        data: {
+          expiresAt: new Date(Date.now() + SESSION_TTL_MS)
+        }
+      });
+    }
 
     return this.toContext(session.user, session.id);
   }

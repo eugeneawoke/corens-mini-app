@@ -45,6 +45,12 @@ function toneForStatus(status: "pending" | "approved" | "declined") {
   return "warning" as const;
 }
 
+function statusLabel(status: "pending" | "approved" | "declined"): string | null {
+  if (status === "approved") return "Открыто";
+  if (status === "declined") return "Отказано";
+  return null;
+}
+
 export default async function ConnectionPage() {
   let profile;
 
@@ -248,9 +254,11 @@ export default async function ConnectionPage() {
                   </span>
                 </div>
               </div>
-              <StatusBadge tone={toneForStatus(connection.contactConsent.status)}>
-                {connection.contactConsent.status}
-              </StatusBadge>
+              {statusLabel(connection.contactConsent.status) && (
+                <StatusBadge tone={toneForStatus(connection.contactConsent.status)}>
+                  {statusLabel(connection.contactConsent.status)}
+                </StatusBadge>
+              )}
             </div>
             <ButtonLink href="/contact-consent" variant="secondary">
               Обменяться контактами
@@ -270,9 +278,11 @@ export default async function ConnectionPage() {
                   </span>
                 </div>
               </div>
-              <StatusBadge tone={toneForStatus(connection.photoConsent.status)}>
-                {connection.photoConsent.status}
-              </StatusBadge>
+              {statusLabel(connection.photoConsent.status) && (
+                <StatusBadge tone={toneForStatus(connection.photoConsent.status)}>
+                  {statusLabel(connection.photoConsent.status)}
+                </StatusBadge>
+              )}
             </div>
             <ButtonLink href="/photo-reveal" variant="secondary">
               Показать фото

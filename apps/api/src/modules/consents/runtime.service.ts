@@ -5,13 +5,15 @@ import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
 import type { AuthenticatedUserContext } from "../auth/service";
 import { ProfilesService } from "../profiles";
+import { BotNotificationService } from "../../telegram/bot-notification.service";
 
 @Injectable()
 export class ConsentRuntimeService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly profiles: ProfilesService,
-    private readonly policyConfig: PolicyConfigService
+    private readonly policyConfig: PolicyConfigService,
+    private readonly notifications: BotNotificationService
   ) {}
 
   async getStatus(
@@ -70,6 +72,14 @@ export class ConsentRuntimeService {
           resolvedAt: decision === "pending" ? null : new Date()
         }
       });
+    }
+
+    if (decision === "approved" && match.peerTelegram) {
+      if (channel === "contact") {
+        await this.notifications.notifyContactRequest(match.peerTelegram.telegramUserId);
+      } else {
+        await this.notifications.notifyPhotoRequest(match.peerTelegram.telegramUserId);
+      }
     }
 
     return this.resolveStatus(match.id, match.selfUserId, match.peerUserId, channel);
