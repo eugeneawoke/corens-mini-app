@@ -31,7 +31,7 @@ export default async function PhotoRevealPage({
   try {
     profile = await getProfileSummary();
     resolution = await getConsentStatus("photo", connectionId);
-    reveal = await getPhotoRevealSummary();
+    reveal = await getPhotoRevealSummary(connectionId);
   } catch (error) {
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;

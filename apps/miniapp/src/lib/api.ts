@@ -109,6 +109,6 @@ export async function getPhotoSummary(): Promise<PhotoSummary> {
   return fetchFromApi("/api/media/photo");
 }
 
-export async function getPhotoRevealSummary(): Promise<PhotoRevealSummary> {
-  return fetchFromApi("/api/media/photo-reveal");
+export async function getPhotoRevealSummary(connectionId: string): Promise<PhotoRevealSummary> {
+  return fetchFromApi(`/api/media/photo-reveal?connectionId=${connectionId}`);
 }

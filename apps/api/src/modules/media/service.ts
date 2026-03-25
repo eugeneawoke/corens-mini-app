@@ -166,9 +166,9 @@ export class MediaService {
     await this.deleteStoredPhotoBytes(existing);
   }
 
-  async getPhotoRevealSummary(user: AuthenticatedUserContext): Promise<PhotoRevealSummary> {
+  async getPhotoRevealSummary(user: AuthenticatedUserContext, connectionId: string): Promise<PhotoRevealSummary> {
     const record = await this.profiles.getCurrentProfileRecord(user);
-    const consent = await this.consents.getStatus(user, "photo");
+    const consent = await this.consents.getStatus(user, "photo", connectionId);
 
     if (consent.status !== "approved") {
       return {
@@ -180,10 +180,9 @@ export class MediaService {
 
     const match = await this.prisma.clientInstance.matchSession.findFirst({
       where: {
-        status: "active",
+        id: connectionId,
         OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
-      },
-      orderBy: { createdAt: "desc" }
+      }
     });
 
     if (!match) {

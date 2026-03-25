@@ -53,7 +53,10 @@ export class MediaController {
 
   @UseGuards(SessionAuthGuard)
   @Get("photo-reveal")
-  getPhotoRevealSummary(@AuthenticatedUser() user: AuthenticatedUserContext) {
-    return this.media.getPhotoRevealSummary(user);
+  getPhotoRevealSummary(
+    @AuthenticatedUser() user: AuthenticatedUserContext,
+    @Query("connectionId") connectionId: string
+  ) {
+    return this.media.getPhotoRevealSummary(user, connectionId);
   }
 }
