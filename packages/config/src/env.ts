@@ -8,7 +8,6 @@ const envSchema = z.object({
   APP_NAME: z.string().default("corens-mini-app"),
   API_PORT: z.coerce.number().default(4000),
   BOT_PORT: z.coerce.number().default(4100),
-  WORKER_PORT: z.coerce.number().default(4200),
   TELEGRAM_BOT_TOKEN: z.string().min(1),
   TELEGRAM_BOT_WEBHOOK_SECRET: z.string().min(1),
   TELEGRAM_BOT_USERNAME: z.string().min(1),

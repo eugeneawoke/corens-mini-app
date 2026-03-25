@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 120,
+            "statusMessage": "TypeScript check before commit...",
+            "command": "cmd=$(jq -r '.tool_input.command'); echo \"$cmd\" | grep -q 'git commit' || exit 0; cd /Users/eugene.gusakov/Documents/self-projects/corens-mini-app && npx tsc -p packages/domain/tsconfig.json && npx tsc -p apps/api/tsconfig.json --noEmit && npx tsc -p apps/miniapp/tsconfig.json --noEmit"
+          }
+        ]
+      }
+    ]
+  }
+}

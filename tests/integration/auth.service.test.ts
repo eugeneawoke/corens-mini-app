@@ -166,7 +166,6 @@ describe("AuthService", () => {
     process.env.APP_NAME = "corens-mini-app";
     process.env.API_PORT = "4000";
     process.env.BOT_PORT = "4100";
-    process.env.WORKER_PORT = "4200";
     process.env.TELEGRAM_BOT_TOKEN = "telegram-bot-token";
     process.env.TELEGRAM_BOT_WEBHOOK_SECRET = "secret";
     process.env.TELEGRAM_BOT_USERNAME = "corens_bot";
