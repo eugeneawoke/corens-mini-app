@@ -99,10 +99,18 @@ export class ProfilesService {
     user: AuthenticatedUserContext,
     input: CompleteOnboardingRequest
   ): Promise<ProfileSummary> {
-    const displayName = input.displayName.trim().replace(/[<>&"']/g, "");
+    const displayName = input.displayName
+      .trim()
+      .replace(/[\x00-\x1F\x7F]/g, "")       // control characters
+      .replace(/[\u200B-\u200D\uFEFF\u202A-\u202E]/g, "") // zero-width + bidi overrides
+      .replace(/[<>&"']/g, "");               // html/injection chars
 
     if (displayName.length < 2) {
       throw new BadRequestException("Display name is too short");
+    }
+
+    if (displayName.length > 48) {
+      throw new BadRequestException("Display name is too long");
     }
 
     if (!stateOptions.some((option) => option.key === input.stateKey)) {
