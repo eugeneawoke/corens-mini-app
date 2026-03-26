@@ -1,6 +1,7 @@
 import { Radio, TimerReset } from "lucide-react";
 import { redirect } from "next/navigation";
-import { AppSurface, Button, NoticeCard, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
+import { AppSurface, NoticeCard, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
+import { BeaconButton } from "../../components/beacon-button";
 
 import { activateBeaconAction, deactivateBeaconAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
@@ -62,7 +63,7 @@ export default async function BeaconPage() {
           <div className="corens-stack corens-gap-sm">
             <BeaconCountdown expiresAt={snapshot.expiresAt} fallbackLabel={snapshot.remainingLabel} />
             <form action={deactivateBeaconAction}>
-              <Button type="submit" variant="beacon">Потушить маяк</Button>
+              <BeaconButton kind="deactivate" />
             </form>
           </div>
         ) : (
@@ -78,7 +79,7 @@ export default async function BeaconPage() {
                 <option value="60">1 час</option>
               </select>
             </div>
-            <Button type="submit" variant="beacon">Зажечь маяк</Button>
+            <BeaconButton kind="activate" />
           </form>
         )}
       </Panel>

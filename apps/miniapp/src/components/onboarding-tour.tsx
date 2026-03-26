@@ -68,7 +68,7 @@ export function OnboardingTour() {
     if (hint) applySpotlight(hint.selector, step === "name");
   }, [step, applySpotlight, clearSpotlight]);
 
-  // Name step: advance on blur/Enter when filled
+  // Name step: advance on blur when filled; mark empty field when blank
   useEffect(() => {
     if (step !== "name") return;
     const input = document.querySelector(
@@ -76,18 +76,33 @@ export function OnboardingTour() {
     ) as HTMLInputElement | null;
     if (!input) return;
 
-    const advance = () => {
-      if (input.value.trim().length >= 2) setStep("state");
+    const fieldWrap = input.closest<HTMLElement>(".corens-field-wrap");
+
+    const handleBlur = () => {
+      const val = input.value.trim();
+      if (val.length >= 2) {
+        fieldWrap?.classList.remove("corens-name-error");
+        setStep("state");
+      } else if (val.length === 0) {
+        fieldWrap?.classList.add("corens-name-error");
+      }
     };
+    const handleFocus = () => fieldWrap?.classList.remove("corens-name-error");
     const handleKey = (e: Event) => {
-      if ((e as KeyboardEvent).key === "Enter") advance();
+      if ((e as KeyboardEvent).key === "Enter" && input.value.trim().length >= 2) {
+        fieldWrap?.classList.remove("corens-name-error");
+        setStep("state");
+      }
     };
 
-    input.addEventListener("blur", advance);
+    input.addEventListener("blur", handleBlur);
+    input.addEventListener("focus", handleFocus);
     input.addEventListener("keydown", handleKey);
     return () => {
-      input.removeEventListener("blur", advance);
+      input.removeEventListener("blur", handleBlur);
+      input.removeEventListener("focus", handleFocus);
       input.removeEventListener("keydown", handleKey);
+      fieldWrap?.classList.remove("corens-name-error");
     };
   }, [step]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2, Lock } from "lucide-react";
 
 interface LockStatusHintProps {
@@ -9,6 +9,22 @@ interface LockStatusHintProps {
 
 export function LockStatusHint({ anyConsentApproved }: LockStatusHintProps) {
   const [showHint, setShowHint] = useState(false);
+
+  // Close hint on any tap / scroll outside (or on the hint itself)
+  useEffect(() => {
+    if (!showHint) return;
+    const close = () => setShowHint(false);
+    // Defer so the opening click doesn't immediately re-close
+    const timer = setTimeout(() => {
+      document.addEventListener("click", close, { once: true });
+      document.addEventListener("touchmove", close, { once: true, passive: true } as AddEventListenerOptions);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("click", close);
+      document.removeEventListener("touchmove", close);
+    };
+  }, [showHint]);
 
   return (
     <div className="corens-lock-hint-wrapper">
@@ -27,14 +43,6 @@ export function LockStatusHint({ anyConsentApproved }: LockStatusHintProps) {
               ? "Один из шагов уже пройден — продолжайте"
               : "Фото и контакт откроются, когда оба дадут согласие"}
           </p>
-          <button
-            type="button"
-            className="corens-lock-hint-close"
-            onClick={() => setShowHint(false)}
-            aria-label="Закрыть"
-          >
-            ×
-          </button>
         </div>
       )}
     </div>

@@ -924,7 +924,7 @@ select.corens-field {
 
 .corens-tour-hint {
   position: fixed;
-  bottom: 24px;
+  top: 80px;
   left: 16px;
   right: 16px;
   z-index: 102;
@@ -983,6 +983,41 @@ select.corens-field {
   font-size: 13px;
   color: var(--corens-text-tertiary);
   cursor: pointer;
+}
+
+/* Required field error state (triggered by onboarding tour) */
+.corens-name-error .corens-field {
+  border-color: var(--corens-warning);
+  box-shadow: 0 0 0 3px rgba(196, 129, 26, 0.14);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.corens-name-error .corens-field-label::after {
+  content: " — не может быть пустым";
+  color: var(--corens-warning);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* ── Beacon button animations ──────────────────────────────────────────────── */
+
+@keyframes corens-beacon-activate {
+  0% { box-shadow: 0 0 0 0 rgba(155, 107, 196, 0.7); }
+  70% { box-shadow: 0 0 0 14px rgba(155, 107, 196, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(155, 107, 196, 0); }
+}
+
+@keyframes corens-beacon-deactivate {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.45; }
+}
+
+.corens-beacon-btn-activating {
+  animation: corens-beacon-activate 1s ease-out infinite;
+}
+
+.corens-beacon-btn-deactivating {
+  animation: corens-beacon-deactivate 0.9s ease-in-out infinite;
 }
 
 .corens-divider {

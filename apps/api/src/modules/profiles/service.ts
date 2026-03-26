@@ -99,7 +99,7 @@ export class ProfilesService {
     user: AuthenticatedUserContext,
     input: CompleteOnboardingRequest
   ): Promise<ProfileSummary> {
-    const displayName = input.displayName.trim();
+    const displayName = input.displayName.trim().replace(/[<>&"']/g, "");
 
     if (displayName.length < 2) {
       throw new BadRequestException("Display name is too short");

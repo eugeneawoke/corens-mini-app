@@ -78,7 +78,7 @@ export async function declineConsentAction(channel: "contact" | "photo", connect
 }
 
 export async function completeOnboardingAction(formData: FormData): Promise<void> {
-  const displayName = String(formData.get("displayName") ?? "").trim();
+  const displayName = String(formData.get("displayName") ?? "").trim().replace(/[<>&"']/g, "");
   const stateKey = String(formData.get("stateKey") ?? "");
   const intentKey = String(formData.get("intentKey") ?? "");
   const allowedTrustKeys = new Set(trustKeyGroups.flatMap((group) => group.items));
