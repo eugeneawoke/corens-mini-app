@@ -91,9 +91,9 @@ export class ConsentRuntimeService {
       });
       const selfName = selfProfile?.displayName ?? "Ваш собеседник";
       if (channel === "contact") {
-        await this.notifications.notifyContactRequest(match.peerTelegram.telegramUserId, selfName);
+        void this.notifications.notifyContactRequest(match.peerTelegram.telegramUserId, selfName);
       } else {
-        await this.notifications.notifyPhotoRequest(match.peerTelegram.telegramUserId, selfName);
+        void this.notifications.notifyPhotoRequest(match.peerTelegram.telegramUserId, selfName);
       }
     }
 

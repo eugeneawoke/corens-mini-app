@@ -112,7 +112,7 @@ export class ModerationRuntimeService {
         select: { telegramUserId: true }
       });
       if (targetUser) {
-        await this.notifications.notifyConnectionClosed(targetUser.telegramUserId);
+        void this.notifications.notifyConnectionClosed(targetUser.telegramUserId);
       }
     }
   }

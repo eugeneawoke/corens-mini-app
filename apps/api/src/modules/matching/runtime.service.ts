@@ -398,10 +398,8 @@ export class MatchingRuntimeService {
         this.prisma.clientInstance.profile.findUnique({ where: { userId: userAId }, select: { displayName: true, user: { select: { telegramUserId: true } } } }),
         this.prisma.clientInstance.profile.findUnique({ where: { userId: userBId }, select: { displayName: true, user: { select: { telegramUserId: true } } } })
       ]);
-      await Promise.all([
-        profileA ? this.notifications.notifyConnectionCreated(profileA.user.telegramUserId, profileB?.displayName ?? "Кто-то") : undefined,
-        profileB ? this.notifications.notifyConnectionCreated(profileB.user.telegramUserId, profileA?.displayName ?? "Кто-то") : undefined
-      ]);
+      if (profileA) void this.notifications.notifyConnectionCreated(profileA.user.telegramUserId, profileB?.displayName ?? "Кто-то");
+      if (profileB) void this.notifications.notifyConnectionCreated(profileB.user.telegramUserId, profileA?.displayName ?? "Кто-то");
     }
   }
 
