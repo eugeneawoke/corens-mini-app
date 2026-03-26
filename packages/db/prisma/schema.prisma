@@ -132,3 +132,12 @@ model Session {
 
   @@index([userId, expiresAt])
 }
+
+model BotNotificationMessage {
+  id              String   @id @default(cuid())
+  telegramUserId  String
+  messageId       Int
+  createdAt       DateTime @default(now())
+
+  @@index([telegramUserId])
+}

@@ -90,7 +90,7 @@ export function OnboardingFormActions({ groups, selected }: Props) {
   return (
     <>
       {/* ── Trust keys ── */}
-      <section className="corens-section">
+      <section className="corens-section" data-onboarding="trust-keys-section">
         <div className="corens-section-header">
           <h2 className="corens-section-title">Ключи доверия</h2>
         </div>

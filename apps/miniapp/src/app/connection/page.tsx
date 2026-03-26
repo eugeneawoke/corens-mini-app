@@ -90,7 +90,7 @@ export default async function ConnectionPage() {
           description={
             isAtLimit
               ? `Все ${CONNECTION_LIMIT} места заняты. Новая связь появится когда закроется одна из текущих.`
-              : `${activeConnections.length} из ${CONNECTION_LIMIT}`
+              : undefined
           }
         >
           <div className="corens-bento-grid">
@@ -104,9 +104,6 @@ export default async function ConnectionPage() {
                   style={{ animationDelay: `${index * 0.5}s` }}
                 >
                   <div className="corens-connection-card-inner">
-                    <div className="corens-connection-card-score">
-                      <StatusBadge tone="success">{connection.matchScore}</StatusBadge>
-                    </div>
                     <h3 className="corens-connection-card-name">{connection.displayName}</h3>
                     <p className="corens-connection-card-state">{connection.sharedState}</p>
                     <div className="corens-chip-row">
@@ -126,35 +123,11 @@ export default async function ConnectionPage() {
           </div>
         </Section>
       ) : (
-        <div className="corens-lighthouse-empty">
-          <svg
-            width="56"
-            height="56"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            {/* Base */}
-            <path d="M5 21h14" />
-            {/* Foundation */}
-            <path d="M8 21v-2h8v2" />
-            {/* Tower body */}
-            <path d="M9 19l-1-8h8l-1 8" />
-            {/* Stripe on tower */}
-            <path d="M8.6 14.5h6.8" />
-            {/* Lantern room */}
-            <rect x="7" y="7" width="10" height="4" rx="0.5" />
-            {/* Dome */}
-            <path d="M7.5 7 Q12 4 16.5 7" />
-            {/* Light beams */}
-            <path d="M4 9.5l3 0.5" opacity="0.5" />
-            <path d="M20 9.5l-3 0.5" opacity="0.5" />
-          </svg>
-          <span className="corens-lighthouse-label">маяк</span>
+        <div className="corens-empty-state">
+          <span className="corens-eyebrow">Пока тихо</span>
+          <p className="corens-copy corens-copy-muted">
+            Поиск идёт по вашим ключам и состоянию. Связь появится, когда найдётся подходящий человек рядом.
+          </p>
         </div>
       )}
 

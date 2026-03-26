@@ -8,6 +8,7 @@ import { completeOnboardingAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import { OnboardingFormActions } from "../../components/onboarding-form-actions";
+import { OnboardingTour } from "../../components/onboarding-tour";
 import {
   getProfileSummary,
   MiniAppBackendUnavailableError,
@@ -66,23 +67,27 @@ export default async function OnboardingPage() {
         </div>
       </Panel>
 
+      <OnboardingTour />
+
       <form action={completeOnboardingAction} className="corens-stack corens-gap-sm">
         <Section title="Как вас показывать?">
-          <Panel>
-            <Field
-              name="displayName"
-              label="Имя в профиле"
-              defaultValue={snapshot.profile.displayName === "Новый профиль" ? "" : snapshot.profile.displayName}
-              placeholder="Например, Мария"
-              minLength={2}
-              maxLength={48}
-              required
-            />
-          </Panel>
+          <div data-onboarding="name-field">
+            <Panel>
+              <Field
+                name="displayName"
+                label="Имя в профиле"
+                defaultValue=""
+                placeholder="Например, Мария"
+                minLength={2}
+                maxLength={48}
+                required
+              />
+            </Panel>
+          </div>
         </Section>
 
         <Section title="Как вы сейчас?">
-          <div className="corens-stack corens-gap-sm">
+          <div className="corens-stack corens-gap-sm" data-onboarding="state-section">
             <div className="corens-choice-section">
               <span className="corens-eyebrow">Светлые состояния</span>
               <div className="corens-choice-grid corens-choice-grid-bento">

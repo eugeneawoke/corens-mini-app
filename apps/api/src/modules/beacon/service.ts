@@ -46,11 +46,13 @@ export class BeaconService {
       orderBy: { cooldownUntil: "desc" }
     });
 
+    const isCooldown = !!cooldownSession;
     return {
-      status: cooldownSession ? "cooldown" : "inactive",
+      status: isCooldown ? "cooldown" : "inactive",
       remainingLabel: this.formatMinutes(this.defaultDurationMinutes(rules)),
-      description:
-        "Вы чуть заметнее для тех, кто сейчас рядом.",
+      description: isCooldown
+        ? "Маяк отдыхает — скоро можно будет зажечь снова."
+        : "Маяк не горит — поиск продолжается в обычном режиме. Зажгите, чтобы стать чуть заметнее.",
       durationLabel: this.formatMinutes(this.defaultDurationMinutes(rules)),
       cooldownLabel: cooldownSession?.cooldownUntil
         ? this.formatRemaining(cooldownSession.cooldownUntil, now)

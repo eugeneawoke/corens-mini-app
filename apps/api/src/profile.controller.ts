@@ -8,14 +8,19 @@ import { AuthenticatedUser } from "./modules/auth/authenticated-user.decorator";
 import type { AuthenticatedUserContext } from "./modules/auth/service";
 import { SessionAuthGuard } from "./modules/auth/session.guard";
 import { ProfilesService } from "./modules/profiles";
+import { BotNotificationService } from "./telegram/bot-notification.service";
 
 @Controller("profile")
 @UseGuards(SessionAuthGuard)
 export class ProfileController {
-  constructor(private readonly profiles: ProfilesService) {}
+  constructor(
+    private readonly profiles: ProfilesService,
+    private readonly notifications: BotNotificationService
+  ) {}
 
   @Get("summary")
-  getSummary(@AuthenticatedUser() user: AuthenticatedUserContext) {
+  async getSummary(@AuthenticatedUser() user: AuthenticatedUserContext) {
+    void this.notifications.cleanupNotifications(user.telegramUserId);
     return this.profiles.getSummary(user);
   }
 

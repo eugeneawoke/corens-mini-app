@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import {
   evaluateMatchingCandidate,
+  lightStateKeys,
+  shadowStateKeys,
   type ConnectionSummary,
   type MatchingCandidate
 } from "@corens/domain";
@@ -153,10 +155,7 @@ export class MatchingRuntimeService {
       matchScore: session.score ?? 0,
       trustLevel: Math.max(1, Math.min(5, sharedKeys.length + 1)),
       sharedKeys,
-      sharedState:
-        profile.stateKey === peer.stateKey
-          ? "Вы в схожем настроении"
-          : "Разное настроение — вы можете дополнить друг друга",
+      sharedState: this.buildSharedState(profile.stateKey, peer.stateKey),
       statusCopy:
         session.origin === "beacon"
           ? "Кто-то из вас зажёг маяк — и это помогло встрече состояться."
@@ -174,6 +173,24 @@ export class MatchingRuntimeService {
       statusCopy: "Мы остановили открытые шаги и вернули вас к обычному поиску.",
       primaryActionLabel: "Вернуться к поиску"
     };
+  }
+
+  private buildSharedState(selfStateKey: string, peerStateKey: string): string {
+    const selfIsLight = lightStateKeys.has(selfStateKey);
+    const peerIsLight = lightStateKeys.has(peerStateKey);
+    const selfIsShadow = shadowStateKeys.has(selfStateKey);
+    const peerIsShadow = shadowStateKeys.has(peerStateKey);
+
+    if (selfStateKey === peerStateKey) {
+      return "Вы в одном настроении прямо сейчас";
+    }
+    if (selfIsShadow && peerIsShadow) {
+      return "Оба сейчас в непростом месте — вы поймёте друг друга";
+    }
+    if ((selfIsLight && peerIsShadow) || (selfIsShadow && peerIsLight)) {
+      return "Вы можете поддержать друг друга — у вас разное место";
+    }
+    return "Разный настрой, но оба в лёгком месте";
   }
 
   // Fills connection slots up to the limit (one new match per call — sweep runs this periodically)
@@ -360,13 +377,13 @@ export class MatchingRuntimeService {
     });
 
     if (isNewMatch) {
-      const [userA, userB] = await Promise.all([
-        this.prisma.clientInstance.user.findUnique({ where: { id: userAId }, select: { telegramUserId: true } }),
-        this.prisma.clientInstance.user.findUnique({ where: { id: userBId }, select: { telegramUserId: true } })
+      const [profileA, profileB] = await Promise.all([
+        this.prisma.clientInstance.profile.findUnique({ where: { userId: userAId }, select: { displayName: true, user: { select: { telegramUserId: true } } } }),
+        this.prisma.clientInstance.profile.findUnique({ where: { userId: userBId }, select: { displayName: true, user: { select: { telegramUserId: true } } } })
       ]);
       await Promise.all([
-        userA ? this.notifications.notifyConnectionCreated(userA.telegramUserId) : undefined,
-        userB ? this.notifications.notifyConnectionCreated(userB.telegramUserId) : undefined
+        profileA ? this.notifications.notifyConnectionCreated(profileA.user.telegramUserId, profileB?.displayName ?? "Кто-то") : undefined,
+        profileB ? this.notifications.notifyConnectionCreated(profileB.user.telegramUserId, profileA?.displayName ?? "Кто-то") : undefined
       ]);
     }
   }

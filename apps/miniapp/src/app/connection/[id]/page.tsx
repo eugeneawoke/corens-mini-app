@@ -1,4 +1,4 @@
-import { Camera, ExternalLink, Lock, Shield, Unlink2 } from "lucide-react";
+import { Camera, ExternalLink, Shield, Unlink2 } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import {
   AppSurface,
@@ -12,6 +12,7 @@ import {
 } from "@corens/ui";
 
 import { blockConnectionAction, reportConnectionAction } from "../../actions";
+import { LockStatusHint } from "../../../components/lock-status-hint";
 import { AuthBootstrapScreen } from "../../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../../components/backend-unavailable";
 import {
@@ -133,9 +134,12 @@ export default async function ConnectionDetailPage({
               Фото и способ связаться откроются только если вы оба захотите.
             </p>
           </div>
-          <div className="corens-status-lock">
-            <Lock size={30} />
-          </div>
+          <LockStatusHint
+            anyConsentApproved={
+              connection.contactConsent.status === "approved" ||
+              connection.photoConsent.status === "approved"
+            }
+          />
         </div>
         <div className="corens-chip-row">
           {connection.sharedKeys.map((key) => (
@@ -149,12 +153,9 @@ export default async function ConnectionDetailPage({
       <Section title="Почему вы рядом">
         <Panel>
           <div className="corens-stack corens-gap-sm">
-            <div className="corens-row corens-row-between">
-              <div>
-                <h3 className="corens-card-title">Общее между вами</h3>
-                <p className="corens-copy corens-copy-muted">{connection.sharedState}</p>
-              </div>
-              <StatusBadge tone="success">Созвучность: {connection.matchScore}</StatusBadge>
+            <div>
+              <h3 className="corens-card-title">Общее между вами</h3>
+              <p className="corens-copy corens-copy-muted">{connection.sharedState}</p>
             </div>
             <p className="corens-copy corens-copy-muted">{connection.statusCopy}</p>
           </div>

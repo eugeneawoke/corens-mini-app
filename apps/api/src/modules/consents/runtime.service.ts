@@ -85,10 +85,15 @@ export class ConsentRuntimeService {
     }
 
     if (decision === "approved" && match.peerTelegram) {
+      const selfProfile = await this.prisma.clientInstance.profile.findUnique({
+        where: { userId: match.selfUserId },
+        select: { displayName: true }
+      });
+      const selfName = selfProfile?.displayName ?? "Ваш собеседник";
       if (channel === "contact") {
-        await this.notifications.notifyContactRequest(match.peerTelegram.telegramUserId);
+        await this.notifications.notifyContactRequest(match.peerTelegram.telegramUserId, selfName);
       } else {
-        await this.notifications.notifyPhotoRequest(match.peerTelegram.telegramUserId);
+        await this.notifications.notifyPhotoRequest(match.peerTelegram.telegramUserId, selfName);
       }
     }
 
