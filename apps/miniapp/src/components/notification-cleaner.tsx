@@ -6,7 +6,7 @@ import { cleanupBotNotificationsAction } from "../app/actions";
 
 export function NotificationCleaner() {
   useEffect(() => {
-    void cleanupBotNotificationsAction();
+    cleanupBotNotificationsAction().catch(() => {});
   }, []);
 
   return null;
