@@ -41,13 +41,11 @@ export class BotNotificationService {
       where: { telegramUserId }
     });
 
-    for (const msg of messages) {
-      try {
-        await this.botWebhook.getBot().api.deleteMessage(telegramUserId, msg.messageId);
-      } catch {
-        // Message may already be deleted or older than 48h — ignore silently
-      }
-    }
+    await Promise.allSettled(
+      messages.map((msg) =>
+        this.botWebhook.getBot().api.deleteMessage(telegramUserId, msg.messageId)
+      )
+    );
   }
 
   private async send(telegramUserId: string, text: string): Promise<void> {

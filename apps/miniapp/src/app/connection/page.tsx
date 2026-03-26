@@ -36,7 +36,6 @@ export default async function ConnectionPage() {
 
   try {
     profile = await getProfileSummary();
-    void cleanupBotNotifications();
   } catch (error) {
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;
@@ -55,7 +54,8 @@ export default async function ConnectionPage() {
 
   const [connectionsResult, beaconResult] = await Promise.allSettled([
     getConnections(),
-    getBeaconSummary()
+    getBeaconSummary(),
+    cleanupBotNotifications()
   ]);
 
   if (connectionsResult.status === "rejected") {
