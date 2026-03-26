@@ -1,4 +1,4 @@
-import { Camera, Lock, Shield, Unlink2 } from "lucide-react";
+import { Camera, ExternalLink, Lock, Shield, Unlink2 } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import {
   AppSurface,
@@ -170,7 +170,11 @@ export default async function ConnectionDetailPage({
                 <div className="corens-stack corens-gap-xs">
                   <strong className="corens-card-title">Способ связаться</strong>
                   <span className="corens-list-description">
-                    Ссылка для общения откроется только после взаимного согласия.
+                    {connection.contactConsent.status === "approved"
+                      ? "Оба согласились — можно написать напрямую."
+                      : connection.contactConsent.myDecision === "approved"
+                        ? "Вы согласились. Ждём ответа другого человека."
+                        : "Ссылка для общения откроется только после взаимного согласия."}
                   </span>
                 </div>
               </div>
@@ -180,9 +184,18 @@ export default async function ConnectionDetailPage({
                 </StatusBadge>
               )}
             </div>
-            <ButtonLink href={`/contact-consent?id=${id}`} variant="secondary">
-              Обменяться контактами
-            </ButtonLink>
+            {connection.contactConsent.status === "approved" && connection.contactConsent.artifactValue ? (
+              <ButtonLink href={connection.contactConsent.artifactValue} variant="success">
+                <ExternalLink size={16} />
+                Написать в Telegram
+              </ButtonLink>
+            ) : connection.contactConsent.myDecision === "approved" ? (
+              <StatusBadge tone="warning">Ждём ответа</StatusBadge>
+            ) : (
+              <ButtonLink href={`/contact-consent?id=${id}`} variant="secondary">
+                Обменяться контактами
+              </ButtonLink>
+            )}
           </div>
         </Panel>
 
@@ -194,7 +207,11 @@ export default async function ConnectionDetailPage({
                 <div className="corens-stack corens-gap-xs">
                   <strong className="corens-card-title">Фотография</strong>
                   <span className="corens-list-description">
-                    Открыть фото можно отдельно — это самостоятельный шаг.
+                    {connection.photoConsent.status === "approved"
+                      ? "Оба согласились — фото доступно."
+                      : connection.photoConsent.myDecision === "approved"
+                        ? "Вы согласились. Ждём ответа другого человека."
+                        : "Открыть фото можно отдельно — это самостоятельный шаг."}
                   </span>
                 </div>
               </div>
@@ -204,9 +221,13 @@ export default async function ConnectionDetailPage({
                 </StatusBadge>
               )}
             </div>
-            <ButtonLink href={`/photo-reveal?id=${id}`} variant="secondary">
-              Показать фото
-            </ButtonLink>
+            {connection.photoConsent.myDecision === "approved" && connection.photoConsent.status !== "approved" ? (
+              <StatusBadge tone="warning">Ждём ответа</StatusBadge>
+            ) : (
+              <ButtonLink href={`/photo-reveal?id=${id}`} variant={connection.photoConsent.status === "approved" ? "success" : "secondary"}>
+                {connection.photoConsent.status === "approved" ? "Посмотреть фото" : "Показать фото"}
+              </ButtonLink>
+            )}
           </div>
         </Panel>
       </Section>

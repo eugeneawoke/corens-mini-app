@@ -225,6 +225,7 @@ export function createConsentStatus(
   return {
     channel,
     status: resolution.status,
+    myDecision: actorDecision,
     warnings: resolution.warnings,
     artifactType: resolution.artifact?.artifactType
   };

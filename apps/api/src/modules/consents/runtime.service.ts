@@ -27,7 +27,7 @@ export class ConsentRuntimeService {
       return this.buildPeerDeletedStatus(channel);
     }
 
-    return this.resolveStatus(match.id, match.selfUserId, match.peerUserId, channel);
+    return this.resolveStatus(match.id, match.selfUserId, match.peerUserId, channel, match.peerTelegram);
   }
 
   async updateStatus(
@@ -152,6 +152,7 @@ export class ConsentRuntimeService {
     return {
       channel,
       status: resolution.status,
+      myDecision: selfDecision as "pending" | "approved" | "declined",
       warnings: resolution.warnings,
       artifactType: resolution.artifact?.artifactType,
       artifactValue:
@@ -218,6 +219,7 @@ export class ConsentRuntimeService {
     return {
       channel,
       status: "declined",
+      myDecision: "declined",
       warnings: ["peer_deleted"]
     };
   }

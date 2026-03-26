@@ -87,10 +87,25 @@ export default async function PhotoRevealPage({
         ) : null}
 
         <div className="corens-action-stack" style={{ marginTop: 16 }}>
-          <StatusBadge tone={resolution?.warnings.includes("peer_deleted") ? "danger" : "warning"}>
-            {resolution?.status ?? "pending"}
-          </StatusBadge>
-          {resolution?.warnings.includes("peer_deleted") ? null : (
+          {resolution?.warnings.includes("peer_deleted") ? (
+            <StatusBadge tone="danger">Связь закрыта</StatusBadge>
+          ) : resolution?.status === "approved" ? (
+            <StatusBadge tone="success">Фото открыто</StatusBadge>
+          ) : resolution?.myDecision === "approved" ? (
+            <>
+              <StatusBadge tone="warning">Ждём ответа</StatusBadge>
+              <p className="corens-copy corens-copy-muted" style={{ textAlign: "center" }}>
+                Вы уже согласились. Фото откроется, как только другой человек тоже согласится.
+              </p>
+            </>
+          ) : resolution?.myDecision === "declined" ? (
+            <>
+              <StatusBadge tone="danger">Вы отказались</StatusBadge>
+              <form action={approveConsentAction.bind(null, "photo", connectionId)}>
+                <Button variant="secondary">Передумал, хочу видеть</Button>
+              </form>
+            </>
+          ) : (
             <>
               <form action={approveConsentAction.bind(null, "photo", connectionId)}>
                 <Button>Да, хочу видеть</Button>

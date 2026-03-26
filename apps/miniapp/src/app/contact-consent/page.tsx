@@ -73,13 +73,27 @@ export default async function ContactConsentPage({
         />
 
         <div className="corens-action-stack" style={{ marginTop: 16 }}>
-          <StatusBadge tone={resolution?.warnings.includes("peer_deleted") ? "danger" : "warning"}>
-            {resolution?.status ?? "pending"}
-          </StatusBadge>
           {resolution?.warnings.includes("peer_deleted") ? null : resolution?.status === "approved" && resolution.artifactValue ? (
-            <ButtonLink href={resolution.artifactValue} variant="success">
-              Открыть Telegram
-            </ButtonLink>
+            <>
+              <StatusBadge tone="success">Контакт открыт</StatusBadge>
+              <ButtonLink href={resolution.artifactValue} variant="success">
+                Написать в Telegram
+              </ButtonLink>
+            </>
+          ) : resolution?.myDecision === "approved" ? (
+            <>
+              <StatusBadge tone="warning">Ждём ответа</StatusBadge>
+              <p className="corens-copy corens-copy-muted" style={{ textAlign: "center" }}>
+                Вы уже согласились. Как только другой человек ответит — контакт откроется автоматически.
+              </p>
+            </>
+          ) : resolution?.myDecision === "declined" ? (
+            <>
+              <StatusBadge tone="danger">Вы отказались</StatusBadge>
+              <form action={approveConsentAction.bind(null, "contact", connectionId)}>
+                <Button variant="secondary">Передумал, хочу написать</Button>
+              </form>
+            </>
           ) : (
             <>
               <form action={approveConsentAction.bind(null, "contact", connectionId)}>
