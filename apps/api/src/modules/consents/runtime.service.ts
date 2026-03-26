@@ -23,7 +23,11 @@ export class ConsentRuntimeService {
   ): Promise<ConsentStatusView> {
     const match = await this.getMatchById(user, connectionId);
 
-    if (match.status === "closed_peer_deleted") {
+    if (
+      match.status === "closed_peer_deleted" ||
+      match.status === "closed_blocked" ||
+      match.status === "closed_reported"
+    ) {
       return this.buildPeerDeletedStatus(channel);
     }
 
@@ -38,7 +42,11 @@ export class ConsentRuntimeService {
   ): Promise<ConsentStatusView> {
     const match = await this.getMatchById(user, connectionId);
 
-    if (match.status === "closed_peer_deleted") {
+    if (
+      match.status === "closed_peer_deleted" ||
+      match.status === "closed_blocked" ||
+      match.status === "closed_reported"
+    ) {
       return this.buildPeerDeletedStatus(channel);
     }
 

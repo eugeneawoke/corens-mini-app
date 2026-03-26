@@ -92,6 +92,10 @@ export class MatchingRuntimeService {
       return this.buildPeerDeletedSummary();
     }
 
+    if (session.status === "closed_blocked" || session.status === "closed_reported") {
+      return null;
+    }
+
     return this.buildActiveConnectionSummary(record.user.id, record.profile, session);
   }
 
@@ -220,6 +224,19 @@ export class MatchingRuntimeService {
       where: { status: "active" }
     });
 
+    // Pairs that were explicitly blocked or reported — never re-match these
+    const blockedPairKeys = new Set(
+      (
+        await this.prisma.clientInstance.matchSession.findMany({
+          where: {
+            status: { in: ["closed_blocked", "closed_reported"] },
+            OR: [{ userAId: userId }, { userBId: userId }]
+          },
+          select: { pairKey: true }
+        })
+      ).map((s) => s.pairKey)
+    );
+
     const activeBeaconUserIds = new Set(
       (
         await this.prisma.clientInstance.beaconSession.findMany({
@@ -254,6 +271,7 @@ export class MatchingRuntimeService {
     for (const candidateProfile of allProfiles) {
       const pairKey = [self.userId, candidateProfile.userId].sort().join(":");
       const hasActivePairMatch = myActivePairKeys.has(pairKey);
+      const hasPairExclusion = blockedPairKeys.has(pairKey);
 
       const candidate = this.toCandidate(
         candidateProfile,
@@ -271,7 +289,7 @@ export class MatchingRuntimeService {
           ),
           moodUpdatedRecently:
             Date.now() - self.updatedAt.getTime() < scoring.freshness.moodHours * 3_600_000,
-          hasPairExclusion: false,
+          hasPairExclusion,
           hasActivePairMatch
         },
         scoring
