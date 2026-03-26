@@ -140,17 +140,22 @@ export function OnboardingTour() {
     return () => container.removeEventListener("change", handleChange);
   }, [step]);
 
-  // State step: advance on radio change
+  // State step: advance on radio change OR click on spotlight card
   useEffect(() => {
     if (step !== "state") return;
     const container = document.querySelector("[data-onboarding='state-section']");
+    const card = document.querySelector("[data-onboarding='first-state-card']");
     if (!container) return;
 
-    const handleChange = () => {
-      setTimeout(() => setStep("awaiting-scroll"), 350);
+    const advance = () => setStep("awaiting-scroll");
+    const advanceDelayed = () => setTimeout(advance, 350);
+
+    container.addEventListener("change", advanceDelayed, { once: true });
+    card?.addEventListener("click", advance, { once: true });
+    return () => {
+      container.removeEventListener("change", advanceDelayed);
+      card?.removeEventListener("click", advance);
     };
-    container.addEventListener("change", handleChange, { once: true });
-    return () => container.removeEventListener("change", handleChange);
   }, [step]);
 
   // Awaiting scroll: IntersectionObserver on trust-keys section
@@ -212,7 +217,7 @@ export function OnboardingTour() {
   return (
     <>
       <div className="corens-tour-backdrop" onClick={handleBackdropClick} />
-      <div className="corens-tour-hint" role="dialog" aria-live="polite">
+      <div className="corens-tour-hint" role="dialog" aria-live="polite" onClick={step === "state" ? () => setStep("awaiting-scroll") : undefined}>
         <div className="corens-tour-hint-content">
           <strong className="corens-tour-hint-title">{hint.title}</strong>
           <p className="corens-tour-hint-text">{hintText}</p>
