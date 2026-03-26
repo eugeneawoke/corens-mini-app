@@ -13,6 +13,8 @@ export interface ProfileSummary {
   profile: {
     displayName: string;
     handle: string;
+    gender: string;
+    partnerGender: string;
   };
   photo: {
     hasPhoto: boolean;
@@ -101,9 +103,14 @@ export interface UpdateTrustKeysRequest {
 
 export interface CompleteOnboardingRequest {
   displayName: string;
+  gender: string;
   stateKey: string;
   intentKey: string;
   trustKeys: string[];
+}
+
+export interface UpdateGenderPreferenceRequest {
+  partnerGender: string;
 }
 
 export interface UpdateVisibilityRequest {

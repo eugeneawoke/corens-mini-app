@@ -1,4 +1,4 @@
-import { BadgeInfo, Camera, HeartHandshake, KeyRound, LifeBuoy, Lock, RotateCcw, Trash2 } from "lucide-react";
+import { BadgeInfo, Camera, HeartHandshake, KeyRound, LifeBuoy, Lock, RotateCcw, Trash2, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 import { AppSurface, Button, ListRow, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
 
@@ -60,6 +60,12 @@ export default async function ProfilePage() {
             title="Ключи доверия"
             description={snapshot.trustKeys.limitLabel}
             icon={KeyRound}
+          />
+          <ListRow
+            href="/gender"
+            title="Пол и поиск"
+            description={snapshot.profile.partnerGender === "all" ? "Поиск среди всех" : "Настроен фильтр по полу"}
+            icon={Users}
           />
           <ListRow
             href="/photo"

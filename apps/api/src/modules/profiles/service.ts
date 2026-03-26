@@ -4,7 +4,8 @@ import type {
   ProfileSummary,
   UpdateVisibilityRequest,
   UpdateStateIntentRequest,
-  UpdateTrustKeysRequest
+  UpdateTrustKeysRequest,
+  UpdateGenderPreferenceRequest
 } from "@corens/domain";
 import {
   hideProfile,
@@ -95,6 +96,23 @@ export class ProfilesService {
     return this.buildSummary(record.user, updated, await this.hasPhoto(record.user.id));
   }
 
+  async updateGenderPreference(
+    user: AuthenticatedUserContext,
+    input: UpdateGenderPreferenceRequest
+  ): Promise<ProfileSummary> {
+    if (!["all", "same", "opposite"].includes(input.partnerGender)) {
+      throw new BadRequestException("Unknown partner gender preference");
+    }
+
+    const record = await this.ensureProfileRecord(user);
+    const updated = await this.prisma.clientInstance.profile.update({
+      where: { userId: record.user.id },
+      data: { partnerGender: input.partnerGender }
+    });
+
+    return this.buildSummary(record.user, updated, await this.hasPhoto(record.user.id));
+  }
+
   async completeOnboarding(
     user: AuthenticatedUserContext,
     input: CompleteOnboardingRequest
@@ -113,6 +131,10 @@ export class ProfilesService {
       throw new BadRequestException("Display name is too long");
     }
 
+    if (!["male", "female"].includes(input.gender)) {
+      throw new BadRequestException("Gender must be male or female");
+    }
+
     if (!stateOptions.some((option) => option.key === input.stateKey)) {
       throw new BadRequestException("Unknown state key");
     }
@@ -129,6 +151,7 @@ export class ProfilesService {
       where: { userId: record.user.id },
       data: {
         displayName,
+        gender: input.gender,
         stateKey: input.stateKey,
         intentKey: input.intentKey.trim(),
         trustKeys,
@@ -294,7 +317,9 @@ export class ProfilesService {
       onboardingCompleted: profile.onboardingCompleted,
       profile: {
         displayName: profile.displayName,
-        handle: user.telegramUsername ? `@${user.telegramUsername}` : `id:${user.telegramUserId}`
+        handle: user.telegramUsername ? `@${user.telegramUsername}` : `id:${user.telegramUserId}`,
+        gender: profile.gender,
+        partnerGender: profile.partnerGender
       },
       photo: {
         hasPhoto,

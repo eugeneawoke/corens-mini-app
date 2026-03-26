@@ -84,6 +84,27 @@ export default async function OnboardingPage() {
               />
             </Panel>
           </div>
+          <div data-onboarding="gender-field">
+            <Panel>
+              <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
+                <legend className="corens-label" style={{ marginBottom: 12 }}>Пол</legend>
+                <div className="corens-choice-grid">
+                  <label className="corens-choice-label">
+                    <input className="corens-choice-input" type="radio" name="gender" value="male" required />
+                    <span className="corens-choice-card">
+                      <strong className="corens-choice-title">Мужской</strong>
+                    </span>
+                  </label>
+                  <label className="corens-choice-label">
+                    <input className="corens-choice-input" type="radio" name="gender" value="female" />
+                    <span className="corens-choice-card">
+                      <strong className="corens-choice-title">Женский</strong>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+            </Panel>
+          </div>
         </Section>
 
         <Section title="Как вы сейчас?">

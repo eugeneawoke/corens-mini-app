@@ -30,6 +30,14 @@ async function sendApiMutation(path: string, init: RequestInit): Promise<void> {
   }
 }
 
+export async function cleanupBotNotificationsAction(): Promise<void> {
+  try {
+    await sendApiMutation("/api/profile/notifications/cleanup", { method: "POST" });
+  } catch {
+    // Silent — cleanup is best-effort
+  }
+}
+
 export async function activateBeaconAction(formData: FormData): Promise<void> {
   const durationMinutesRaw = formData.get("durationMinutes");
   const durationMinutes = durationMinutesRaw ? Number(durationMinutesRaw) : undefined;
@@ -83,6 +91,8 @@ export async function completeOnboardingAction(formData: FormData): Promise<void
     .replace(/[\x00-\x1F\x7F]/g, "")
     .replace(/[\u200B-\u200D\uFEFF\u202A-\u202E]/g, "")
     .replace(/[<>&"']/g, "");
+  const genderRaw = String(formData.get("gender") ?? "");
+  const gender = ["male", "female"].includes(genderRaw) ? genderRaw : "";
   const stateKey = String(formData.get("stateKey") ?? "");
   const intentKey = String(formData.get("intentKey") ?? "");
   const allowedTrustKeys = new Set(trustKeyGroups.flatMap((group) => group.items));
@@ -97,6 +107,7 @@ export async function completeOnboardingAction(formData: FormData): Promise<void
     method: "POST",
     body: JSON.stringify({
       displayName,
+      gender,
       stateKey,
       intentKey,
       trustKeys
@@ -152,6 +163,24 @@ export async function updateTrustKeysAction(formData: FormData): Promise<void> {
   revalidatePath("/profile");
   revalidatePath("/trust-keys");
   revalidatePath("/connection");
+  redirect("/profile");
+}
+
+export async function updateGenderPreferenceAction(formData: FormData): Promise<void> {
+  const partnerGender = String(formData.get("partnerGender") ?? "");
+
+  if (!["all", "same", "opposite"].includes(partnerGender)) {
+    return;
+  }
+
+  await sendApiMutation("/api/profile/gender-preference", {
+    method: "PATCH",
+    body: JSON.stringify({ partnerGender })
+  });
+
+  revalidateTag("profile");
+  revalidatePath("/profile");
+  revalidatePath("/gender");
   redirect("/profile");
 }
 

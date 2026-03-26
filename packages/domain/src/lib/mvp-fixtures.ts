@@ -118,7 +118,9 @@ export function createProfileSummary(state: DemoMvpState): ProfileSummary {
     onboardingCompleted: state.profile.onboardingCompleted,
     profile: {
       displayName: state.profile.displayName,
-      handle: state.profile.handle
+      handle: state.profile.handle,
+      gender: "",
+      partnerGender: "all"
     },
     photo: {
       hasPhoto: false,

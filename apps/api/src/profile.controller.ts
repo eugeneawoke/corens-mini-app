@@ -2,7 +2,8 @@ import { Body, Controller, Get, Patch, Post, UseGuards } from "@nestjs/common";
 import type {
   CompleteOnboardingRequest,
   UpdateStateIntentRequest,
-  UpdateTrustKeysRequest
+  UpdateTrustKeysRequest,
+  UpdateGenderPreferenceRequest
 } from "@corens/domain";
 import { AuthenticatedUser } from "./modules/auth/authenticated-user.decorator";
 import type { AuthenticatedUserContext } from "./modules/auth/service";
@@ -24,6 +25,12 @@ export class ProfileController {
     return this.profiles.getSummary(user);
   }
 
+  @Post("notifications/cleanup")
+  async cleanupNotifications(@AuthenticatedUser() user: AuthenticatedUserContext) {
+    await this.notifications.cleanupNotifications(user.telegramUserId);
+    return { ok: true };
+  }
+
   @Patch("state-intent")
   updateStateIntent(
     @AuthenticatedUser() user: AuthenticatedUserContext,
@@ -38,6 +45,14 @@ export class ProfileController {
     @Body() body: UpdateTrustKeysRequest
   ) {
     return this.profiles.updateTrustKeys(user, body);
+  }
+
+  @Patch("gender-preference")
+  updateGenderPreference(
+    @AuthenticatedUser() user: AuthenticatedUserContext,
+    @Body() body: UpdateGenderPreferenceRequest
+  ) {
+    return this.profiles.updateGenderPreference(user, body);
   }
 
   @Post("onboarding")

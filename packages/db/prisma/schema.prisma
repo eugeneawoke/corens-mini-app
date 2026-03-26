@@ -24,6 +24,8 @@ model Profile {
   userId            String   @id
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   displayName       String
+  gender            String   @default("")
+  partnerGender     String   @default("all")
   about             String?
   stateKey          String   @default("calm")
   intentKey         String   @default("")
