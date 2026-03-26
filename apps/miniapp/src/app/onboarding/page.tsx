@@ -91,13 +91,13 @@ export default async function OnboardingPage() {
                 <div className="corens-choice-grid">
                   <label className="corens-choice-label">
                     <input className="corens-choice-input" type="radio" name="gender" value="male" required />
-                    <span className="corens-choice-card">
+                    <span className="corens-choice-card corens-choice-card-compact">
                       <strong className="corens-choice-title">Мужской</strong>
                     </span>
                   </label>
                   <label className="corens-choice-label">
                     <input className="corens-choice-input" type="radio" name="gender" value="female" />
-                    <span className="corens-choice-card">
+                    <span className="corens-choice-card corens-choice-card-compact">
                       <strong className="corens-choice-title">Женский</strong>
                     </span>
                   </label>
@@ -116,7 +116,7 @@ export default async function OnboardingPage() {
                   const Icon = optionIcons[index % optionIcons.length];
 
                   return (
-                    <label key={option.key} className="corens-choice-label">
+                    <label key={option.key} className="corens-choice-label" {...(index === 0 ? { "data-onboarding": "first-state-card" } : {})}>
                       <input
                         className="corens-choice-input"
                         type="radio"

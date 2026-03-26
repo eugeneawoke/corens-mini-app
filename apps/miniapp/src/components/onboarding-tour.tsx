@@ -23,7 +23,7 @@ const HINTS: Partial<Record<Step, HintConfig>> = {
     text: "По умолчанию мы ищем людей любого пола. В настройках профиля можно уточнить — искать только своего или противоположного пола."
   },
   state: {
-    selector: "[data-onboarding='state-section']",
+    selector: "[data-onboarding='first-state-card']",
     title: "Как вы сейчас?",
     text: "Выберите состояние. Светлое или теневое — оба честны. Если сейчас сложно, можно выбрать теневое состояние."
   },
@@ -52,13 +52,13 @@ export function OnboardingTour() {
   }, []);
 
   const applySpotlight = useCallback(
-    (selector: string, focusInput?: boolean) => {
+    (selector: string, focusInput?: boolean, scroll = true) => {
       clearSpotlight();
       const el = document.querySelector(selector);
       if (!el) return;
       el.classList.add("corens-tour-spotlight");
       spotlightRef.current = el;
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (scroll) el.scrollIntoView({ behavior: "smooth", block: "center" });
       if (focusInput) {
         const input = el.querySelector("input") as HTMLInputElement | null;
         if (input) setTimeout(() => input.focus(), 300);
@@ -79,7 +79,14 @@ export function OnboardingTour() {
       return;
     }
     const hint = HINTS[step];
-    if (hint) applySpotlight(hint.selector, step === "name");
+    if (!hint) return;
+    if (step === "gender") {
+      // Dismiss keyboard, highlight block without scrolling
+      (document.activeElement as HTMLElement | null)?.blur();
+      applySpotlight(hint.selector, false, false);
+    } else {
+      applySpotlight(hint.selector, step === "name");
+    }
   }, [step, applySpotlight, clearSpotlight]);
 
   // Name step: advance on blur/Enter when filled; mark empty field when blank

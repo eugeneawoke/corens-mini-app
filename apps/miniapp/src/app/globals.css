@@ -518,6 +518,14 @@ textarea:focus-visible,
   border-radius: 16px;
 }
 
+.corens-choice-card-compact {
+  min-height: auto;
+  padding: 12px 16px;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+}
+
 .corens-choice-card-shadow {
   background: linear-gradient(180deg, rgba(248, 246, 242, 0.96), rgba(255, 255, 255, 0.92));
 }
