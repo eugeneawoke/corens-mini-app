@@ -96,8 +96,8 @@ export function OnboardingFormActions({ groups, selected }: Props) {
         </div>
 
         <div className="corens-panel corens-stack corens-gap-sm">
-          <p style={{ margin: 0, fontSize: "13px", color: "var(--corens-text-tertiary)", lineHeight: 1.4 }}>
-            Выберите ключи в каждой группе — они помогут найти близкого человека
+          <p style={{ margin: 0, fontSize: "14px", color: "var(--corens-text-secondary)", lineHeight: 1.5 }}>
+            Выберите хотя бы один ключ в каждой группе — это поможет найти человека, близкого по духу
           </p>
           {groups.map((group, gi) => {
             const limit = GROUP_LIMITS[gi] ?? 3;

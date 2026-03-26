@@ -1,0 +1,8 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - heading "Входим..." [level=1] [ref=e5]
+    - generic [ref=e8]:
+      - strong [ref=e9]: Не получилось войти
+      - paragraph [ref=e10]: Откройте приложение через Telegram — иначе войти не получится.
+    - button "Попробовать снова" [ref=e11]
+  - alert [ref=e12]

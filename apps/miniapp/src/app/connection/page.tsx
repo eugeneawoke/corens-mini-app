@@ -16,6 +16,7 @@ import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import { BeaconCountdown } from "../../components/beacon-countdown";
 import {
+  cleanupBotNotifications,
   getBeaconSummary,
   getConnections,
   getProfileSummary,
@@ -35,6 +36,7 @@ export default async function ConnectionPage() {
 
   try {
     profile = await getProfileSummary();
+    void cleanupBotNotifications();
   } catch (error) {
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;

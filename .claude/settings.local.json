@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(find /Users/eugene.gusakov/Documents/self-projects/corens-mini-app -type f -name README* -o -name package.json -o -name *.config.js -o -name *.config.ts -o -name .env*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(/Users/eugene.gusakov/.volta/bin/pnpm typecheck:*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm --filter @corens/db exec prisma generate)",
+      "Bash(grep -E \"\\\\.\\(tsx?|jsx?\\)$\")",
+      "Bash(grep -E \"\\\\.tsx?$\")",
+      "Bash(npx prisma:*)",
+      "Bash(ls /Users/eugene.gusakov/Documents/self-projects/corens-mini-app/*.env* /Users/eugene.gusakov/Documents/self-projects/corens-mini-app/apps/api/*.env*)",
+      "Bash(pnpm --filter @corens/domain build)",
+      "Bash(npx turbo:*)",
+      "Bash(pnpm --filter @corens/db prisma migrate dev --name add_bot_notification_message)",
+      "Bash(DATABASE_URL=postgresql://postgres:postgres@localhost:5432/corens DATABASE_URL_UNPOOLED=postgresql://postgres:postgres@localhost:5432/corens npx prisma generate --schema packages/db/prisma/schema.prisma)",
+      "Bash(ls .env*)"
+    ]
+  }
+}

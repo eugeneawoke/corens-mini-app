@@ -2,16 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Step = "name" | "gender" | "state" | "awaiting-scroll" | "trust-keys" | "done";
+type Step = "name" | "gender" | "state" | "done";
 
 interface HintConfig {
   selector: string;
   title: string;
   text: string;
-  dismissLabel?: string;
 }
 
-const HINTS: Partial<Record<Step, HintConfig>> = {
+const HINTS: Record<Exclude<Step, "done">, HintConfig> = {
   name: {
     selector: "[data-onboarding='name-field']",
     title: "Добро пожаловать в Corens",
@@ -26,12 +25,6 @@ const HINTS: Partial<Record<Step, HintConfig>> = {
     selector: "[data-onboarding='first-state-card']",
     title: "Как вы сейчас?",
     text: "Выберите состояние. Светлое или теневое — оба честны. Если сейчас сложно, можно выбрать теневое состояние."
-  },
-  "trust-keys": {
-    selector: "[data-onboarding='trust-keys-section']",
-    title: "Ключи доверия",
-    text: "Выберите что важно для вас в контакте с людьми. Совпадение ключей поможет найти тех, кто близок по духу.",
-    dismissLabel: "Понятно"
   }
 };
 
@@ -42,7 +35,6 @@ export function OnboardingTour() {
   const [step, setStep] = useState<Step>("name");
   const [nameSkipAttempted, setNameSkipAttempted] = useState(false);
   const spotlightRef = useRef<Element | null>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const clearSpotlight = useCallback(() => {
     if (spotlightRef.current) {
@@ -74,14 +66,12 @@ export function OnboardingTour() {
 
   // Apply spotlight when step changes
   useEffect(() => {
-    if (step === "done" || step === "awaiting-scroll") {
+    if (step === "done") {
       clearSpotlight();
       return;
     }
     const hint = HINTS[step];
-    if (!hint) return;
     if (step === "gender") {
-      // Dismiss keyboard, highlight block without scrolling
       (document.activeElement as HTMLElement | null)?.blur();
       applySpotlight(hint.selector, false, false);
     } else {
@@ -133,9 +123,7 @@ export function OnboardingTour() {
     const container = document.querySelector("[data-onboarding='gender-field']");
     if (!container) return;
 
-    const handleChange = () => {
-      setTimeout(() => setStep("state"), 200);
-    };
+    const handleChange = () => setTimeout(() => setStep("state"), 200);
     container.addEventListener("change", handleChange, { once: true });
     return () => container.removeEventListener("change", handleChange);
   }, [step]);
@@ -147,7 +135,7 @@ export function OnboardingTour() {
     const card = document.querySelector("[data-onboarding='first-state-card']");
     if (!container) return;
 
-    const advance = () => setStep("awaiting-scroll");
+    const advance = () => setStep("done");
     const advanceDelayed = () => setTimeout(advance, 350);
 
     container.addEventListener("change", advanceDelayed, { once: true });
@@ -158,31 +146,9 @@ export function OnboardingTour() {
     };
   }, [step]);
 
-  // Awaiting scroll: IntersectionObserver on trust-keys section
-  useEffect(() => {
-    if (step !== "awaiting-scroll") return;
-    const target = document.querySelector("[data-onboarding='trust-keys-section']");
-    if (!target) return;
-
-    observerRef.current = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          observerRef.current?.disconnect();
-          setStep("trust-keys");
-        }
-      },
-      { threshold: 0.3 }
-    );
-    observerRef.current.observe(target);
-    return () => observerRef.current?.disconnect();
-  }, [step]);
-
   // Cleanup on unmount
   useEffect(() => {
-    return () => {
-      clearSpotlight();
-      observerRef.current?.disconnect();
-    };
+    return () => clearSpotlight();
   }, [clearSpotlight]);
 
   const handleBackdropClick = () => {
@@ -199,40 +165,30 @@ export function OnboardingTour() {
       }
       return;
     }
-    if (step === "gender") {
-      // Gender is required — don't allow dismissing this step
-      return;
-    }
+    if (step === "gender") return;
     setStep("done");
   };
 
-  if (step === "done" || step === "awaiting-scroll") return null;
+  if (step === "done") return null;
 
   const hint = HINTS[step];
-  if (!hint) return null;
-
-  const hintText =
-    step === "name" && nameSkipAttempted ? NAME_SKIP_TEXT : hint.text;
+  const hintText = step === "name" && nameSkipAttempted ? NAME_SKIP_TEXT : hint.text;
 
   return (
     <>
       <div className="corens-tour-backdrop" onClick={handleBackdropClick} />
-      <div className="corens-tour-hint" role="dialog" aria-live="polite" onClick={step === "state" ? () => setStep("awaiting-scroll") : undefined}>
+      <div
+        className="corens-tour-hint"
+        role="dialog"
+        aria-live="polite"
+        onClick={step === "state" ? () => setStep("done") : undefined}
+      >
         <div className="corens-tour-hint-content">
           <strong className="corens-tour-hint-title">{hint.title}</strong>
           <p className="corens-tour-hint-text">{hintText}</p>
         </div>
-        <div className="corens-tour-hint-actions">
-          {hint.dismissLabel ? (
-            <button
-              type="button"
-              className="corens-tour-hint-btn-primary"
-              onClick={() => setStep("done")}
-            >
-              {hint.dismissLabel}
-            </button>
-          ) : null}
-          {step !== "name" && step !== "gender" ? (
+        {step !== "name" && step !== "gender" ? (
+          <div className="corens-tour-hint-actions">
             <button
               type="button"
               className="corens-tour-hint-btn-skip"
@@ -240,8 +196,8 @@ export function OnboardingTour() {
             >
               Пропустить
             </button>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
     </>
   );

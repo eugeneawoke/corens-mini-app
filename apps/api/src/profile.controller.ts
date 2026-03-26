@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Patch, Post, UseGuards } from "@nestjs/common";
+// Note: notifications/cleanup is intentionally GET (idempotent, called from server-side fetch)
 import type {
   CompleteOnboardingRequest,
   UpdateStateIntentRequest,
@@ -25,7 +26,7 @@ export class ProfileController {
     return this.profiles.getSummary(user);
   }
 
-  @Post("notifications/cleanup")
+  @Get("notifications/cleanup")
   async cleanupNotifications(@AuthenticatedUser() user: AuthenticatedUserContext) {
     await this.notifications.cleanupNotifications(user.telegramUserId);
     return { ok: true };

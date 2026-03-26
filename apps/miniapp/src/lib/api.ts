@@ -79,6 +79,15 @@ export async function getProfileSummary(): Promise<ProfileSummary> {
   return fetchFromApi("/api/profile/summary", { tags: ["profile"] });
 }
 
+export async function cleanupBotNotifications(): Promise<void> {
+  // No-store GET — runs on every server render of connection page to delete bot notification messages
+  try {
+    await fetchFromApi<{ ok: boolean }>("/api/profile/notifications/cleanup");
+  } catch {
+    // best-effort
+  }
+}
+
 export async function getBeaconSummary(): Promise<BeaconSummary> {
   return fetchFromApi("/api/beacon/status");
 }
