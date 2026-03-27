@@ -15,7 +15,7 @@
   --corens-beacon: #9b6bc4;
   --corens-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   --corens-radius-card: 20px;
-  --corens-radius-control: 16px;
+  --corens-radius-control: 999px;
   --corens-page-width: 440px;
 }
 
@@ -113,7 +113,7 @@ textarea:focus-visible,
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--tg-theme-bg-color, #fff);
+  background: var(--corens-bg);
 }
 
 .corens-topbar-copy {
@@ -748,8 +748,8 @@ textarea:focus-visible,
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 28px;
-  gap: 20px;
+  padding: 40px 32px;
+  gap: 16px;
   text-align: center;
   opacity: 0;
   transition: opacity 0.4s ease;
@@ -757,6 +757,19 @@ textarea:focus-visible,
 
 .corens-intro-slide[data-active="true"] {
   opacity: 1;
+}
+
+.corens-intro-slide .corens-hero-title {
+  font-family: var(--font-handwritten), cursive;
+  font-size: 52px;
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--corens-text);
+}
+
+.corens-intro-slide .corens-copy-muted {
+  font-size: 15px;
+  max-width: 280px;
 }
 
 .corens-intro-icon {

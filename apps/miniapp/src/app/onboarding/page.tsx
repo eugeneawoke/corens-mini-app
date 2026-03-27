@@ -1,14 +1,13 @@
 import { Compass, Heart, MoonStar, Orbit, Sparkle } from "lucide-react";
 import { redirect } from "next/navigation";
 import type { SelectOption } from "@corens/domain";
-import { AppSurface, Field, Panel, Section, TopBar } from "@corens/ui";
+import { AppSurface, Field, Panel, Section } from "@corens/ui";
 import { lightStateKeys, shadowStateKeys } from "@corens/domain/profile-options";
 
 import { completeOnboardingAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import { OnboardingFormActions } from "../../components/onboarding-form-actions";
-import { OnboardingTour } from "../../components/onboarding-tour";
 import {
   getProfileSummary,
   MiniAppBackendUnavailableError,
@@ -49,8 +48,6 @@ export default async function OnboardingPage() {
 
   return (
     <AppSurface>
-      <TopBar title="Добро пожаловать" subtitle="Давайте познакомимся" />
-
       <Panel className="corens-hero-card">
         <div className="corens-hero-copy">
           <span className="corens-eyebrow">Первый шаг</span>
@@ -66,8 +63,6 @@ export default async function OnboardingPage() {
           </div>
         </div>
       </Panel>
-
-      <OnboardingTour />
 
       <form action={completeOnboardingAction} className="corens-stack corens-gap-sm">
         <Section title="Как вас показывать?">
