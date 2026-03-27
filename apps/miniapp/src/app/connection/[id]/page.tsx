@@ -200,16 +200,12 @@ export default async function ConnectionDetailPage({
       <Section title="Если хочется отпустить эту связь">
         <Panel tone="warning">
           <div className="corens-stack corens-gap-sm">
-            <div className="corens-inline-head">
-              <Unlink2 size={18} />
-              <strong className="corens-card-title">Закрыть связь</strong>
-            </div>
             <p className="corens-copy corens-copy-muted">
-              После этого связь закроется, а этот человек не появится у вас в мэтче ближайшие 72 часа.
+              После этого связь прервётся, и этот человек не появится у вас снова в ближайшие 72 часа.
             </p>
             <form action={closeConnectionAction.bind(null, id)}>
               <Button type="submit" variant="secondary" className="corens-button-outline-warm">
-                Закрыть связь
+                Прервать связь
               </Button>
             </form>
             <ButtonLink
