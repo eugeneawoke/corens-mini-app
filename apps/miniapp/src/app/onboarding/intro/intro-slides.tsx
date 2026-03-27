@@ -77,7 +77,8 @@ export function IntroSlides() {
     return () => clearTimeout(timer);
   }, [current, isLast, isPaused, timerKey]);
 
-  const handlePointerDown = () => {
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
     pressStartRef.current = Date.now();
     setIsPaused(true);
   };
@@ -112,7 +113,6 @@ export function IntroSlides() {
         className="corens-intro-slides-wrap"
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerCancel}
         onPointerCancel={handlePointerCancel}
       >
         {SLIDES.map((slide, i) => (
@@ -130,21 +130,19 @@ export function IntroSlides() {
 
       <div className="corens-intro-footer">
         <div className="corens-intro-footer-row">
-          <div className="corens-intro-footer-side">
-            {current > 0 && (
-              <button
-                type="button"
-                className="corens-intro-back"
-                onPointerDown={(e) => e.stopPropagation()}
-                onPointerUp={(e) => {
-                  e.stopPropagation();
-                  if (current > 0) setCurrent((c) => c - 1);
-                }}
-              >
-                ← Назад
-              </button>
-            )}
-          </div>
+          {current > 0 && (
+            <button
+              type="button"
+              className="corens-intro-back"
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => {
+                e.stopPropagation();
+                setCurrent((c) => c - 1);
+              }}
+            >
+              ← Назад
+            </button>
+          )}
           <div
             key={`${current}-${timerKey}`}
             className="corens-intro-indicator"
@@ -158,7 +156,6 @@ export function IntroSlides() {
               />
             ))}
           </div>
-          <div className="corens-intro-footer-side" />
         </div>
 
         {isLast && (
@@ -171,7 +168,8 @@ export function IntroSlides() {
               router.push("/onboarding");
             }}
           >
-            Настроить профиль
+            Настроить профиль{" "}
+            <span className="corens-intro-cta-arrow" aria-hidden="true">→</span>
           </button>
         )}
       </div>
