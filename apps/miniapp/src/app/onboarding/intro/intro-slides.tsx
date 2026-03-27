@@ -4,6 +4,7 @@ import { Compass, Sparkle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
+import { markOnboardingStartedAction } from "../../actions";
 
 const SLIDE_DURATION = 4000;
 
@@ -67,20 +68,43 @@ function SlideIcon({ kind }: { kind: string }) {
 export function IntroSlides() {
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
   const pressStartRef = useRef<number | null>(null);
+  const isStartingRef = useRef(false);
   const router = useRouter();
   const isLast = current === SLIDES.length - 1;
 
   useEffect(() => {
-    if (isLast || isPaused) return;
+    router.prefetch("/onboarding");
+  }, [router]);
+
+  useEffect(() => {
+    if (isLast || isPaused || isStarting) return;
     const timer = setTimeout(() => setCurrent((c) => c + 1), SLIDE_DURATION);
     return () => clearTimeout(timer);
-  }, [current, isLast, isPaused, timerKey]);
+  }, [current, isLast, isPaused, isStarting, timerKey]);
+
+  async function beginOnboarding() {
+    if (isStartingRef.current) return;
+
+    isStartingRef.current = true;
+    setIsPaused(true);
+    setIsStarting(true);
+
+    try {
+      await markOnboardingStartedAction();
+      router.push("/onboarding");
+    } catch {
+      isStartingRef.current = false;
+      setIsStarting(false);
+      setIsPaused(false);
+    }
+  }
 
   function goNext() {
     if (isLast) {
-      router.push("/onboarding");
+      void beginOnboarding();
       return;
     }
 
@@ -93,7 +117,7 @@ export function IntroSlides() {
 
   const handleZonePointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
     // Only primary pointer (first finger / left mouse)
-    if (!e.isPrimary) return;
+    if (!e.isPrimary || isStartingRef.current) return;
 
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
@@ -109,7 +133,7 @@ export function IntroSlides() {
     e: ReactPointerEvent<HTMLButtonElement>,
     direction: "back" | "next"
   ) => {
-    if (!e.isPrimary) return;
+    if (!e.isPrimary || isStartingRef.current) return;
     if (pressStartRef.current === null) return;
 
     const held = Date.now() - pressStartRef.current;
@@ -130,7 +154,7 @@ export function IntroSlides() {
   };
 
   const handleZonePointerCancel = (e: ReactPointerEvent<HTMLButtonElement>) => {
-    if (!e.isPrimary) return;
+    if (!e.isPrimary || isStartingRef.current) return;
     pressStartRef.current = null;
     setIsPaused(false);
     setTimerKey((k) => k + 1);
@@ -140,11 +164,13 @@ export function IntroSlides() {
     <div
       className="corens-intro"
       data-paused={String(isPaused)}
+      data-transitioning={String(isStarting)}
     >
       <div className="corens-intro-hit-zones" aria-hidden="true">
         <button
           type="button"
           className="corens-intro-hit-zone"
+          disabled={isStarting}
           onPointerDown={handleZonePointerDown}
           onPointerUp={(e) => handleZonePointerUp(e, "back")}
           onPointerCancel={handleZonePointerCancel}
@@ -152,6 +178,7 @@ export function IntroSlides() {
         <button
           type="button"
           className="corens-intro-hit-zone"
+          disabled={isStarting}
           onPointerDown={handleZonePointerDown}
           onPointerUp={(e) => handleZonePointerUp(e, "next")}
           onPointerCancel={handleZonePointerCancel}
@@ -179,6 +206,7 @@ export function IntroSlides() {
               <button
                 type="button"
                 className="corens-intro-back"
+                disabled={isStarting}
                 onClick={goBack}
               >
                 ← Назад
@@ -204,6 +232,7 @@ export function IntroSlides() {
             <button
               type="button"
               className="corens-intro-cta"
+              disabled={isStarting}
               onClick={goNext}
             >
               {isLast ? "Начать" : "Дальше"}{" "}
@@ -212,6 +241,21 @@ export function IntroSlides() {
           </div>
         </div>
       </div>
+
+      {isStarting && (
+        <div className="corens-intro-transition" role="status" aria-live="polite">
+          <div className="corens-intro-transition-orb" aria-hidden="true" />
+          <div className="corens-intro-transition-copy">
+            <h2 className="corens-intro-transition-title">Начинаем знакомство</h2>
+            <p className="corens-intro-transition-text">Подготовим ваш первый шаг</p>
+          </div>
+          <div className="corens-intro-transition-dots" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

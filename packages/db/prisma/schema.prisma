@@ -35,6 +35,7 @@ model Profile {
   visibilityStatus  String
   matchingEnabled   Boolean  @default(true)
   onboardingCompleted Boolean @default(false)
+  onboardingStartedAt DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

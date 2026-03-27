@@ -65,6 +65,11 @@ export class ProfileController {
     return this.profiles.updateGenderPreference(user, body);
   }
 
+  @Post("onboarding/start")
+  markOnboardingStarted(@AuthenticatedUser() user: AuthenticatedUserContext) {
+    return this.profiles.markOnboardingStarted(user);
+  }
+
   @Post("onboarding")
   completeOnboarding(
     @AuthenticatedUser() user: AuthenticatedUserContext,

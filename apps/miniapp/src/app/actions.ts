@@ -38,6 +38,17 @@ export async function cleanupBotNotificationsAction(): Promise<void> {
   }
 }
 
+export async function markOnboardingStartedAction(): Promise<void> {
+  await sendApiMutation("/api/profile/onboarding/start", {
+    method: "POST",
+    body: JSON.stringify({})
+  });
+
+  revalidateTag("profile");
+  revalidatePath("/onboarding");
+  revalidatePath("/onboarding/intro");
+}
+
 export async function activateBeaconAction(formData: FormData): Promise<void> {
   const durationMinutesRaw = formData.get("durationMinutes");
   const durationMinutes = durationMinutesRaw ? Number(durationMinutesRaw) : undefined;

@@ -1,0 +1,2 @@
+ALTER TABLE "Profile"
+  ADD COLUMN IF NOT EXISTS "onboardingStartedAt" TIMESTAMPTZ;

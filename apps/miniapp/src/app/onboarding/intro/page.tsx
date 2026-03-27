@@ -30,5 +30,9 @@ export default async function OnboardingIntroPage() {
     redirect("/connection");
   }
 
+  if (snapshot.onboardingStartedAt) {
+    redirect("/onboarding");
+  }
+
   return <IntroSlides />;
 }

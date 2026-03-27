@@ -44,6 +44,18 @@ export class ProfilesService {
     return this.buildSummary(record.user, record.profile, await this.hasPhoto(record.user.id));
   }
 
+  async markOnboardingStarted(user: AuthenticatedUserContext): Promise<ProfileSummary> {
+    const record = await this.ensureProfileRecord(user);
+    const updated = await this.prisma.clientInstance.profile.update({
+      where: { userId: record.user.id },
+      data: {
+        onboardingStartedAt: record.profile.onboardingStartedAt ?? new Date()
+      }
+    });
+
+    return this.buildSummary(record.user, updated, await this.hasPhoto(record.user.id));
+  }
+
   async updateStateIntent(
     user: AuthenticatedUserContext,
     input: UpdateStateIntentRequest
@@ -179,6 +191,7 @@ export class ProfilesService {
         stateKey: input.stateKey,
         intentKey: input.intentKey.trim(),
         trustKeys,
+        onboardingStartedAt: record.profile.onboardingStartedAt ?? new Date(),
         onboardingCompleted: true
       }
     });
@@ -310,7 +323,8 @@ export class ProfilesService {
         intentKey: "",
         trustKeys: [],
         partnerGender: "opposite",
-        onboardingCompleted: false
+        onboardingCompleted: false,
+        onboardingStartedAt: null
       }
     });
 
@@ -340,6 +354,7 @@ export class ProfilesService {
 
     return {
       onboardingCompleted: profile.onboardingCompleted,
+      onboardingStartedAt: profile.onboardingStartedAt?.toISOString() ?? null,
       profile: {
         displayName: profile.displayName,
         handle: user.telegramUsername ? `@${user.telegramUsername}` : `id:${user.telegramUserId}`,

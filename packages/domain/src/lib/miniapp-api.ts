@@ -10,6 +10,7 @@ export interface SelectOption {
 
 export interface ProfileSummary {
   onboardingCompleted: boolean;
+  onboardingStartedAt: string | null;
   profile: {
     displayName: string;
     handle: string;

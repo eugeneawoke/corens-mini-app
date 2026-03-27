@@ -116,6 +116,7 @@ export function createProfileSummary(state: DemoMvpState): ProfileSummary {
 
   return {
     onboardingCompleted: state.profile.onboardingCompleted,
+    onboardingStartedAt: null,
     profile: {
       displayName: state.profile.displayName,
       handle: state.profile.handle,
