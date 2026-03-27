@@ -11,8 +11,11 @@ export interface MatchingScoringConfig {
     activeConnections: number;
   };
   cooldowns: {
-    trustKeysDays: number;
     intentHours: number;
+    pairRematchHours: number;
+  };
+  timers: {
+    activeMatchHours: number;
   };
   freshness: {
     moodHours: number;

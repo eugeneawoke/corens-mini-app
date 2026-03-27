@@ -6,6 +6,7 @@ import { BeaconButton } from "../../components/beacon-button";
 import { activateBeaconAction, deactivateBeaconAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
+import { BeaconHero } from "../../components/beacon-hero";
 import { BeaconCountdown } from "../../components/beacon-countdown";
 import {
   getBeaconSummary,
@@ -44,13 +45,14 @@ export default async function BeaconPage() {
 
   return (
     <AppSurface>
-      <TopBar title="Маяк" backHref="/" />
+      <TopBar title="Маяк" backHref="/beacon/about" />
 
       <Panel
         className="corens-stack corens-gap-sm"
         tone="beacon"
         style={isActive ? { boxShadow: "0 8px 32px rgba(155, 107, 196, 0.35)" } : undefined}
       >
+        <BeaconHero active={isActive} />
         <div className="corens-stack corens-gap-xs">
           <div className="corens-inline-head">
             <Radio size={18} />
@@ -88,13 +90,13 @@ export default async function BeaconPage() {
         <Panel>
           <div className="corens-stack corens-gap-sm">
             <p className="corens-copy corens-copy-muted">
-              На короткое время вы становитесь чуть заметнее для тех, кто сейчас рядом. Поиск при этом продолжается как обычно.
+              На короткое время вы становитесь чуть заметнее для тех, кто сейчас рядом. Это мягкий способ
+              дать поиску больше шансов, когда хочется не ждать слишком долго.
             </p>
-            <div className="corens-row">
-              <StatusBadge tone="accent">По желанию</StatusBadge>
-              <StatusBadge tone="neutral">Без лишнего</StatusBadge>
-              <StatusBadge tone="neutral">Приватно</StatusBadge>
-            </div>
+            <p className="corens-copy corens-copy-muted">
+              Маяк ничего не навязывает и не открывает лишнего. Он просто бережно помогает тем, кто вам подходит,
+              заметить вас немного раньше.
+            </p>
           </div>
         </Panel>
       </Section>

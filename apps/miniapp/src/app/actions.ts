@@ -288,3 +288,13 @@ export async function blockConnectionAction(connectionId: string, formData: Form
   revalidatePath("/connection");
   redirect("/connection");
 }
+
+export async function closeConnectionAction(connectionId: string): Promise<void> {
+  await sendApiMutation(`/api/matching/connections/${connectionId}/close`, {
+    method: "POST"
+  });
+
+  revalidatePath("/connection");
+  revalidatePath(`/connection/${connectionId}`);
+  redirect("/connection");
+}

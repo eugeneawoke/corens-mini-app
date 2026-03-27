@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Param, UseGuards } from "@nestjs/common";
+import { Controller, Get, NotFoundException, Param, Post, UseGuards } from "@nestjs/common";
 import type { ConnectionSummary } from "@corens/domain";
 import { AuthenticatedUser } from "./modules/auth/authenticated-user.decorator";
 import type { AuthenticatedUserContext } from "./modules/auth/service";
@@ -29,5 +29,14 @@ export class MatchingController {
     }
 
     return connection;
+  }
+
+  @Post("connections/:id/close")
+  async closeConnection(
+    @AuthenticatedUser() user: AuthenticatedUserContext,
+    @Param("id") id: string
+  ) {
+    await this.matching.closeConnection(user, id);
+    return { ok: true };
   }
 }

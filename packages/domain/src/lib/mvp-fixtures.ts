@@ -25,8 +25,11 @@ const matchingConfig = {
     activeConnections: 1
   },
   cooldowns: {
-    trustKeysDays: 14,
-    intentHours: 6
+    intentHours: 6,
+    pairRematchHours: 72
+  },
+  timers: {
+    activeMatchHours: 24
   },
   freshness: {
     moodHours: 2
@@ -141,7 +144,7 @@ export function createProfileSummary(state: DemoMvpState): ProfileSummary {
         selected: state.profile.trustKeys,
         groups: trustKeyGroups,
         limitLabel: `Выбрано ${state.profile.trustKeys.length} из 3`,
-        cooldownLabel: "Следующее изменение ключей через 14 дней",
+        cooldownLabel: "Можно изменить в любое время",
         isOnCooldown: false
       },
     privacy: {

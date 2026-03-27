@@ -14,6 +14,7 @@ import {
 import { deactivateBeaconAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
+import { BeaconHero } from "../../components/beacon-hero";
 import { BeaconCountdown } from "../../components/beacon-countdown";
 import {
   cleanupBotNotifications,
@@ -72,7 +73,7 @@ export default async function ConnectionPage() {
   const connections = connectionsResult.value;
   const beacon = beaconResult.status === "fulfilled" ? beaconResult.value : FALLBACK_BEACON;
   const activeConnections = connections.filter((c) => c.kind === "active");
-  const CONNECTION_LIMIT = 5;
+  const CONNECTION_LIMIT = 8;
   const isAtLimit = activeConnections.length >= CONNECTION_LIMIT;
 
   return (
@@ -134,6 +135,9 @@ export default async function ConnectionPage() {
       )}
 
       <Section title="Маяк">
+        <div className="corens-beacon-hero-shell">
+          <BeaconHero active={beacon.status === "active"} size={72} />
+        </div>
         <Panel tone={beacon.status === "active" ? "beacon" : "muted"}>
           <div className="corens-stack corens-gap-sm">
             <div className="corens-row corens-row-between">
@@ -180,7 +184,7 @@ export default async function ConnectionPage() {
                 <Button type="submit" variant="beacon">Потушить маяк</Button>
               </form>
             ) : (
-              <ButtonLink href="/beacon" variant="beacon">Зажечь маяк</ButtonLink>
+              <ButtonLink href="/beacon/about" variant="beacon">Зажечь маяк</ButtonLink>
             )}
           </div>
         </Panel>

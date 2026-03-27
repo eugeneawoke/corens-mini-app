@@ -129,8 +129,11 @@ export class PolicyConfigService {
         activeConnections: this.readNumber(raw, "limits.active_connections", 1)
       },
       cooldowns: {
-        trustKeysDays: this.readNumber(raw, "cooldowns.trust_keys_days"),
-        intentHours: this.readNumber(raw, "cooldowns.intent_hours")
+        intentHours: this.readNumber(raw, "cooldowns.intent_hours"),
+        pairRematchHours: this.readNumber(raw, "cooldowns.pair_rematch_hours")
+      },
+      timers: {
+        activeMatchHours: this.readNumber(raw, "timers.active_match_hours")
       },
       freshness: {
         moodHours: this.readNumber(raw, "freshness.mood_hours")

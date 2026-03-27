@@ -933,6 +933,52 @@ textarea:focus-visible,
   }
 }
 
+.corens-beacon-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.corens-beacon-hero-icon {
+  color: #d2963c;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center;
+}
+
+.corens-beacon-hero-icon::before {
+  content: "";
+  position: absolute;
+  inset: -26px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(244, 186, 93, 0.26) 0%, rgba(244, 186, 93, 0.12) 42%, rgba(244, 186, 93, 0.03) 72%, transparent 100%);
+  opacity: 0.44;
+}
+
+.corens-beacon-hero[data-active="true"] .corens-beacon-hero-icon {
+  animation: intro-beacon 4.6s ease-in-out infinite;
+}
+
+.corens-beacon-hero[data-active="true"] .corens-beacon-hero-icon::before {
+  animation: intro-beacon-glow 4.6s ease-in-out infinite;
+  opacity: 0.88;
+}
+
+.corens-beacon-hero-shell {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.corens-beacon-about {
+  min-height: calc(100dvh - 220px);
+  justify-content: center;
+}
+
 /* Pause all icon & progress animations on hold */
 .corens-intro[data-paused="true"] .corens-intro-icon-anim,
 .corens-intro[data-paused="true"] .corens-intro-dot[data-active="true"]::after {

@@ -6,11 +6,13 @@ weights:
   no_connections_bonus: 2
   recent_mood_bonus: 1
 limits:
-  active_connections: 5
+  active_connections: 8
 cooldowns:
   state_days: 3
-  trust_keys_days: 14
   intent_hours: 6
+  pair_rematch_hours: 72
+timers:
+  active_match_hours: 24
 freshness:
   mood_hours: 2
 notes:

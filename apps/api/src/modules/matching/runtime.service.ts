@@ -32,6 +32,7 @@ export class MatchingRuntimeService {
   // Returns the full list of connections (active + one peer_deleted if any)
   async getConnections(user: AuthenticatedUserContext): Promise<ConnectionSummary[]> {
     const record = await this.profiles.getCurrentProfileRecord(user);
+    await this.expireStaleActiveMatches();
 
     // Try to fill slots before building the response
     await this.ensureMatchFill(record.user.id);
@@ -79,6 +80,7 @@ export class MatchingRuntimeService {
     sessionId: string
   ): Promise<ConnectionSummary | null> {
     const record = await this.profiles.getCurrentProfileRecord(user);
+    await this.expireStaleActiveMatches();
     const session = await this.prisma.clientInstance.matchSession.findFirst({
       where: {
         id: sessionId,
@@ -94,7 +96,12 @@ export class MatchingRuntimeService {
       return this.buildPeerDeletedSummary();
     }
 
-    if (session.status === "closed_blocked" || session.status === "closed_reported") {
+    if (
+      session.status === "closed_blocked" ||
+      session.status === "closed_reported" ||
+      session.status === "closed_manual" ||
+      session.status === "closed_expired"
+    ) {
       return null;
     }
 
@@ -102,6 +109,8 @@ export class MatchingRuntimeService {
   }
 
   async sweep(): Promise<void> {
+    await this.expireStaleActiveMatches();
+
     const users = await this.prisma.clientInstance.user.findMany({
       where: {
         status: "active",
@@ -116,6 +125,70 @@ export class MatchingRuntimeService {
 
     for (const user of users) {
       await this.ensureMatchFill(user.id);
+    }
+  }
+
+  async closeConnection(user: AuthenticatedUserContext, connectionId: string): Promise<void> {
+    const record = await this.profiles.getCurrentProfileRecord(user);
+    const rules = await this.policyConfig.getMatchingScoring();
+    const now = new Date();
+    const cooldownUntil = new Date(
+      now.getTime() + rules.cooldowns.pairRematchHours * 60 * 60 * 1000
+    );
+
+    const match = await this.prisma.clientInstance.matchSession.findFirst({
+      where: {
+        id: connectionId,
+        status: "active",
+        OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
+      }
+    });
+
+    if (!match) {
+      throw new NotFoundException("Connection not found");
+    }
+
+    const peerUserId = match.userAId === record.user.id ? match.userBId : match.userAId;
+
+    await this.prisma.clientInstance.$transaction(async (tx) => {
+      await tx.matchSession.update({
+        where: { id: match.id },
+        data: {
+          status: "closed_manual",
+          expiresAt: cooldownUntil
+        }
+      });
+
+      await tx.contactConsent.updateMany({
+        where: {
+          matchSessionId: match.id,
+          requestStatus: "pending"
+        },
+        data: {
+          requestStatus: "declined",
+          resolvedAt: now
+        }
+      });
+
+      await tx.photoRevealConsent.updateMany({
+        where: {
+          matchSessionId: match.id,
+          requestStatus: "pending"
+        },
+        data: {
+          requestStatus: "declined",
+          resolvedAt: now
+        }
+      });
+    });
+
+    const peerUser = await this.prisma.clientInstance.user.findUnique({
+      where: { id: peerUserId },
+      select: { telegramUserId: true }
+    });
+
+    if (peerUser) {
+      void this.notifications.notifyConnectionClosed(peerUser.telegramUserId);
     }
   }
 
@@ -210,6 +283,79 @@ export class MatchingRuntimeService {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
+  private async expireStaleActiveMatches(): Promise<void> {
+    const rules = await this.policyConfig.getMatchingScoring();
+    const now = new Date();
+    const cooldownUntil = new Date(
+      now.getTime() + rules.cooldowns.pairRematchHours * 60 * 60 * 1000
+    );
+    const activeTtlMs = rules.timers.activeMatchHours * 60 * 60 * 1000;
+
+    const missingExpiry = await this.prisma.clientInstance.matchSession.findMany({
+      where: {
+        status: "active",
+        expiresAt: null
+      },
+      select: {
+        id: true,
+        createdAt: true
+      }
+    });
+
+    for (const session of missingExpiry) {
+      await this.prisma.clientInstance.matchSession.update({
+        where: { id: session.id },
+        data: {
+          expiresAt: new Date(session.createdAt.getTime() + activeTtlMs)
+        }
+      });
+    }
+
+    const staleSessions = await this.prisma.clientInstance.matchSession.findMany({
+      where: {
+        status: "active",
+        expiresAt: {
+          lte: now
+        }
+      },
+      select: { id: true }
+    });
+
+    for (const session of staleSessions) {
+      await this.prisma.clientInstance.$transaction(async (tx) => {
+        await tx.matchSession.update({
+          where: { id: session.id },
+          data: {
+            status: "closed_expired",
+            expiresAt: cooldownUntil
+          }
+        });
+
+        await tx.contactConsent.updateMany({
+          where: {
+            matchSessionId: session.id,
+            requestStatus: "pending"
+          },
+          data: {
+            requestStatus: "declined",
+            resolvedAt: now
+          }
+        });
+
+        await tx.photoRevealConsent.updateMany({
+          where: {
+            matchSessionId: session.id,
+            requestStatus: "pending"
+          },
+          data: {
+            requestStatus: "declined",
+            resolvedAt: now
+          }
+        });
+      });
+    }
+  }
+
   // Fills connection slots up to the limit (one new match per call — sweep runs this periodically)
   private async ensureMatchFill(userId: string): Promise<void> {
     const scoring = await this.policyConfig.getMatchingScoring();
@@ -271,6 +417,19 @@ export class MatchingRuntimeService {
       ).map((s) => s.pairKey)
     );
 
+    const temporarilyBlockedPairKeys = new Set(
+      (
+        await this.prisma.clientInstance.matchSession.findMany({
+          where: {
+            status: { in: ["closed_manual", "closed_expired"] },
+            expiresAt: { gt: new Date() },
+            OR: [{ userAId: userId }, { userBId: userId }]
+          },
+          select: { pairKey: true }
+        })
+      ).map((s) => s.pairKey)
+    );
+
     const activeBeaconUserIds = new Set(
       (
         await this.prisma.clientInstance.beaconSession.findMany({
@@ -305,7 +464,7 @@ export class MatchingRuntimeService {
     for (const candidateProfile of allProfiles) {
       const pairKey = [self.userId, candidateProfile.userId].sort().join(":");
       const hasActivePairMatch = myActivePairKeys.has(pairKey);
-      const hasPairExclusion = blockedPairKeys.has(pairKey);
+      const hasPairExclusion = blockedPairKeys.has(pairKey) || temporarilyBlockedPairKeys.has(pairKey);
 
       const candidate = this.toCandidate(
         candidateProfile,
@@ -377,7 +536,10 @@ export class MatchingRuntimeService {
             userBId,
             origin: bestMatch!.origin,
             status: "active",
-            score: bestMatch!.score
+            score: bestMatch!.score,
+            expiresAt: new Date(
+              Date.now() + scoring.timers.activeMatchHours * 60 * 60 * 1000
+            )
           }
         });
         isNewMatch = true;

@@ -4,14 +4,13 @@ import {
   AppSurface,
   Button,
   ButtonLink,
-  Field,
   Panel,
   Section,
   StatusBadge,
   TopBar
 } from "@corens/ui";
 
-import { blockConnectionAction, reportConnectionAction } from "../../actions";
+import { closeConnectionAction } from "../../actions";
 import { LockStatusHint } from "../../../components/lock-status-hint";
 import { AuthBootstrapScreen } from "../../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../../components/backend-unavailable";
@@ -198,32 +197,22 @@ export default async function ConnectionDetailPage({
         </Panel>
       </Section>
 
-      <Section title="Если что-то пошло не так">
+      <Section title="Если хочется отпустить эту связь">
         <Panel tone="warning">
           <div className="corens-stack corens-gap-sm">
             <div className="corens-inline-head">
               <Unlink2 size={18} />
-              <strong className="corens-card-title">Выйти из этой связи</strong>
+              <strong className="corens-card-title">Закрыть связь</strong>
             </div>
             <p className="corens-copy corens-copy-muted">
-              После этого связь закроется, все открытые процессы остановятся.
+              После этого связь закроется, а этот человек не появится у вас в мэтче ближайшие 72 часа.
             </p>
-            <form action={reportConnectionAction.bind(null, id)} className="corens-stack corens-gap-sm">
-              <Field
-                name="note"
-                label="Что случилось?"
-                placeholder="Опишите кратко"
-              />
-              <Button type="submit" variant="secondary">Пожаловаться на этого человека</Button>
+            <form action={closeConnectionAction.bind(null, id)}>
+              <Button type="submit" variant="secondary">Закрыть связь</Button>
             </form>
-            <form action={blockConnectionAction.bind(null, id)} className="corens-stack corens-gap-sm">
-              <Field
-                name="note"
-                label="Почему вы хотите заблокировать?"
-                placeholder="Опишите кратко"
-              />
-              <Button type="submit" variant="danger">Заблокировать</Button>
-            </form>
+            <ButtonLink href={`/connection/${id}/safety`} variant="ghost">
+              Пожаловаться или заблокировать
+            </ButtonLink>
           </div>
         </Panel>
       </Section>
