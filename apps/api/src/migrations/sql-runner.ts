@@ -1,11 +1,59 @@
+import { execFile } from "node:child_process";
 import { readdir, readFile } from "node:fs/promises";
+import { promisify } from "node:util";
 import path from "node:path";
 import { Client } from "pg";
 
 const MIGRATION_TABLE = "__corens_sql_migrations";
+const execFileAsync = promisify(execFile);
+
+function resolvePrismaSchemaPath(): string {
+  return path.resolve(process.cwd(), "../../packages/db/prisma/schema.prisma");
+}
 
 function resolveMigrationsDir(): string {
   return path.resolve(process.cwd(), "../../migrations");
+}
+
+async function hasBaseSchema(client: Client): Promise<boolean> {
+  const result = await client.query<{ table_name: string }>(`
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name IN ('User', 'Profile')
+  `);
+
+  const existingTables = new Set(result.rows.map((row) => row.table_name));
+
+  return existingTables.has("User") && existingTables.has("Profile");
+}
+
+async function bootstrapBaseSchemaIfNeeded(client: Client): Promise<void> {
+  if (await hasBaseSchema(client)) {
+    return;
+  }
+
+  await client.end();
+
+  await execFileAsync(
+    "corepack",
+    [
+      "pnpm",
+      "exec",
+      "prisma",
+      "db",
+      "push",
+      "--skip-generate",
+      "--schema",
+      resolvePrismaSchemaPath()
+    ],
+    {
+      cwd: process.cwd(),
+      env: process.env
+    }
+  );
+
+  await client.connect();
 }
 
 async function ensureMigrationTable(client: Client): Promise<void> {
@@ -47,6 +95,7 @@ export async function runPendingSqlMigrations(): Promise<void> {
   await client.connect();
 
   try {
+    await bootstrapBaseSchemaIfNeeded(client);
     await ensureMigrationTable(client);
 
     const [appliedMigrations, migrationFiles] = await Promise.all([
