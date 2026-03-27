@@ -2,83 +2,118 @@
 
 import { Compass, Sparkle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+const SLIDE_DURATION = 4000;
 
 const SLIDES = [
   {
-    icon: "compass",
+    icon: "compass" as const,
     title: "Живой контакт",
     text: "Corens — это живой контакт с людьми рядом, без ленты и алгоритмов",
   },
   {
-    icon: "sparkle",
+    icon: "sparkle" as const,
     title: "Умный поиск",
     text: "Мы подбираем людей по состоянию, намерению и ключам доверия — автоматически",
   },
   {
-    icon: "beacon",
+    icon: "beacon" as const,
     title: "Маяк",
     text: "Включите маяк, когда хочется познакомиться прямо сейчас. Люди с похожим состоянием рядом увидят вас первыми",
   },
 ] as const;
 
 function SlideIcon({ kind }: { kind: string }) {
-  if (kind === "compass") return <Compass size={32} />;
-  if (kind === "sparkle") return <Sparkle size={32} />;
+  if (kind === "compass") {
+    return (
+      <div className="corens-intro-icon-anim corens-intro-icon-compass">
+        <Compass size={44} />
+      </div>
+    );
+  }
+  if (kind === "sparkle") {
+    return (
+      <div className="corens-intro-icon-anim corens-intro-icon-sparkle">
+        <Sparkle size={44} />
+      </div>
+    );
+  }
   return (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M5 21h14" />
-      <path d="M8 21v-2h8v2" />
-      <path d="M9 19l-1-8h8l-1 8" />
-      <path d="M8.6 14.5h6.8" />
-      <rect x="7" y="7" width="10" height="4" rx="0.5" />
-      <path d="M7.5 7 Q12 4 16.5 7" />
-    </svg>
+    <div className="corens-intro-icon-anim corens-intro-icon-beacon">
+      <svg
+        width="44"
+        height="44"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M5 21h14" />
+        <path d="M8 21v-2h8v2" />
+        <path d="M9 19l-1-8h8l-1 8" />
+        <path d="M8.6 14.5h6.8" />
+        <rect x="7" y="7" width="10" height="4" rx="0.5" />
+        <path d="M7.5 7 Q12 4 16.5 7" />
+      </svg>
+    </div>
   );
 }
 
 export function IntroSlides() {
   const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [timerKey, setTimerKey] = useState(0);
+  const pressStartRef = useRef(0);
   const router = useRouter();
   const isLast = current === SLIDES.length - 1;
 
   useEffect(() => {
-    if (isLast) return;
-    const timer = setTimeout(() => setCurrent((c) => c + 1), 4000);
+    if (isLast || isPaused) return;
+    const timer = setTimeout(() => setCurrent((c) => c + 1), SLIDE_DURATION);
     return () => clearTimeout(timer);
-  }, [current, isLast]);
+  }, [current, isLast, isPaused, timerKey]);
 
-  const advance = () => {
-    if (isLast) {
-      router.push("/onboarding");
+  const handlePointerDown = () => {
+    pressStartRef.current = Date.now();
+    setIsPaused(true);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const held = Date.now() - pressStartRef.current;
+    setIsPaused(false);
+
+    if (held < 250) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const isLeft = e.clientX < rect.left + rect.width / 2;
+      if (isLeft) {
+        if (current > 0) setCurrent((c) => c - 1);
+      } else {
+        if (isLast) router.push("/onboarding");
+        else setCurrent((c) => c + 1);
+      }
     } else {
-      setCurrent((c) => c + 1);
+      // Long hold — reset animation and timer on resume
+      setTimerKey((k) => k + 1);
     }
   };
 
-  const goBack = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrent((c) => c - 1);
+  const handlePointerCancel = () => {
+    setIsPaused(false);
+    setTimerKey((k) => k + 1);
   };
 
   return (
-    <div className="corens-intro">
+    <div className="corens-intro" data-paused={String(isPaused)}>
       <div
         className="corens-intro-slides-wrap"
-        onClick={advance}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => e.key === "Enter" && advance()}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerCancel}
+        onPointerCancel={handlePointerCancel}
       >
         {SLIDES.map((slide, i) => (
           <div
@@ -86,9 +121,7 @@ export function IntroSlides() {
             className="corens-intro-slide"
             data-active={String(i === current)}
           >
-            <div className="corens-intro-icon">
-              <SlideIcon kind={slide.icon} />
-            </div>
+            <SlideIcon kind={slide.icon} />
             <h1 className="corens-hero-title">{slide.title}</h1>
             <p className="corens-copy corens-copy-muted">{slide.text}</p>
           </div>
@@ -96,30 +129,44 @@ export function IntroSlides() {
       </div>
 
       <div className="corens-intro-footer">
-        {/* key=current forces remount on slide change → CSS progress animation restarts */}
-        <div key={current} className="corens-intro-indicator" aria-hidden="true">
-          {SLIDES.map((_, i) => (
-            <div
-              key={i}
-              className="corens-intro-dot"
-              data-active={String(i === current)}
-            />
-          ))}
-        </div>
-        {current > 0 && (
-          <button
-            type="button"
-            className="corens-intro-back"
-            onClick={goBack}
+        <div className="corens-intro-footer-row">
+          <div className="corens-intro-footer-side">
+            {current > 0 && (
+              <button
+                type="button"
+                className="corens-intro-back"
+                onPointerDown={(e) => e.stopPropagation()}
+                onPointerUp={(e) => {
+                  e.stopPropagation();
+                  if (current > 0) setCurrent((c) => c - 1);
+                }}
+              >
+                ← Назад
+              </button>
+            )}
+          </div>
+          <div
+            key={`${current}-${timerKey}`}
+            className="corens-intro-indicator"
+            aria-hidden="true"
           >
-            ← Назад
-          </button>
-        )}
+            {SLIDES.map((_, i) => (
+              <div
+                key={i}
+                className="corens-intro-dot"
+                data-active={String(i === current)}
+              />
+            ))}
+          </div>
+          <div className="corens-intro-footer-side" />
+        </div>
+
         {isLast && (
           <button
             type="button"
-            className="corens-button corens-button-primary"
-            onClick={(e) => {
+            className="corens-intro-cta"
+            onPointerDown={(e) => e.stopPropagation()}
+            onPointerUp={(e) => {
               e.stopPropagation();
               router.push("/onboarding");
             }}
