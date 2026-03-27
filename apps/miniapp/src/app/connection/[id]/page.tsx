@@ -1,4 +1,4 @@
-import { Camera, ExternalLink, Shield, Unlink2 } from "lucide-react";
+import { ExternalLink, Shield, Unlink2 } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import {
   AppSurface,
@@ -131,14 +131,11 @@ export default async function ConnectionDetailPage({
             <span className="corens-eyebrow">О человеке рядом</span>
             <h2 className="corens-section-title">{connection.displayName}</h2>
             <p className="corens-copy corens-copy-muted">
-              Фото и способ связаться откроются только если вы оба захотите.
+              Способ связаться откроется только если вы оба захотите.
             </p>
           </div>
           <LockStatusHint
-            anyConsentApproved={
-              connection.contactConsent.status === "approved" ||
-              connection.photoConsent.status === "approved"
-            }
+            anyConsentApproved={connection.contactConsent.status === "approved"}
           />
         </div>
         <div className="corens-chip-row">
@@ -195,38 +192,6 @@ export default async function ConnectionDetailPage({
             ) : (
               <ButtonLink href={`/contact-consent?id=${id}`} variant="secondary">
                 Обменяться контактами
-              </ButtonLink>
-            )}
-          </div>
-        </Panel>
-
-        <Panel>
-          <div className="corens-stack corens-gap-sm">
-            <div className="corens-row corens-row-between">
-              <div className="corens-inline-head">
-                <Camera size={18} />
-                <div className="corens-stack corens-gap-xs">
-                  <strong className="corens-card-title">Фотография</strong>
-                  <span className="corens-list-description">
-                    {connection.photoConsent.status === "approved"
-                      ? "Оба согласились — фото доступно."
-                      : connection.photoConsent.myDecision === "approved"
-                        ? "Вы согласились. Ждём ответа другого человека."
-                        : "Открыть фото можно отдельно — это самостоятельный шаг."}
-                  </span>
-                </div>
-              </div>
-              {statusLabel(connection.photoConsent.status) && (
-                <StatusBadge tone={toneForStatus(connection.photoConsent.status)}>
-                  {statusLabel(connection.photoConsent.status)}
-                </StatusBadge>
-              )}
-            </div>
-            {connection.photoConsent.myDecision === "approved" && connection.photoConsent.status !== "approved" ? (
-              <StatusBadge tone="warning">Ждём ответа</StatusBadge>
-            ) : (
-              <ButtonLink href={`/photo-reveal?id=${id}`} variant={connection.photoConsent.status === "approved" ? "success" : "secondary"}>
-                {connection.photoConsent.status === "approved" ? "Посмотреть фото" : "Показать фото"}
               </ButtonLink>
             )}
           </div>

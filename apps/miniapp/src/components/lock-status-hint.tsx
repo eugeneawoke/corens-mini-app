@@ -41,7 +41,7 @@ export function LockStatusHint({ anyConsentApproved }: LockStatusHintProps) {
           <p className="corens-lock-hint-text">
             {anyConsentApproved
               ? "Один из шагов уже пройден — продолжайте"
-              : "Фото и контакт откроются, когда оба дадут согласие"}
+              : "Способ связаться откроется, когда оба дадут согласие"}
           </p>
         </div>
       )}

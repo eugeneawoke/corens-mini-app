@@ -1,13 +1,7 @@
-import { Camera, Lock } from "lucide-react";
 import { redirect } from "next/navigation";
-import { Button, ButtonLink, NoticeCard, StatusBadge } from "@corens/ui";
-
-import { approveConsentAction, declineConsentAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import {
-  getConsentStatus,
-  getPhotoRevealSummary,
   getProfileSummary,
   MiniAppBackendUnavailableError,
   MiniAppSessionRequiredError
@@ -25,13 +19,9 @@ export default async function PhotoRevealPage({
   }
 
   let profile;
-  let resolution;
-  let reveal;
 
   try {
     profile = await getProfileSummary();
-    resolution = await getConsentStatus("photo", connectionId);
-    reveal = await getPhotoRevealSummary(connectionId);
   } catch (error) {
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;
@@ -48,78 +38,5 @@ export default async function PhotoRevealPage({
     redirect("/onboarding/intro");
   }
 
-  return (
-    <div className="corens-sheet-layout">
-      <div className="corens-sheet">
-        <div className="corens-sheet-handle" />
-        <div className="corens-sheet-copy">
-          <div className="corens-sheet-icon">
-            <Camera size={28} />
-          </div>
-          <span className="corens-eyebrow">Взаимный шаг</span>
-          <h1 className="corens-section-title">Увидеть друг друга?</h1>
-          <p className="corens-copy corens-copy-muted">
-            Фотографии открываются только когда оба захотят. Это отдельный шаг — не связанный с контактами.
-          </p>
-          <div className="corens-status-lock">
-            <Lock size={26} />
-          </div>
-        </div>
-
-        <NoticeCard
-          title="Пока здесь"
-          description={
-            resolution?.warnings.includes("peer_deleted")
-              ? "Другой человек удалил аккаунт. Эта связь закрыта, поэтому фото больше недоступно."
-              : reveal.state === "photo_missing"
-                ? "Вы оба согласились, но у другого человека пока нет загруженного фото."
-                : "Фото откроется только если вы оба нажмёте «да»."
-          }
-          tone={resolution?.warnings.includes("peer_deleted") ? "danger" : "warning"}
-        />
-
-        {reveal.state === "ready" && reveal.imageUrl ? (
-          <img
-            src={reveal.imageUrl}
-            alt="Фото собеседника"
-            style={{ width: "100%", borderRadius: 24, objectFit: "cover", marginTop: 16 }}
-          />
-        ) : null}
-
-        <div className="corens-action-stack" style={{ marginTop: 16 }}>
-          {resolution?.warnings.includes("peer_deleted") ? (
-            <StatusBadge tone="danger">Связь закрыта</StatusBadge>
-          ) : resolution?.status === "approved" ? (
-            <StatusBadge tone="success">Фото открыто</StatusBadge>
-          ) : resolution?.myDecision === "approved" ? (
-            <>
-              <StatusBadge tone="warning">Ждём ответа</StatusBadge>
-              <p className="corens-copy corens-copy-muted" style={{ textAlign: "center" }}>
-                Вы уже согласились. Фото откроется, как только другой человек тоже согласится.
-              </p>
-            </>
-          ) : resolution?.myDecision === "declined" ? (
-            <>
-              <StatusBadge tone="danger">Вы отказались</StatusBadge>
-              <form action={approveConsentAction.bind(null, "photo", connectionId)}>
-                <Button variant="secondary">Передумал, хочу видеть</Button>
-              </form>
-            </>
-          ) : (
-            <>
-              <form action={approveConsentAction.bind(null, "photo", connectionId)}>
-                <Button>Да, хочу видеть</Button>
-              </form>
-              <form action={declineConsentAction.bind(null, "photo", connectionId)}>
-                <Button variant="danger">Пока не хочу</Button>
-              </form>
-            </>
-          )}
-          <ButtonLink href={`/connection/${connectionId}`} variant="ghost">
-            Вернуться
-          </ButtonLink>
-        </div>
-      </div>
-    </div>
-  );
+  redirect(`/connection/${connectionId}`);
 }
