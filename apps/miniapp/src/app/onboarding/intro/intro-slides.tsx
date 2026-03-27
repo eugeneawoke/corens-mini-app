@@ -66,6 +66,11 @@ export function IntroSlides() {
     }
   };
 
+  const goBack = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrent((c) => c - 1);
+  };
+
   return (
     <div className="corens-intro">
       <div
@@ -91,7 +96,8 @@ export function IntroSlides() {
       </div>
 
       <div className="corens-intro-footer">
-        <div className="corens-intro-indicator" aria-hidden="true">
+        {/* key=current forces remount on slide change → CSS progress animation restarts */}
+        <div key={current} className="corens-intro-indicator" aria-hidden="true">
           {SLIDES.map((_, i) => (
             <div
               key={i}
@@ -100,6 +106,15 @@ export function IntroSlides() {
             />
           ))}
         </div>
+        {current > 0 && (
+          <button
+            type="button"
+            className="corens-intro-back"
+            onClick={goBack}
+          >
+            ← Назад
+          </button>
+        )}
         {isLast && (
           <button
             type="button"

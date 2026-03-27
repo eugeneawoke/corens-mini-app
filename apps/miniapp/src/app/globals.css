@@ -813,7 +813,33 @@ textarea:focus-visible,
 .corens-intro-dot[data-active="true"] {
   width: 22px;
   opacity: 1;
+  background: var(--corens-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.corens-intro-dot[data-active="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   background: var(--corens-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: intro-progress 4s linear forwards;
+}
+
+@keyframes intro-progress {
+  to { transform: scaleX(1); }
+}
+
+.corens-intro-back {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--corens-text-secondary);
+  cursor: pointer;
+  padding: 4px 12px;
 }
 
 .corens-empty-orb {
