@@ -734,11 +734,13 @@ textarea:focus-visible,
 .corens-bio-textarea {
   width: 100%;
   border: none;
+  border-radius: 0;
   background: transparent;
   font-size: 16px;
   line-height: 1.55;
   resize: none;
   outline: none;
+  box-shadow: none;
   font-family: inherit;
   color: var(--corens-text);
   padding: 0;
@@ -752,6 +754,13 @@ textarea:focus-visible,
   overflow-wrap: anywhere;
   word-break: break-word;
   white-space: pre-wrap;
+}
+
+.corens-bio-textarea:focus,
+.corens-bio-textarea:focus-visible {
+  border: none;
+  outline: none;
+  box-shadow: none;
 }
 
 .corens-bio-textarea::placeholder {
