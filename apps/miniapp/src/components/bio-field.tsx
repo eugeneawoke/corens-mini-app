@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { updateAboutAction } from "../app/actions";
 
@@ -9,30 +9,46 @@ interface BioFieldProps {
 }
 
 export function BioField({ initialValue }: BioFieldProps) {
-  const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialValue ?? "");
   const [, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const initialValueRef = useRef(initialValue ?? "");
 
-  const handleActivate = () => {
-    setIsEditing(true);
-    setTimeout(() => textareaRef.current?.focus(), 0);
+  useEffect(() => {
+    const nextValue = initialValue ?? "";
+    setValue(nextValue);
+    initialValueRef.current = nextValue;
+  }, [initialValue]);
+
+  const resizeTextarea = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "0px";
+    const maxHeight = 160;
+    const nextHeight = Math.min(textarea.scrollHeight, maxHeight);
+    textarea.style.height = `${nextHeight}px`;
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
   };
 
+  useEffect(() => {
+    resizeTextarea();
+  }, [value]);
+
   const handleBlur = () => {
-    setIsEditing(false);
     const trimmed = value.trim();
-    if (trimmed !== (initialValue ?? "")) {
+    if (trimmed !== initialValueRef.current) {
       startTransition(() => {
         updateAboutAction(trimmed);
       });
+      initialValueRef.current = trimmed;
     }
   };
 
-  if (isEditing) {
-    return (
-      <div className="corens-bio-field">
-        <span className="corens-eyebrow">О себе</span>
+  return (
+    <div className="corens-bio-field">
+      <span className="corens-eyebrow">О себе</span>
+      <div className="corens-bio-editor">
         <textarea
           ref={textareaRef}
           className="corens-bio-textarea"
@@ -40,30 +56,13 @@ export function BioField({ initialValue }: BioFieldProps) {
           onChange={(e) => setValue(e.target.value)}
           onBlur={handleBlur}
           maxLength={200}
-          placeholder="Расскажите немного о себе..."
+          placeholder="Расскажите немного о себе"
           rows={3}
         />
-        <p className="corens-copy corens-copy-muted" style={{ fontSize: 12 }}>
-          {value.length}/200
-        </p>
       </div>
-    );
-  }
-
-  return (
-    <div
-      className="corens-bio-field corens-bio-field-interactive"
-      onClick={handleActivate}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && handleActivate()}
-    >
-      <span className="corens-eyebrow">О себе</span>
-      {value.trim() ? (
-        <p className="corens-copy">{value}</p>
-      ) : (
-        <p className="corens-copy corens-copy-muted">Добавить о себе...</p>
-      )}
+      <p className="corens-copy corens-copy-muted corens-bio-counter">
+        {value.length}/200
+      </p>
     </div>
   );
 }

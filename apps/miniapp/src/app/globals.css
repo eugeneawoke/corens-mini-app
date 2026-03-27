@@ -710,25 +710,57 @@ textarea:focus-visible,
 .corens-bio-field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 4px 0;
+  gap: 8px;
+  padding: 4px 0 0;
 }
 
-.corens-bio-field-interactive {
-  cursor: text;
+.corens-bio-editor {
+  border: 1px solid var(--corens-border);
+  border-radius: 16px;
+  background: rgba(249, 249, 248, 0.96);
+  padding: 12px 14px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.corens-bio-editor:has(.corens-bio-textarea:focus) {
+  border-color: rgba(108, 106, 196, 0.42);
+  box-shadow: 0 0 0 4px rgba(108, 106, 196, 0.08);
+  background: #fff;
 }
 
 .corens-bio-textarea {
   width: 100%;
   border: none;
   background: transparent;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 16px;
+  line-height: 1.55;
   resize: none;
   outline: none;
   font-family: inherit;
   color: var(--corens-text);
   padding: 0;
+  min-height: 72px;
+  max-height: 160px;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  -webkit-appearance: none;
+  -webkit-text-size-adjust: 100%;
+  caret-color: var(--corens-accent);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.corens-bio-textarea::placeholder {
+  color: var(--corens-text-secondary);
+}
+
+.corens-bio-counter {
+  align-self: flex-end;
+  font-size: 12px;
 }
 
 /* Intro onboarding slides */
