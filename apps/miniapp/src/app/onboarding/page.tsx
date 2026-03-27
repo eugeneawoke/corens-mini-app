@@ -72,7 +72,7 @@ export default async function OnboardingPage() {
                 name="displayName"
                 label="Имя в профиле"
                 defaultValue=""
-                placeholder="Например, Мария"
+                placeholder="Например, Маша"
                 minLength={2}
                 maxLength={48}
                 required

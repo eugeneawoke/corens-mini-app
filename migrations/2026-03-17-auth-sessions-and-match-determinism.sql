@@ -1,5 +1,5 @@
 ALTER TABLE "MatchSession"
-ADD COLUMN "pairKey" TEXT;
+ADD COLUMN IF NOT EXISTS "pairKey" TEXT;
 
 UPDATE "MatchSession"
 SET "pairKey" = CASE
@@ -8,14 +8,25 @@ SET "pairKey" = CASE
 END
 WHERE "pairKey" IS NULL;
 
-ALTER TABLE "MatchSession"
-ALTER COLUMN "pairKey" SET NOT NULL;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'MatchSession'
+      AND column_name = 'pairKey'
+      AND is_nullable = 'YES'
+  ) THEN
+    ALTER TABLE "MatchSession"
+      ALTER COLUMN "pairKey" SET NOT NULL;
+  END IF;
+END $$;
 
-CREATE UNIQUE INDEX "MatchSession_pairKey_status_key" ON "MatchSession"("pairKey", "status");
-CREATE INDEX "MatchSession_userAId_status_idx" ON "MatchSession"("userAId", "status");
-CREATE INDEX "MatchSession_userBId_status_idx" ON "MatchSession"("userBId", "status");
+CREATE UNIQUE INDEX IF NOT EXISTS "MatchSession_pairKey_status_key" ON "MatchSession"("pairKey", "status");
+CREATE INDEX IF NOT EXISTS "MatchSession_userAId_status_idx" ON "MatchSession"("userAId", "status");
+CREATE INDEX IF NOT EXISTS "MatchSession_userBId_status_idx" ON "MatchSession"("userBId", "status");
 
-CREATE TABLE "Session" (
+CREATE TABLE IF NOT EXISTS "Session" (
   "id" TEXT NOT NULL,
   "userId" TEXT NOT NULL,
   "tokenHash" TEXT NOT NULL,

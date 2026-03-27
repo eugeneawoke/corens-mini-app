@@ -4,13 +4,17 @@ import { readAppEnv } from "@corens/config";
 import { AppModule } from "./app.module";
 import { BotWebhookService } from "./telegram/bot-webhook.service";
 import { MaintenanceService } from "./maintenance/maintenance.service";
+import { runPendingSqlMigrations } from "./migrations/sql-runner";
 
 export async function bootstrapApiApp(): Promise<void> {
   const env = readAppEnv();
+  const logger = new Logger("ApiBootstrap");
+
+  await runPendingSqlMigrations();
+
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true
   });
-  const logger = new Logger("ApiBootstrap");
   const botWebhook = app.get(BotWebhookService);
   const maintenance = app.get(MaintenanceService);
 
