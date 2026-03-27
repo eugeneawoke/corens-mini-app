@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { useFormStatus } from "react-dom";
 import { Loader2 } from "lucide-react";
 
@@ -12,11 +13,40 @@ type TrustKeyGroup = {
 // Per-group limits: group[0] max 3, group[1] max 2
 const GROUP_LIMITS = [3, 2];
 
+function focusRequiredGenderField() {
+  const container = document.querySelector("[data-onboarding='gender-field']") as HTMLElement | null;
+  const panel = container?.querySelector(".corens-panel") as HTMLElement | null;
+  const firstInput = container?.querySelector("input[name='gender']") as HTMLInputElement | null;
+
+  if (!container || !panel) {
+    return;
+  }
+
+  panel.classList.remove("corens-panel-attention");
+  void panel.offsetWidth;
+  panel.classList.add("corens-panel-attention");
+  container.scrollIntoView({ behavior: "smooth", block: "center" });
+  window.setTimeout(() => panel.classList.remove("corens-panel-attention"), 1400);
+  firstInput?.focus();
+}
+
 // ─── Submit button (reads useFormStatus from parent form) ─────────────────────
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
   const isDisabled = disabled || pending;
+
+  function handleClick(event: ReactMouseEvent<HTMLButtonElement>) {
+    const form = event.currentTarget.form;
+    const hasGender = Boolean(form?.querySelector("input[name='gender']:checked"));
+
+    if (hasGender) {
+      return;
+    }
+
+    event.preventDefault();
+    focusRequiredGenderField();
+  }
 
   return (
     <div className="corens-stack corens-gap-sm">
@@ -25,6 +55,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
         disabled={isDisabled}
         className="corens-button corens-button-primary"
         style={{ gap: "8px" }}
+        onClick={handleClick}
       >
         {pending ? (
           <>

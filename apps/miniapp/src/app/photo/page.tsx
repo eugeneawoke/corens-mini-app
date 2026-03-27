@@ -4,24 +4,18 @@ import { AppSurface, NoticeCard, TopBar } from "@corens/ui";
 
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
-import { PhotoManager } from "../../components/photo-manager";
 import {
-  getPhotoSummary,
   getProfileSummary,
   MiniAppBackendUnavailableError,
   MiniAppSessionRequiredError
 } from "../../lib/api";
 
 export default async function PhotoPage() {
-  // Fetch profile and photo status in parallel
-  const [profileResult, photoResult] = await Promise.allSettled([
-    getProfileSummary(),
-    getPhotoSummary()
-  ]);
+  let profile;
 
-  if (profileResult.status === "rejected" || photoResult.status === "rejected") {
-    const failed = (profileResult.status === "rejected" ? profileResult : photoResult) as PromiseRejectedResult;
-    const error = failed.reason;
+  try {
+    profile = await getProfileSummary();
+  } catch (error) {
     if (error instanceof MiniAppSessionRequiredError) {
       return <AuthBootstrapScreen />;
     }
@@ -31,9 +25,6 @@ export default async function PhotoPage() {
     throw error;
   }
 
-  const profile = profileResult.value;
-  const photo = photoResult.value;
-
   if (!profile.onboardingCompleted) {
     redirect("/onboarding/intro");
   }
@@ -42,15 +33,11 @@ export default async function PhotoPage() {
     <AppSurface>
       <TopBar title="Моё фото" backHref="/profile" />
 
-      {photo.hasPhoto && (
-        <NoticeCard
-          icon={Camera}
-          title="Фото готово"
-          description="Фото хранится приватно и раскроется только после взаимного согласия."
-        />
-      )}
-
-      <PhotoManager summary={photo} />
+      <NoticeCard
+        icon={Camera}
+        title="Фото пока отключено"
+        description="Загрузку фото временно убрали из приложения. Позже вернём её в более зрелом виде."
+      />
     </AppSurface>
   );
 }

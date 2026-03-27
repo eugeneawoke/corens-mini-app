@@ -1,4 +1,4 @@
-import { BadgeInfo, Camera, HeartHandshake, KeyRound, LifeBuoy, Lock, RotateCcw, Trash2, User, UserRound, Users } from "lucide-react";
+import { BadgeInfo, HeartHandshake, KeyRound, LifeBuoy, Lock, RotateCcw, Trash2, User, UserRound, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 import { AppSurface, Button, ListRow, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
 
@@ -72,12 +72,6 @@ export default async function ProfilePage() {
             title="Пол и поиск"
             description={snapshot.profile.partnerGender === "all" ? "Поиск среди всех" : "Настроен фильтр по полу"}
             icon={Users}
-          />
-          <ListRow
-            href="/photo"
-            title="Моё фото"
-            description={snapshot.photo.statusLabel}
-            icon={Camera}
           />
           <ListRow
             href="/privacy"
