@@ -3,6 +3,7 @@
 import { Compass, Sparkle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 
 const SLIDE_DURATION = 4000;
 
@@ -68,7 +69,6 @@ export function IntroSlides() {
   const [isPaused, setIsPaused] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
   const pressStartRef = useRef<number | null>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const isLast = current === SLIDES.length - 1;
 
@@ -78,21 +78,37 @@ export function IntroSlides() {
     return () => clearTimeout(timer);
   }, [current, isLast, isPaused, timerKey]);
 
-  // Root-level pointer handlers — the root div is min-height:100dvh
-  // so it always has a proper hit area (unlike the empty slides-wrap without a background).
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  function goNext() {
+    if (isLast) {
+      router.push("/onboarding");
+      return;
+    }
+
+    setCurrent((value) => Math.min(value + 1, SLIDES.length - 1));
+  }
+
+  function goBack() {
+    setCurrent((value) => Math.max(value - 1, 0));
+  }
+
+  const handleZonePointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
     // Only primary pointer (first finger / left mouse)
     if (!e.isPrimary) return;
+
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
       // setPointerCapture may fail in some WebViews — continue anyway
     }
+
     pressStartRef.current = Date.now();
     setIsPaused(true);
   };
 
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleZonePointerUp = (
+    e: ReactPointerEvent<HTMLButtonElement>,
+    direction: "back" | "next"
+  ) => {
     if (!e.isPrimary) return;
     if (pressStartRef.current === null) return;
 
@@ -101,21 +117,19 @@ export function IntroSlides() {
     setIsPaused(false);
 
     if (held < 250) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const isLeft = e.clientX < rect.left + rect.width / 2;
-      if (isLeft) {
-        if (current > 0) setCurrent((c) => c - 1);
-      } else {
-        if (isLast) router.push("/onboarding");
-        else setCurrent((c) => c + 1);
+      if (direction === "back") {
+        goBack();
+        return;
       }
+
+      goNext();
     } else {
       // Long hold — reset animation and timer on resume
       setTimerKey((k) => k + 1);
     }
   };
 
-  const handlePointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleZonePointerCancel = (e: ReactPointerEvent<HTMLButtonElement>) => {
     if (!e.isPrimary) return;
     pressStartRef.current = null;
     setIsPaused(false);
@@ -124,13 +138,26 @@ export function IntroSlides() {
 
   return (
     <div
-      ref={rootRef}
       className="corens-intro"
       data-paused={String(isPaused)}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerCancel}
     >
+      <div className="corens-intro-hit-zones" aria-hidden="true">
+        <button
+          type="button"
+          className="corens-intro-hit-zone"
+          onPointerDown={handleZonePointerDown}
+          onPointerUp={(e) => handleZonePointerUp(e, "back")}
+          onPointerCancel={handleZonePointerCancel}
+        />
+        <button
+          type="button"
+          className="corens-intro-hit-zone"
+          onPointerDown={handleZonePointerDown}
+          onPointerUp={(e) => handleZonePointerUp(e, "next")}
+          onPointerCancel={handleZonePointerCancel}
+        />
+      </div>
+
       <div className="corens-intro-slides-wrap">
         {SLIDES.map((slide, i) => (
           <div
@@ -147,19 +174,17 @@ export function IntroSlides() {
 
       <div className="corens-intro-footer">
         <div className="corens-intro-footer-row">
-          {current > 0 && (
-            <button
-              type="button"
-              className="corens-intro-back"
-              onPointerDown={(e) => e.stopPropagation()}
-              onPointerUp={(e) => {
-                e.stopPropagation();
-                setCurrent((c) => c - 1);
-              }}
-            >
-              ← Назад
-            </button>
-          )}
+          <div className="corens-intro-footer-side corens-intro-footer-side-left">
+            {current > 0 && (
+              <button
+                type="button"
+                className="corens-intro-back"
+                onClick={goBack}
+              >
+                ← Назад
+              </button>
+            )}
+          </div>
 
           <div
             key={`${current}-${timerKey}`}
@@ -175,20 +200,18 @@ export function IntroSlides() {
             ))}
           </div>
 
-          {isLast && (
-            <button
-              type="button"
-              className="corens-intro-cta"
-              onPointerDown={(e) => e.stopPropagation()}
-              onPointerUp={(e) => {
-                e.stopPropagation();
-                router.push("/onboarding");
-              }}
-            >
-              Настроить{" "}
-              <span className="corens-intro-cta-arrow" aria-hidden="true">→</span>
-            </button>
-          )}
+          <div className="corens-intro-footer-side corens-intro-footer-side-right">
+            {isLast && (
+              <button
+                type="button"
+                className="corens-intro-cta"
+                onClick={goNext}
+              >
+                Настроить профиль{" "}
+                <span className="corens-intro-cta-arrow" aria-hidden="true">→</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
