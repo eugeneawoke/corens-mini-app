@@ -36,7 +36,7 @@ export default async function PrivacyPage() {
   }
 
   if (!snapshot.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect("/onboarding/intro");
   }
 
   return (

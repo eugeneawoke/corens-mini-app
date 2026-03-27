@@ -55,7 +55,7 @@ export default async function ConnectionDetailPage({
   }
 
   if (!profile.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect("/onboarding/intro");
   }
 
   let connection;

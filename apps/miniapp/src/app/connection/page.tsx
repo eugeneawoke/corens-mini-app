@@ -1,5 +1,5 @@
 import type { BeaconSummary } from "@corens/domain";
-import { CircleUserRound } from "lucide-react";
+import { CircleUserRound, User, UserRound } from "lucide-react";
 import { redirect } from "next/navigation";
 import {
   AppSurface,
@@ -49,7 +49,7 @@ export default async function ConnectionPage() {
   }
 
   if (!profile.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect("/onboarding/intro");
   }
 
   const [connectionsResult, beaconResult] = await Promise.allSettled([
@@ -81,7 +81,7 @@ export default async function ConnectionPage() {
         title="Рядом"
         action={
           <a className="corens-icon-button" href="/profile" aria-label="Профиль">
-            <CircleUserRound size={18} />
+            {profile.profile.gender === "female" ? <UserRound size={18} /> : <User size={18} />}
           </a>
         }
       />
@@ -166,7 +166,9 @@ export default async function ConnectionPage() {
                 <p className="corens-copy corens-copy-muted">
                   {beacon.status === "active"
                     ? "Вы чуть заметнее для тех, кто сейчас рядом."
-                    : beacon.description}
+                    : activeConnections.length === 0
+                      ? "Зажгите маяк — люди с похожим состоянием рядом смогут вас заметить. Так проще найти первый контакт."
+                      : "Хотите встретить ещё кого-то? Маяк сделает вас заметнее для тех, у кого похожее состояние и ключи доверия."}
                 </p>
               </div>
               {beacon.status === "active" && (

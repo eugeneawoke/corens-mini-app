@@ -40,7 +40,7 @@ export default async function StateIntentPage() {
   }
 
   if (!snapshot.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect("/onboarding/intro");
   }
 
   const stateGroups = splitStateOptions(snapshot.state.options);

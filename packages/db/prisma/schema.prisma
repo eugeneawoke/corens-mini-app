@@ -25,7 +25,7 @@ model Profile {
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   displayName       String
   gender            String   @default("")
-  partnerGender     String   @default("all")
+  partnerGender     String   @default("opposite")
   about             String?
   stateKey          String   @default("calm")
   intentKey         String   @default("")

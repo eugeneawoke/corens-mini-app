@@ -15,7 +15,7 @@
   --corens-beacon: #9b6bc4;
   --corens-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   --corens-radius-card: 20px;
-  --corens-radius-control: 12px;
+  --corens-radius-control: 16px;
   --corens-page-width: 440px;
 }
 
@@ -110,6 +110,10 @@ textarea:focus-visible,
   align-items: center;
   gap: 12px;
   padding-top: calc(8px + env(safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px));
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--tg-theme-bg-color, #fff);
 }
 
 .corens-topbar-copy {
@@ -154,6 +158,19 @@ textarea:focus-visible,
   border-radius: 999px;
   border: 1px solid var(--corens-border);
   background: rgba(255, 255, 255, 0.85);
+}
+
+.corens-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: 1px solid var(--corens-border);
+  background: rgba(255, 255, 255, 0.85);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--corens-text-secondary);
 }
 
 .corens-eyebrow {
@@ -682,6 +699,108 @@ textarea:focus-visible,
 .corens-empty-state {
   align-items: center;
   text-align: center;
+}
+
+/* Bio field */
+.corens-bio-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.corens-bio-field-interactive {
+  cursor: text;
+}
+
+.corens-bio-textarea {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+  color: var(--corens-text);
+  padding: 0;
+}
+
+/* Intro onboarding slides */
+.corens-intro {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px));
+}
+
+.corens-intro-slides-wrap {
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+}
+
+.corens-intro-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 28px;
+  gap: 20px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.corens-intro-slide[data-active="true"] {
+  opacity: 1;
+}
+
+.corens-intro-icon {
+  width: 76px;
+  height: 76px;
+  border-radius: 999px;
+  border: 1px solid var(--corens-border);
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--corens-accent);
+}
+
+.corens-intro-footer {
+  padding: 24px 16px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.corens-intro-indicator {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  height: 6px;
+}
+
+.corens-intro-dot {
+  height: 6px;
+  width: 6px;
+  border-radius: 999px;
+  background: var(--corens-text-secondary);
+  opacity: 0.35;
+  transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+.corens-intro-dot[data-active="true"] {
+  width: 22px;
+  opacity: 1;
+  background: var(--corens-accent);
 }
 
 .corens-empty-orb {

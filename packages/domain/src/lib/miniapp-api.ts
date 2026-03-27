@@ -15,6 +15,7 @@ export interface ProfileSummary {
     handle: string;
     gender: string;
     partnerGender: string;
+    about: string | null;
   };
   photo: {
     hasPhoto: boolean;
@@ -111,6 +112,10 @@ export interface CompleteOnboardingRequest {
 
 export interface UpdateGenderPreferenceRequest {
   partnerGender: string;
+}
+
+export interface UpdateAboutRequest {
+  about: string;
 }
 
 export interface UpdateVisibilityRequest {

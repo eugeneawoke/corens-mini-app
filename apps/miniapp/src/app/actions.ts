@@ -166,6 +166,16 @@ export async function updateTrustKeysAction(formData: FormData): Promise<void> {
   redirect("/profile");
 }
 
+export async function updateAboutAction(about: string): Promise<void> {
+  await sendApiMutation("/api/profile/about", {
+    method: "PATCH",
+    body: JSON.stringify({ about: about.trim() })
+  });
+
+  revalidateTag("profile");
+  revalidatePath("/profile");
+}
+
 export async function updateGenderPreferenceAction(formData: FormData): Promise<void> {
   const partnerGender = String(formData.get("partnerGender") ?? "");
 

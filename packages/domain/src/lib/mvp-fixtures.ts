@@ -120,7 +120,8 @@ export function createProfileSummary(state: DemoMvpState): ProfileSummary {
       displayName: state.profile.displayName,
       handle: state.profile.handle,
       gender: "",
-      partnerGender: "all"
+      partnerGender: "opposite",
+      about: null
     },
     photo: {
       hasPhoto: false,

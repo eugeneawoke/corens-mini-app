@@ -51,7 +51,7 @@ export default async function GenderPage() {
   }
 
   if (!snapshot.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect("/onboarding/intro");
   }
 
   return (

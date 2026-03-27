@@ -35,7 +35,7 @@ export default async function PhotoPage() {
   const photo = photoResult.value;
 
   if (!profile.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect("/onboarding/intro");
   }
 
   return (

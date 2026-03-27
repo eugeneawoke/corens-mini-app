@@ -37,7 +37,7 @@ export default async function DeletePage() {
   }
 
   if (!snapshot.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect("/onboarding/intro");
   }
 
   return (

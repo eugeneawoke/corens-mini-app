@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { AppSurface, Button, NoticeCard, Panel, TopBar } from "@corens/ui";
+import { AppSurface, Button, Panel, TopBar } from "@corens/ui";
 
 import { updateTrustKeysAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
@@ -29,7 +29,7 @@ export default async function TrustKeysPage() {
   }
 
   if (!snapshot.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect("/onboarding/intro");
   }
 
   return (
@@ -44,13 +44,7 @@ export default async function TrustKeysPage() {
           />
         </Panel>
 
-        <NoticeCard
-          title={snapshot.trustKeys.isOnCooldown ? "Пауза между изменениями" : "Ключи доверия"}
-          description={snapshot.trustKeys.cooldownLabel}
-          tone={snapshot.trustKeys.isOnCooldown ? "warning" : "default"}
-        />
-
-        <Button type="submit" disabled={snapshot.trustKeys.isOnCooldown}>Сохранить</Button>
+        <Button type="submit">Сохранить</Button>
       </form>
     </AppSurface>
   );

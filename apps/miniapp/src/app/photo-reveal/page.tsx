@@ -45,7 +45,7 @@ export default async function PhotoRevealPage({
   }
 
   if (!profile.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect("/onboarding/intro");
   }
 
   return (

@@ -37,7 +37,7 @@ export default async function BeaconPage() {
   const snapshot = snapshotResult.value;
 
   if (!profile.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect("/onboarding/intro");
   }
 
   const isActive = snapshot.status === "active";

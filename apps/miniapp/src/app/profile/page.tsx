@@ -1,9 +1,10 @@
-import { BadgeInfo, Camera, HeartHandshake, KeyRound, LifeBuoy, Lock, RotateCcw, Trash2, Users } from "lucide-react";
+import { BadgeInfo, Camera, HeartHandshake, KeyRound, LifeBuoy, Lock, RotateCcw, Trash2, User, UserRound, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 import { AppSurface, Button, ListRow, Panel, Section, StatusBadge, TopBar } from "@corens/ui";
 
 import { devResetAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
+import { BioField } from "../../components/bio-field";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import {
   getProfileSummary,
@@ -29,7 +30,7 @@ export default async function ProfilePage() {
   }
 
   if (!snapshot.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect("/onboarding/intro");
   }
 
   return (
@@ -38,13 +39,18 @@ export default async function ProfilePage() {
 
       <Panel className="corens-stack corens-gap-sm">
         <div className="corens-row corens-row-between">
-          <div className="corens-stack corens-gap-xs">
-            <span className="corens-eyebrow">Вы</span>
-            <h2 className="corens-section-title">{snapshot.profile.displayName}</h2>
-            <p className="corens-copy corens-copy-muted">{snapshot.profile.handle}</p>
+          <div className="corens-row corens-gap-sm" style={{ alignItems: "center" }}>
+            <div className="corens-avatar">
+              {snapshot.profile.gender === "female" ? <UserRound size={22} /> : <User size={22} />}
+            </div>
+            <div className="corens-stack corens-gap-xs">
+              <h2 className="corens-section-title">{snapshot.profile.displayName}</h2>
+              <p className="corens-copy corens-copy-muted">{snapshot.profile.handle}</p>
+            </div>
           </div>
           <StatusBadge tone="success">В поиске</StatusBadge>
         </div>
+        <BioField initialValue={snapshot.profile.about} />
       </Panel>
 
       <Section title="О вас">

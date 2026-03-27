@@ -2,6 +2,7 @@ import { Body, Controller, Get, Patch, Post, UseGuards } from "@nestjs/common";
 // Note: notifications/cleanup is intentionally GET (idempotent, called from server-side fetch)
 import type {
   CompleteOnboardingRequest,
+  UpdateAboutRequest,
   UpdateStateIntentRequest,
   UpdateTrustKeysRequest,
   UpdateGenderPreferenceRequest
@@ -46,6 +47,14 @@ export class ProfileController {
     @Body() body: UpdateTrustKeysRequest
   ) {
     return this.profiles.updateTrustKeys(user, body);
+  }
+
+  @Patch("about")
+  updateAbout(
+    @AuthenticatedUser() user: AuthenticatedUserContext,
+    @Body() body: UpdateAboutRequest
+  ) {
+    return this.profiles.updateAbout(user, body);
   }
 
   @Patch("gender-preference")

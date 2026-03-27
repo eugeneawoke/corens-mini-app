@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import type {
   CompleteOnboardingRequest,
   ProfileSummary,
+  UpdateAboutRequest,
   UpdateVisibilityRequest,
   UpdateStateIntentRequest,
   UpdateTrustKeysRequest,
@@ -91,6 +92,29 @@ export class ProfilesService {
         trustKeys: sanitized,
         trustKeysUpdatedAt: new Date()
       }
+    });
+
+    return this.buildSummary(record.user, updated, await this.hasPhoto(record.user.id));
+  }
+
+  async updateAbout(
+    user: AuthenticatedUserContext,
+    input: UpdateAboutRequest
+  ): Promise<ProfileSummary> {
+    const about = input.about
+      .trim()
+      .replace(/[\x00-\x1F\x7F]/g, "")
+      .replace(/[\u200B-\u200D\uFEFF\u202A-\u202E]/g, "")
+      .replace(/[<>]/g, "");
+
+    if (about.length > 200) {
+      throw new BadRequestException("Bio is too long");
+    }
+
+    const record = await this.ensureProfileRecord(user);
+    const updated = await this.prisma.clientInstance.profile.update({
+      where: { userId: record.user.id },
+      data: { about: about.length > 0 ? about : null }
     });
 
     return this.buildSummary(record.user, updated, await this.hasPhoto(record.user.id));
@@ -285,6 +309,7 @@ export class ProfilesService {
         stateKey: "calm",
         intentKey: "",
         trustKeys: [],
+        partnerGender: "opposite",
         onboardingCompleted: false
       }
     });
@@ -319,7 +344,8 @@ export class ProfilesService {
         displayName: profile.displayName,
         handle: user.telegramUsername ? `@${user.telegramUsername}` : `id:${user.telegramUserId}`,
         gender: profile.gender,
-        partnerGender: profile.partnerGender
+        partnerGender: profile.partnerGender,
+        about: profile.about ?? null
       },
       photo: {
         hasPhoto,

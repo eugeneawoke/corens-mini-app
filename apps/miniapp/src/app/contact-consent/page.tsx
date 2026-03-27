@@ -42,7 +42,7 @@ export default async function ContactConsentPage({
   }
 
   if (!profile.onboardingCompleted) {
-    redirect("/onboarding");
+    redirect("/onboarding/intro");
   }
 
   return (
