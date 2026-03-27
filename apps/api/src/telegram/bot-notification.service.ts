@@ -15,19 +15,37 @@ export class BotNotificationService {
   ) {}
 
   async notifyConnectionCreated(telegramUserId: string, peerName: string): Promise<void> {
-    await this.send(telegramUserId, `Новая связь с ${peerName} — загляните в приложение.`);
+    await this.send(
+      telegramUserId,
+      `У вас новая связь с ${peerName}. Загляните в приложение.`,
+      this.notificationUrl()
+    );
   }
 
   async notifyContactRequest(telegramUserId: string, peerName: string): Promise<void> {
-    await this.send(telegramUserId, `${peerName} хочет обменяться контактами. Ответьте в приложении.`);
+    await this.send(
+      telegramUserId,
+      `${peerName} хочет обменяться контактами. Ответьте в приложении.`,
+      this.notificationUrl()
+    );
   }
 
   async notifyPhotoRequest(telegramUserId: string, peerName: string): Promise<void> {
-    await this.send(telegramUserId, `${peerName} хочет увидеть ваше фото. Ответьте в приложении.`);
+    await this.send(
+      telegramUserId,
+      `${peerName} хочет увидеть ваше фото. Ответьте в приложении.`,
+      this.notificationUrl()
+    );
   }
 
-  async notifyConnectionClosed(telegramUserId: string): Promise<void> {
-    await this.send(telegramUserId, "Эта связь завершилась. Не переживайте — новая встреча уже ищется.");
+  async notifyConnectionClosed(telegramUserId: string, peerName?: string): Promise<void> {
+    await this.send(
+      telegramUserId,
+      peerName
+        ? `Связь с ${peerName} завершилась. Не переживайте — новая встреча уже ищется.`
+        : "Эта связь завершилась. Не переживайте — новая встреча уже ищется.",
+      this.notificationUrl()
+    );
   }
 
   async cleanupNotifications(telegramUserId: string): Promise<void> {
@@ -48,9 +66,15 @@ export class BotNotificationService {
     );
   }
 
-  private async send(telegramUserId: string, text: string): Promise<void> {
+  private notificationUrl(): string {
+    const url = new URL(this.miniAppUrl);
+    url.searchParams.set("from", "notification");
+    return url.toString();
+  }
+
+  private async send(telegramUserId: string, text: string, url = this.miniAppUrl): Promise<void> {
     try {
-      const keyboard = new InlineKeyboard().webApp("Открыть приложение", this.miniAppUrl);
+      const keyboard = new InlineKeyboard().webApp("Открыть приложение", url);
       const message = await this.botWebhook.getBot().api.sendMessage(telegramUserId, text, {
         reply_markup: keyboard
       });

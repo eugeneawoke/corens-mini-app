@@ -23,7 +23,6 @@ export class ProfileController {
 
   @Get("summary")
   async getSummary(@AuthenticatedUser() user: AuthenticatedUserContext) {
-    void this.notifications.cleanupNotifications(user.telegramUserId);
     return this.profiles.getSummary(user);
   }
 

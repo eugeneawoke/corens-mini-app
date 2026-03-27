@@ -107,12 +107,19 @@ export class ModerationRuntimeService {
     });
 
     if (eventType === "block") {
+      const actorProfile = await this.prisma.clientInstance.profile.findUnique({
+        where: { userId: record.user.id },
+        select: { displayName: true }
+      });
       const targetUser = await this.prisma.clientInstance.user.findUnique({
         where: { id: targetUserId },
         select: { telegramUserId: true }
       });
       if (targetUser) {
-        void this.notifications.notifyConnectionClosed(targetUser.telegramUserId);
+        void this.notifications.notifyConnectionClosed(
+          targetUser.telegramUserId,
+          actorProfile?.displayName ?? undefined
+        );
       }
     }
   }

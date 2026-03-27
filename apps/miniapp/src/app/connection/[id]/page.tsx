@@ -208,9 +208,15 @@ export default async function ConnectionDetailPage({
               После этого связь закроется, а этот человек не появится у вас в мэтче ближайшие 72 часа.
             </p>
             <form action={closeConnectionAction.bind(null, id)}>
-              <Button type="submit" variant="secondary">Закрыть связь</Button>
+              <Button type="submit" variant="secondary" className="corens-button-outline-warm">
+                Закрыть связь
+              </Button>
             </form>
-            <ButtonLink href={`/connection/${id}/safety`} variant="ghost">
+            <ButtonLink
+              href={`/connection/${id}/safety`}
+              variant="ghost"
+              className="corens-button-ghost-danger"
+            >
               Пожаловаться или заблокировать
             </ButtonLink>
           </div>

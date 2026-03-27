@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 function formatCountdown(target: Date): string {
   const diffMs = Math.max(target.getTime() - Date.now(), 0);
@@ -17,19 +18,38 @@ type Props = {
 };
 
 export function BeaconCountdown({ expiresAt, fallbackLabel }: Props) {
+  const router = useRouter();
   const [label, setLabel] = useState(
     expiresAt ? formatCountdown(new Date(expiresAt)) : fallbackLabel
   );
 
   useEffect(() => {
-    if (!expiresAt) return;
+    if (!expiresAt) {
+      setLabel(fallbackLabel);
+      return;
+    }
+
     const target = new Date(expiresAt);
-    setLabel(formatCountdown(target));
+    const expiresAtMs = target.getTime();
+    let didRefresh = false;
+
+    const tick = () => {
+      const nextLabel = formatCountdown(target);
+      setLabel(nextLabel);
+
+      if (!didRefresh && Date.now() >= expiresAtMs) {
+        didRefresh = true;
+        router.refresh();
+      }
+    };
+
+    tick();
     const interval = setInterval(() => {
-      setLabel(formatCountdown(target));
+      tick();
     }, 1000);
+
     return () => clearInterval(interval);
-  }, [expiresAt]);
+  }, [expiresAt, fallbackLabel, router]);
 
   return (
     <span

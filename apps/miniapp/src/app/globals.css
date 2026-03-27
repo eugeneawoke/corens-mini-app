@@ -644,6 +644,7 @@ textarea:focus-visible,
 .corens-button-secondary {
   background: rgba(255, 255, 255, 0.9);
   border-color: var(--corens-border);
+  color: var(--corens-text-primary);
 }
 
 .corens-button-ghost {
@@ -664,6 +665,23 @@ textarea:focus-visible,
 .corens-button-success {
   background: var(--corens-success);
   color: #fff;
+}
+
+.corens-button-outline-warm {
+  border-color: rgba(196, 129, 26, 0.28);
+  background: rgba(255, 255, 255, 0.92);
+  color: #7b5520;
+  box-shadow: 0 6px 18px rgba(196, 129, 26, 0.08);
+}
+
+.corens-button-ghost-danger {
+  color: #8b3f4e;
+}
+
+.corens-button-ghost-danger:hover,
+.corens-button-ghost-danger:focus-visible {
+  color: #7a3040;
+  background: rgba(139, 63, 78, 0.08);
 }
 
 .corens-bottom-bar {

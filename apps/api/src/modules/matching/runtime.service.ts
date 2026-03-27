@@ -188,7 +188,14 @@ export class MatchingRuntimeService {
     });
 
     if (peerUser) {
-      void this.notifications.notifyConnectionClosed(peerUser.telegramUserId);
+      const selfProfile = await this.prisma.clientInstance.profile.findUnique({
+        where: { userId: record.user.id },
+        select: { displayName: true }
+      });
+      void this.notifications.notifyConnectionClosed(
+        peerUser.telegramUserId,
+        selfProfile?.displayName ?? undefined
+      );
     }
   }
 

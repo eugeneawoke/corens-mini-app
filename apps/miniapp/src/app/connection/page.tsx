@@ -32,7 +32,12 @@ const FALLBACK_BEACON: BeaconSummary = {
   durationLabel: "Недоступно"
 };
 
-export default async function ConnectionPage() {
+export default async function ConnectionPage({
+  searchParams
+}: {
+  searchParams: Promise<{ from?: string }>;
+}) {
+  const { from } = await searchParams;
   let profile;
 
   try {
@@ -53,10 +58,13 @@ export default async function ConnectionPage() {
     redirect("/onboarding/intro");
   }
 
+  if (from === "notification") {
+    await cleanupBotNotifications();
+  }
+
   const [connectionsResult, beaconResult] = await Promise.allSettled([
     getConnections(),
-    getBeaconSummary(),
-    cleanupBotNotifications()
+    getBeaconSummary()
   ]);
 
   if (connectionsResult.status === "rejected") {
