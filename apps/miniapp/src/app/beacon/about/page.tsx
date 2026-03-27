@@ -54,6 +54,10 @@ export default async function BeaconAboutPage() {
           <p className="corens-copy corens-copy-muted">
             Всё остаётся бережно и спокойно: маяк лишь помогает поиску, но ничего не открывает без вашего выбора.
           </p>
+          <p className="corens-copy corens-copy-muted">
+            Если взаимный контакт так и не откроется, связь освободится сама. А если вы оба захотите продолжить,
+            она останется с вами без лишнего давления по времени.
+          </p>
         </div>
       </Panel>
     </AppSurface>

@@ -162,6 +162,18 @@ export class ConsentRuntimeService {
       revealRules.channels
     );
 
+    if (channel === "contact" && resolution.status === "approved") {
+      await this.prisma.clientInstance.matchSession.updateMany({
+        where: {
+          id: matchSessionId,
+          status: "active"
+        },
+        data: {
+          expiresAt: null
+        }
+      });
+    }
+
     return {
       channel,
       status: resolution.status,

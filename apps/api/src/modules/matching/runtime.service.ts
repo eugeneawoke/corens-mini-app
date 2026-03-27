@@ -303,6 +303,10 @@ export class MatchingRuntimeService {
     });
 
     for (const session of missingExpiry) {
+      if (await this.hasMutualContactConsent(session.id)) {
+        continue;
+      }
+
       await this.prisma.clientInstance.matchSession.update({
         where: { id: session.id },
         data: {
@@ -322,6 +326,16 @@ export class MatchingRuntimeService {
     });
 
     for (const session of staleSessions) {
+      if (await this.hasMutualContactConsent(session.id)) {
+        await this.prisma.clientInstance.matchSession.update({
+          where: { id: session.id },
+          data: {
+            expiresAt: null
+          }
+        });
+        continue;
+      }
+
       await this.prisma.clientInstance.$transaction(async (tx) => {
         await tx.matchSession.update({
           where: { id: session.id },
@@ -354,6 +368,20 @@ export class MatchingRuntimeService {
         });
       });
     }
+  }
+
+  private async hasMutualContactConsent(matchSessionId: string): Promise<boolean> {
+    const approvals = await this.prisma.clientInstance.contactConsent.findMany({
+      where: {
+        matchSessionId,
+        requestStatus: "approved"
+      },
+      select: {
+        requestedBy: true
+      }
+    });
+
+    return new Set(approvals.map((item) => item.requestedBy)).size >= 2;
   }
 
   // Fills connection slots up to the limit (one new match per call — sweep runs this periodically)
