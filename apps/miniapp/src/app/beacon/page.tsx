@@ -45,7 +45,7 @@ export default async function BeaconPage() {
 
   return (
     <AppSurface>
-      <TopBar title="Маяк" backHref="/beacon/about" />
+      <TopBar title="Маяк" backHref="/connection" />
 
       <Panel
         className="corens-stack corens-gap-sm"

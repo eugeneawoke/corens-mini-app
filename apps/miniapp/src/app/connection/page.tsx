@@ -184,7 +184,7 @@ export default async function ConnectionPage() {
                 <Button type="submit" variant="beacon">Потушить маяк</Button>
               </form>
             ) : (
-              <ButtonLink href="/beacon/about" variant="beacon">Зажечь маяк</ButtonLink>
+              <ButtonLink href="/beacon" variant="beacon">Зажечь маяк</ButtonLink>
             )}
           </div>
         </Panel>
