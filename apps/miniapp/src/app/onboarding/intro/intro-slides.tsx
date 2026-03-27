@@ -1,6 +1,6 @@
 "use client";
 
-import { Compass, Sparkle } from "lucide-react";
+import { Compass, HeartHandshake, Sparkle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
@@ -20,14 +20,14 @@ const SLIDES = [
     text: "Мы подбираем людей по состоянию, намерению и ключам доверия автоматически",
   },
   {
-    icon: "beacon" as const,
-    title: "Маяк",
-    text: "Включите маяк, когда хочется познакомиться прямо сейчас. Люди с похожим состоянием рядом увидят вас первыми",
+    icon: "link" as const,
+    title: "Связь без давления",
+    text: "Если взаимный контакт не открылся, связь сама освободится через 24 часа. Если вы оба открыли контакт, она останется",
   },
   {
     icon: "beacon" as const,
-    title: "Связь без давления",
-    text: "Если взаимный контакт не открылся, связь сама освободится через 24 часа. Если вы оба открыли контакт, она останется",
+    title: "Маяк",
+    text: "Включите маяк, когда хочется познакомиться прямо сейчас. Люди с похожим состоянием рядом увидят вас первыми",
   },
 ] as const;
 
@@ -43,6 +43,13 @@ function SlideIcon({ kind }: { kind: string }) {
     return (
       <div className="corens-intro-icon-anim corens-intro-icon-sparkle">
         <Sparkle size={44} />
+      </div>
+    );
+  }
+  if (kind === "link") {
+    return (
+      <div className="corens-intro-icon-anim corens-intro-icon-link">
+        <HeartHandshake size={44} />
       </div>
     );
   }
