@@ -38,4 +38,4 @@ CREATE TABLE IF NOT EXISTS "Session" (
   CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE INDEX "Session_userId_expiresAt_idx" ON "Session"("userId", "expiresAt");
+CREATE INDEX IF NOT EXISTS "Session_userId_expiresAt_idx" ON "Session"("userId", "expiresAt");
