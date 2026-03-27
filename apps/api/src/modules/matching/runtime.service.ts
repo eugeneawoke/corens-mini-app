@@ -406,6 +406,8 @@ export class MatchingRuntimeService {
   private toCandidate(
     profile: {
       userId: string;
+      gender: string;
+      partnerGender: string;
       stateKey: string;
       intentKey: string | null;
       trustKeys: string[];
@@ -417,6 +419,8 @@ export class MatchingRuntimeService {
   ): MatchingCandidate & { updatedAt: Date } {
     return {
       userId: profile.userId,
+      gender: profile.gender,
+      partnerGender: profile.partnerGender,
       stateKey: profile.stateKey,
       intentKey: this.normalizeOptionalIntent(profile.intentKey),
       trustKeys: profile.trustKeys.map((item) => item.toLowerCase()),

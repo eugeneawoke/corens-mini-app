@@ -88,16 +88,6 @@ export class ProfilesService {
     this.assertTrustKeyGroupLimits(sanitized);
 
     const record = await this.ensureProfileRecord(user);
-    const matchingScoring = await this.policyConfig.getMatchingScoring();
-    const cooldownMs = matchingScoring.cooldowns.trustKeysDays * 24 * 60 * 60 * 1000;
-
-    if (record.profile.trustKeysUpdatedAt) {
-      const elapsed = Date.now() - record.profile.trustKeysUpdatedAt.getTime();
-      if (elapsed < cooldownMs) {
-        throw new BadRequestException("Ключи доверия можно менять не чаще одного раза в сутки");
-      }
-    }
-
     const updated = await this.prisma.clientInstance.profile.update({
       where: { userId: record.user.id },
       data: {
@@ -231,28 +221,8 @@ export class ProfilesService {
     return this.buildSummary(record.user, updated, await this.hasPhoto(record.user.id));
   }
 
-  private buildTrustKeysCooldown(
-    trustKeysUpdatedAt: Date | null,
-    cooldownDays: number
-  ): { cooldownLabel: string; isOnCooldown: boolean } {
-    if (!trustKeysUpdatedAt) {
-      return { cooldownLabel: "Можно изменить в любое время", isOnCooldown: false };
-    }
-
-    const cooldownMs = cooldownDays * 24 * 60 * 60 * 1000;
-    const elapsed = Date.now() - trustKeysUpdatedAt.getTime();
-
-    if (elapsed >= cooldownMs) {
-      return { cooldownLabel: "Можно изменить в любое время", isOnCooldown: false };
-    }
-
-    const remainingMs = cooldownMs - elapsed;
-    const remainingHours = Math.ceil(remainingMs / (60 * 60 * 1000));
-    const label = remainingHours >= 24
-      ? `Следующее изменение через ${Math.ceil(remainingHours / 24)} дн.`
-      : `Следующее изменение через ${remainingHours} ч`;
-
-    return { cooldownLabel: label, isOnCooldown: true };
+  private buildTrustKeysCooldown(): { cooldownLabel: string; isOnCooldown: boolean } {
+    return { cooldownLabel: "Можно изменить в любое время", isOnCooldown: false };
   }
 
   private sanitizeTrustKeys(values: string[]): string[] {
@@ -381,7 +351,7 @@ export class ProfilesService {
         limitLabel: profile.trustKeys.length >= 5
           ? "Все ключи выбраны"
           : `Выбрано ${profile.trustKeys.length} из 5`,
-        ...this.buildTrustKeysCooldown(profile.trustKeysUpdatedAt, matchingScoring.cooldowns.trustKeysDays)
+        ...this.buildTrustKeysCooldown()
       },
       privacy: {
         visibility,

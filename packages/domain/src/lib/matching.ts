@@ -1,5 +1,7 @@
 export interface MatchingCandidate {
   userId: string;
+  gender: string;
+  partnerGender: string;
   stateKey: string;
   intentKey: string | null;
   trustKeys: string[];

@@ -45,6 +45,13 @@ export function evaluateMatchingCandidate(
     reasons.push("candidate_not_matchable");
   }
 
+  if (
+    !matchesGenderPreference(input.self.partnerGender, input.self.gender, input.candidate.gender) ||
+    !matchesGenderPreference(input.candidate.partnerGender, input.candidate.gender, input.self.gender)
+  ) {
+    reasons.push("gender_preference_mismatch");
+  }
+
   if (overlapCount < 1) {
     reasons.push("missing_trust_overlap");
   }
@@ -94,4 +101,28 @@ export function evaluateMatchingCandidate(
 function countTrustKeyOverlap(left: string[], right: string[]): number {
   const rightSet = new Set(right);
   return left.filter((item) => rightSet.has(item)).length;
+}
+
+function matchesGenderPreference(
+  preference: string,
+  selfGender: string,
+  candidateGender: string
+): boolean {
+  if (!selfGender || !candidateGender) {
+    return false;
+  }
+
+  if (preference === "all") {
+    return true;
+  }
+
+  if (preference === "same") {
+    return selfGender === candidateGender;
+  }
+
+  if (preference === "opposite") {
+    return selfGender !== candidateGender;
+  }
+
+  return false;
 }
