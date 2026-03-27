@@ -16,7 +16,7 @@ const SLIDES = [
   {
     icon: "sparkle" as const,
     title: "Умный поиск",
-    text: "Мы подбираем людей по состоянию, намерению и ключам доверия — автоматически",
+    text: "Мы подбираем людей по состоянию, намерению и ключам доверия автоматически",
   },
   {
     icon: "beacon" as const,
@@ -201,16 +201,14 @@ export function IntroSlides() {
           </div>
 
           <div className="corens-intro-footer-side corens-intro-footer-side-right">
-            {isLast && (
-              <button
-                type="button"
-                className="corens-intro-cta"
-                onClick={goNext}
-              >
-                Настроить профиль{" "}
-                <span className="corens-intro-cta-arrow" aria-hidden="true">→</span>
-              </button>
-            )}
+            <button
+              type="button"
+              className="corens-intro-cta"
+              onClick={goNext}
+            >
+              {isLast ? "Начать" : "Дальше"}{" "}
+              <span className="corens-intro-cta-arrow" aria-hidden="true">→</span>
+            </button>
           </div>
         </div>
       </div>
