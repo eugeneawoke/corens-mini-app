@@ -4,6 +4,7 @@ import { AuthenticatedUser } from "./modules/auth/authenticated-user.decorator";
 import type { AuthenticatedUserContext } from "./modules/auth/service";
 import { SessionAuthGuard } from "./modules/auth/session.guard";
 import { ConsentRuntimeService } from "./modules/consents/runtime.service";
+import { parseConsentDecisionRequest } from "./request-validation";
 
 @Controller("consents")
 @UseGuards(SessionAuthGuard)
@@ -27,10 +28,12 @@ export class ConsentsController {
   updateStatus(
     @AuthenticatedUser() user: AuthenticatedUserContext,
     @Param("channel") channel: ConsentChannel,
-    @Body() body: ConsentDecisionRequest,
+    @Body() body: unknown,
     @Query("connectionId") connectionId: string
   ) {
-    if (!body?.decision) {
+    const input = parseConsentDecisionRequest(body);
+
+    if (!input.decision) {
       throw new NotFoundException("Consent status is unavailable");
     }
 
@@ -38,6 +41,6 @@ export class ConsentsController {
       throw new NotFoundException("connectionId is required");
     }
 
-    return this.consents.updateStatus(user, channel, body.decision, connectionId);
+    return this.consents.updateStatus(user, channel, input.decision, connectionId);
   }
 }

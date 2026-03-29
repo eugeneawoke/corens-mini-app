@@ -11,6 +11,13 @@ import { AuthenticatedUser } from "./modules/auth/authenticated-user.decorator";
 import type { AuthenticatedUserContext } from "./modules/auth/service";
 import { SessionAuthGuard } from "./modules/auth/session.guard";
 import { ProfilesService } from "./modules/profiles";
+import {
+  parseCompleteOnboardingRequest,
+  parseUpdateAboutRequest,
+  parseUpdateGenderPreferenceRequest,
+  parseUpdateStateIntentRequest,
+  parseUpdateTrustKeysRequest
+} from "./request-validation";
 import { BotNotificationService } from "./telegram/bot-notification.service";
 
 @Controller("profile")
@@ -35,33 +42,33 @@ export class ProfileController {
   @Patch("state-intent")
   updateStateIntent(
     @AuthenticatedUser() user: AuthenticatedUserContext,
-    @Body() body: UpdateStateIntentRequest
+    @Body() body: unknown
   ) {
-    return this.profiles.updateStateIntent(user, body);
+    return this.profiles.updateStateIntent(user, parseUpdateStateIntentRequest(body));
   }
 
   @Patch("trust-keys")
   updateTrustKeys(
     @AuthenticatedUser() user: AuthenticatedUserContext,
-    @Body() body: UpdateTrustKeysRequest
+    @Body() body: unknown
   ) {
-    return this.profiles.updateTrustKeys(user, body);
+    return this.profiles.updateTrustKeys(user, parseUpdateTrustKeysRequest(body));
   }
 
   @Patch("about")
   updateAbout(
     @AuthenticatedUser() user: AuthenticatedUserContext,
-    @Body() body: UpdateAboutRequest
+    @Body() body: unknown
   ) {
-    return this.profiles.updateAbout(user, body);
+    return this.profiles.updateAbout(user, parseUpdateAboutRequest(body));
   }
 
   @Patch("gender-preference")
   updateGenderPreference(
     @AuthenticatedUser() user: AuthenticatedUserContext,
-    @Body() body: UpdateGenderPreferenceRequest
+    @Body() body: unknown
   ) {
-    return this.profiles.updateGenderPreference(user, body);
+    return this.profiles.updateGenderPreference(user, parseUpdateGenderPreferenceRequest(body));
   }
 
   @Post("onboarding/start")
@@ -72,8 +79,8 @@ export class ProfileController {
   @Post("onboarding")
   completeOnboarding(
     @AuthenticatedUser() user: AuthenticatedUserContext,
-    @Body() body: CompleteOnboardingRequest
+    @Body() body: unknown
   ) {
-    return this.profiles.completeOnboarding(user, body);
+    return this.profiles.completeOnboarding(user, parseCompleteOnboardingRequest(body));
   }
 }

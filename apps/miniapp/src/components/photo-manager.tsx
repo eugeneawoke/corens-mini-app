@@ -89,9 +89,7 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
       // Upload via Next.js proxy (avoids CORS issues with direct browser→B2 upload)
       const proxyForm = new FormData();
       proxyForm.append("file", file);
-      proxyForm.append("uploadUrl", intent.uploadUrl);
-      proxyForm.append("authorizationToken", intent.authorizationToken);
-      proxyForm.append("objectKey", intent.objectKey);
+      proxyForm.append("intentToken", intent.intentToken);
 
       const uploadResponse = await fetch("/api/media/photo/upload-proxy", {
         method: "POST",
@@ -246,4 +244,3 @@ export function PhotoManager({ summary }: PhotoManagerProps) {
     </div>
   );
 }
-

@@ -161,9 +161,6 @@ export interface PhotoSummary {
 }
 
 export interface PhotoUploadIntent {
-  uploadUrl: string;
-  authorizationToken: string;
-  objectKey: string;
   intentToken: string;
   expiresAt: string;
   maxBytes: number;

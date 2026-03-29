@@ -26,6 +26,26 @@ const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 const UPLOAD_INTENT_TTL_SECONDS = 10 * 60;
 const ACCESS_TOKEN_TTL_SECONDS = 5 * 60;
 
+type PhotoUploadIntentPayload = {
+  kind: "photo_upload";
+  userId: string;
+  objectKey: string;
+  contentType: string;
+  uploadUrl: string;
+  authorizationToken: string;
+  maxBytes: number;
+  exp: number;
+};
+
+type PhotoAccessTokenPayload = {
+  kind: "photo_preview" | "photo_reveal";
+  viewerUserId: string;
+  ownerUserId: string;
+  objectKey: string;
+  matchSessionId?: string;
+  exp: number;
+};
+
 type B2AuthorizeResponse = {
   apiUrl: string;
   authorizationToken: string;
@@ -63,7 +83,12 @@ export class MediaService {
       hasPhoto: true,
       status: "ready",
       statusCopy: "Фото загружено и будет раскрыто только после взаимного согласия.",
-      previewUrl: this.buildAccessUrl(photo.objectKey)
+      previewUrl: this.buildAccessUrl({
+        kind: "photo_preview",
+        viewerUserId: user.id,
+        ownerUserId: user.id,
+        objectKey: photo.objectKey
+      })
     };
   }
 
@@ -85,14 +110,14 @@ export class MediaService {
     const objectKey = `user-photo/${user.id}/${Date.now()}.${extension}`;
 
     return {
-      uploadUrl: uploadTarget.uploadUrl,
-      authorizationToken: uploadTarget.authorizationToken,
-      objectKey,
       intentToken: this.signPayload({
         kind: "photo_upload",
         userId: user.id,
         objectKey,
         contentType,
+        uploadUrl: uploadTarget.uploadUrl,
+        authorizationToken: uploadTarget.authorizationToken,
+        maxBytes: MAX_PHOTO_BYTES,
         exp: this.expiresAt(UPLOAD_INTENT_TTL_SECONDS)
       }),
       expiresAt: new Date(Date.now() + UPLOAD_INTENT_TTL_SECONDS * 1000).toISOString(),
@@ -107,7 +132,7 @@ export class MediaService {
   ): Promise<PhotoSummary> {
     await this.profiles.getCurrentProfileRecord(user);
 
-    const payload = this.verifyPayload(input.intentToken);
+    const payload = this.verifyUploadIntent(input.intentToken);
     if (payload.kind !== "photo_upload" || payload.userId !== user.id) {
       throw new ForbiddenException("Photo upload intent is invalid");
     }
@@ -206,25 +231,47 @@ export class MediaService {
       };
     }
 
-    return {
-      state: "ready",
-      title: "Фото открыто",
-      description: "Фото доступно, пока действует эта связь и взаимное согласие.",
-      imageUrl: this.buildAccessUrl(peerPhoto.objectKey)
-    };
+      return {
+        state: "ready",
+        title: "Фото открыто",
+        description: "Фото доступно, пока действует эта связь и взаимное согласие.",
+        imageUrl: this.buildAccessUrl({
+          kind: "photo_reveal",
+          viewerUserId: user.id,
+          ownerUserId: peerUserId,
+          objectKey: peerPhoto.objectKey,
+          matchSessionId: match.id
+        })
+      };
   }
 
-  async streamPhoto(accessToken: string): Promise<{
+  async streamPhoto(user: AuthenticatedUserContext, accessToken: string): Promise<{
     buffer: Buffer;
     contentType: string;
   }> {
-    const payload = this.verifyPayload(accessToken);
-    if (payload.kind !== "photo_access") {
+    const payload = this.verifyPhotoAccessToken(accessToken);
+
+    if (payload.viewerUserId !== user.id) {
+      throw new ForbiddenException("Photo access token is invalid");
+    }
+
+    if (payload.kind === "photo_reveal") {
+      if (!payload.matchSessionId) {
+        throw new ForbiddenException("Photo access token is invalid");
+      }
+
+      const consent = await this.consents.getStatus(user, "photo", payload.matchSessionId);
+
+      if (consent.status !== "approved") {
+        throw new ForbiddenException("Photo access is unavailable");
+      }
+    } else if (payload.ownerUserId !== user.id) {
       throw new ForbiddenException("Photo access token is invalid");
     }
 
     const photo = await this.prisma.clientInstance.userPhoto.findFirst({
       where: {
+        userId: payload.ownerUserId,
         objectKey: payload.objectKey,
         status: "ready"
       }
@@ -256,30 +303,25 @@ export class MediaService {
     await this.deleteStoredPhotoBytes(photo);
   }
 
-  private buildAccessUrl(objectKey: string): string {
+  private buildAccessUrl(payload: Omit<PhotoAccessTokenPayload, "exp">): string {
     const env = readAppEnv();
-    const baseUrl = (process.env.CORENS_API_BASE_URL ?? process.env.NEXT_PUBLIC_CORENS_API_BASE_URL ?? "").replace(/\/$/, "");
-    const fallbackBase = env.TELEGRAM_MINI_APP_URL.replace(/\/$/, "").replace(/:\d+$/, `:${env.API_PORT}`);
-    const urlBase = baseUrl
-      ? `${baseUrl}${baseUrl.endsWith("/api") ? "" : "/api"}`
-      : `${fallbackBase}/api`;
+    const urlBase = env.TELEGRAM_MINI_APP_URL.replace(/\/$/, "");
     const token = this.signPayload({
-      kind: "photo_access",
-      objectKey,
+      ...payload,
       exp: this.expiresAt(ACCESS_TOKEN_TTL_SECONDS)
     });
 
-    return `${urlBase}/media/photo/access?token=${encodeURIComponent(token)}`;
+    return `${urlBase}/api/media/photo/access?token=${encodeURIComponent(token)}`;
   }
 
-  private signPayload(payload: Record<string, string | number>): string {
+  private signPayload(payload: Record<string, string | number | undefined>): string {
     const env = readAppEnv();
     const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
     const signature = createHmac("sha256", env.SESSION_SECRET).update(body).digest("base64url");
     return `${body}.${signature}`;
   }
 
-  private verifyPayload(token: string): Record<string, string> {
+  private verifyPayload(token: string): Record<string, string | number> {
     const env = readAppEnv();
     const [body, signature] = token.split(".", 2);
 
@@ -296,13 +338,50 @@ export class MediaService {
       throw new ForbiddenException("Signed payload is invalid");
     }
 
-    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as Record<string, string>;
+    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as Record<string, string | number>;
 
     if (Number(payload.exp) <= Math.floor(Date.now() / 1000)) {
       throw new ForbiddenException("Signed payload has expired");
     }
 
     return payload;
+  }
+
+  private verifyUploadIntent(token: string): PhotoUploadIntentPayload {
+    const payload = this.verifyPayload(token);
+
+    if (
+      payload.kind !== "photo_upload" ||
+      typeof payload.userId !== "string" ||
+      typeof payload.objectKey !== "string" ||
+      typeof payload.contentType !== "string" ||
+      typeof payload.uploadUrl !== "string" ||
+      typeof payload.authorizationToken !== "string" ||
+      typeof payload.maxBytes !== "number"
+    ) {
+      throw new ForbiddenException("Photo upload intent is invalid");
+    }
+
+    return payload as unknown as PhotoUploadIntentPayload;
+  }
+
+  private verifyPhotoAccessToken(token: string): PhotoAccessTokenPayload {
+    const payload = this.verifyPayload(token);
+
+    if (
+      (payload.kind !== "photo_preview" && payload.kind !== "photo_reveal") ||
+      typeof payload.viewerUserId !== "string" ||
+      typeof payload.ownerUserId !== "string" ||
+      typeof payload.objectKey !== "string"
+    ) {
+      throw new ForbiddenException("Photo access token is invalid");
+    }
+
+    if (payload.kind === "photo_reveal" && typeof payload.matchSessionId !== "string") {
+      throw new ForbiddenException("Photo access token is invalid");
+    }
+
+    return payload as unknown as PhotoAccessTokenPayload;
   }
 
   private expiresAt(ttlSeconds: number): number {

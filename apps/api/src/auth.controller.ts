@@ -1,17 +1,18 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from "@nestjs/common";
-import type { AuthBootstrapRequest } from "@corens/domain";
 import { AuthenticatedUser } from "./modules/auth/authenticated-user.decorator";
 import { AuthService } from "./modules/auth/service";
 import type { AuthenticatedUserContext } from "./modules/auth/service";
 import { SessionAuthGuard } from "./modules/auth/session.guard";
+import { parseAuthBootstrapRequest } from "./request-validation";
 
 @Controller("auth")
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Post("bootstrap")
-  bootstrap(@Body() body: AuthBootstrapRequest) {
-    return this.auth.bootstrap(body.initData);
+  bootstrap(@Body() body: unknown) {
+    const input = parseAuthBootstrapRequest(body);
+    return this.auth.bootstrap(input.initData);
   }
 
   @Post("revoke")

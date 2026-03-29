@@ -1,4 +1,4 @@
-import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import {
   ForbiddenException,
   Injectable,
@@ -183,8 +183,8 @@ export class AuthService {
 
   private hashTokenSecret(tokenSecret: string): string {
     const env = readAppEnv();
-    return createHash("sha256")
-      .update(`${env.SESSION_SECRET}:${tokenSecret}`)
+    return createHmac("sha256", env.SESSION_SECRET)
+      .update(tokenSecret)
       .digest("hex");
   }
 

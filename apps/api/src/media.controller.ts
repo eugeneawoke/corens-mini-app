@@ -8,16 +8,25 @@ import { AuthenticatedUser } from "./modules/auth/authenticated-user.decorator";
 import type { AuthenticatedUserContext } from "./modules/auth/service";
 import { SessionAuthGuard } from "./modules/auth/session.guard";
 import { MediaService } from "./modules/media/service";
+import {
+  parseConfirmPhotoUploadRequest,
+  parseCreatePhotoUploadIntentRequest
+} from "./request-validation";
 
-@Controller("media")
-export class MediaController {
+  @Controller("media")
+  export class MediaController {
   constructor(private readonly media: MediaService) {}
 
+  @UseGuards(SessionAuthGuard)
   @Get("photo/access")
-  async accessPhoto(@Query("token") token: string, @Res() response: Response): Promise<void> {
-    const asset = await this.media.streamPhoto(token);
+  async accessPhoto(
+    @AuthenticatedUser() user: AuthenticatedUserContext,
+    @Query("token") token: string,
+    @Res() response: Response
+  ): Promise<void> {
+    const asset = await this.media.streamPhoto(user, token);
     response.setHeader("content-type", asset.contentType);
-    response.setHeader("cache-control", "private, max-age=300");
+    response.setHeader("cache-control", "private, no-store");
     response.send(asset.buffer);
   }
 
@@ -31,18 +40,18 @@ export class MediaController {
   @Post("photo/upload-intent")
   createUploadIntent(
     @AuthenticatedUser() user: AuthenticatedUserContext,
-    @Body() body: CreatePhotoUploadIntentRequest
+    @Body() body: unknown
   ) {
-    return this.media.createUploadIntent(user, body);
+    return this.media.createUploadIntent(user, parseCreatePhotoUploadIntentRequest(body));
   }
 
   @UseGuards(SessionAuthGuard)
   @Post("photo/confirm")
   confirmUpload(
     @AuthenticatedUser() user: AuthenticatedUserContext,
-    @Body() body: ConfirmPhotoUploadRequest
+    @Body() body: unknown
   ) {
-    return this.media.confirmUpload(user, body);
+    return this.media.confirmUpload(user, parseConfirmPhotoUploadRequest(body));
   }
 
   @UseGuards(SessionAuthGuard)

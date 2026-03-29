@@ -82,7 +82,7 @@ export class BotNotificationService {
         data: { telegramUserId, messageId: message.message_id }
       });
     } catch (error) {
-      this.logger.warn(`Failed to send notification to ${telegramUserId}: ${error}`);
+      this.logger.warn(`Failed to send Telegram notification: ${String(error)}`);
     }
   }
 }

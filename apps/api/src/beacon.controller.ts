@@ -3,6 +3,7 @@ import { AuthenticatedUser } from "./modules/auth/authenticated-user.decorator";
 import type { AuthenticatedUserContext } from "./modules/auth/service";
 import { SessionAuthGuard } from "./modules/auth/session.guard";
 import { BeaconService } from "./modules/beacon/service";
+import { parseBeaconActivateBody } from "./request-validation";
 
 @Controller("beacon")
 @UseGuards(SessionAuthGuard)
@@ -17,9 +18,10 @@ export class BeaconController {
   @Post("activate")
   activate(
     @AuthenticatedUser() user: AuthenticatedUserContext,
-    @Body() body?: { durationMinutes?: number }
+    @Body() body?: unknown
   ) {
-    return this.beacon.activate(user, body?.durationMinutes);
+    const input = parseBeaconActivateBody(body);
+    return this.beacon.activate(user, input.durationMinutes);
   }
 
   @Post("deactivate")

@@ -5,6 +5,7 @@ import type { AuthenticatedUserContext } from "./modules/auth/service";
 import { SessionAuthGuard } from "./modules/auth/session.guard";
 import { PrivacyRuntimeService } from "./modules/privacy/runtime.service";
 import { ProfilesService } from "./modules/profiles";
+import { parseDeleteAccountRequest, parseUpdateVisibilityRequest } from "./request-validation";
 
 @Controller("privacy")
 @UseGuards(SessionAuthGuard)
@@ -17,17 +18,17 @@ export class PrivacyController {
   @Patch("visibility")
   updateVisibility(
     @AuthenticatedUser() user: AuthenticatedUserContext,
-    @Body() body: UpdateVisibilityRequest
+    @Body() body: unknown
   ) {
-    return this.profiles.updateVisibility(user, body);
+    return this.profiles.updateVisibility(user, parseUpdateVisibilityRequest(body));
   }
 
   @Post("delete-request")
   requestDeletion(
     @AuthenticatedUser() user: AuthenticatedUserContext,
-    @Body() body: DeleteAccountRequest
+    @Body() body: unknown
   ) {
-    return this.privacy.requestDeletion(user, body.confirmation);
+    return this.privacy.requestDeletion(user, parseDeleteAccountRequest(body).confirmation);
   }
 
   @Post("dev-reset")

@@ -79,9 +79,13 @@ function createMediaFixture() {
         findFirst: async ({
           where
         }: {
-          where?: { objectKey?: string; status?: string };
+          where?: { userId?: string; objectKey?: string; status?: string };
         }) =>
           photos.find((photo) => {
+            if (where?.userId && photo.userId !== where.userId) {
+              return false;
+            }
+
             if (where?.objectKey && photo.objectKey !== where.objectKey) {
               return false;
             }
@@ -225,7 +229,9 @@ describe("MediaService", () => {
       }
     );
 
-    expect(intent.uploadUrl).toBe("https://upload.b2.example.com");
+    expect(intent).not.toHaveProperty("uploadUrl");
+    expect(intent).not.toHaveProperty("authorizationToken");
+    expect(intent).not.toHaveProperty("objectKey");
     expect(intent.allowedMimeTypes).toContain("image/jpeg");
 
     const summary = await fixture.media.confirmUpload(
@@ -259,12 +265,15 @@ describe("MediaService", () => {
     const fixture = createMediaFixture();
     fixture.setConsentApproved();
 
-    const missing = await fixture.media.getPhotoRevealSummary({
-      id: "user-1",
-      sessionId: "session-1",
-      telegramUserId: "42",
-      telegramUsername: "eugene"
-    });
+    const missing = await fixture.media.getPhotoRevealSummary(
+      {
+        id: "user-1",
+        sessionId: "session-1",
+        telegramUserId: "42",
+        telegramUsername: "eugene"
+      },
+      "match-1"
+    );
 
     expect(missing.state).toBe("photo_missing");
 
@@ -279,12 +288,15 @@ describe("MediaService", () => {
       updatedAt: new Date()
     });
 
-    const ready = await fixture.media.getPhotoRevealSummary({
-      id: "user-1",
-      sessionId: "session-1",
-      telegramUserId: "42",
-      telegramUsername: "eugene"
-    });
+    const ready = await fixture.media.getPhotoRevealSummary(
+      {
+        id: "user-1",
+        sessionId: "session-1",
+        telegramUserId: "42",
+        telegramUsername: "eugene"
+      },
+      "match-1"
+    );
 
     expect(ready.state).toBe("ready");
     expect(ready.imageUrl).toContain("/api/media/photo/access?token=");
