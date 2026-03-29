@@ -24,7 +24,12 @@ export async function bootstrapApiApp(): Promise<void> {
     credentials: true
   });
   botWebhook.mount(app);
-  maintenance.start();
+
+  if (env.ENABLE_MAINTENANCE_SCHEDULER) {
+    maintenance.start();
+  } else {
+    logger.log("Maintenance scheduler is disabled");
+  }
 
   await app.listen(env.API_PORT);
   logger.log(`API listening on http://localhost:${env.API_PORT}/api/health`);

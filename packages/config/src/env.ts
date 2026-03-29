@@ -6,6 +6,10 @@ const envSchema = z.object({
   NODE_ENV: z.string().default("development"),
   APP_ENV: z.string().default("local"),
   APP_NAME: z.string().default("corens-mini-app"),
+  ENABLE_MAINTENANCE_SCHEDULER: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
   API_PORT: z.coerce.number().default(4000),
   BOT_PORT: z.coerce.number().default(4100),
   TELEGRAM_BOT_TOKEN: z.string().min(1),
