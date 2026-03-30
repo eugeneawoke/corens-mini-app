@@ -1,64 +1,14 @@
-import { Buffer } from "node:buffer";
-import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { MINIAPP_SESSION_COOKIE } from "../../../../../lib/session";
-
-type UploadIntentPayload = {
-  kind: "photo_upload";
-  userId: string;
-  objectKey: string;
-  contentType: string;
-  uploadUrl: string;
-  authorizationToken: string;
-  maxBytes: number;
-  exp: number;
-};
+import {
+  authenticateUploadSession,
+  buildStorageFailureResponse,
+  UploadProxyError,
+  verifyUploadIntentToken
+} from "./logic";
 
 const MULTIPART_OVERHEAD_BYTES = 64 * 1024;
-
-function verifyUploadIntentToken(token: string): UploadIntentPayload {
-  const secret = process.env.SESSION_SECRET;
-
-  if (!secret) {
-    throw new Error("SESSION_SECRET is not configured");
-  }
-
-  const [body, signature] = token.split(".", 2);
-
-  if (!body || !signature) {
-    throw new Error("Upload intent is invalid");
-  }
-
-  const expected = createHmac("sha256", secret).update(body).digest("base64url");
-
-  if (
-    expected.length !== signature.length ||
-    !timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
-  ) {
-    throw new Error("Upload intent is invalid");
-  }
-
-  const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as Partial<UploadIntentPayload>;
-
-  if (
-    payload.kind !== "photo_upload" ||
-    typeof payload.objectKey !== "string" ||
-    typeof payload.contentType !== "string" ||
-    typeof payload.uploadUrl !== "string" ||
-    typeof payload.authorizationToken !== "string" ||
-    typeof payload.maxBytes !== "number" ||
-    typeof payload.exp !== "number"
-  ) {
-    throw new Error("Upload intent is invalid");
-  }
-
-  if (payload.exp <= Math.floor(Date.now() / 1000)) {
-    throw new Error("Upload intent has expired");
-  }
-
-  return payload as UploadIntentPayload;
-}
 
 /**
  * Proxy the file upload to B2 server-side.
@@ -96,7 +46,12 @@ export async function POST(request: Request): Promise<Response> {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
 
+    const session = await authenticateUploadSession(sessionToken);
     const intent = verifyUploadIntentToken(intentToken);
+
+    if (intent.userId !== session.id) {
+      return NextResponse.json({ message: "Upload intent does not match the active session" }, { status: 403 });
+    }
 
     // iOS WebKit sometimes delivers an empty MIME type — default to JPEG
     const contentType = file.type && file.type !== "" ? file.type : "image/jpeg";
@@ -130,18 +85,19 @@ export async function POST(request: Request): Promise<Response> {
     });
 
     if (!b2Response.ok) {
-      const errorText = await b2Response.text().catch(() => "");
-      return NextResponse.json(
-        { message: `Хранилище вернуло ошибку ${b2Response.status}${errorText ? `: ${errorText}` : ""}` },
-        { status: 502 }
-      );
+      return buildStorageFailureResponse(b2Response.status);
     }
 
     const result = await b2Response.json();
     return NextResponse.json(result);
   } catch (err) {
+    if (err instanceof UploadProxyError) {
+      return NextResponse.json({ message: err.message }, { status: err.status });
+    }
+
+    console.error("Photo upload proxy failed", err);
     return NextResponse.json(
-      { message: err instanceof Error ? err.message : "Ошибка прокси-загрузки" },
+      { message: "Ошибка прокси-загрузки" },
       { status: 500 }
     );
   }

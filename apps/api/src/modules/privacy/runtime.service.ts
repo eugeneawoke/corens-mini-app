@@ -56,7 +56,17 @@ export class PrivacyRuntimeService {
     await this.policyConfig.getPrivacyRules();
 
     if (userPhoto) {
-      await this.media.deleteStoredPhotoBytes(userPhoto);
+      try {
+        await this.media.deleteStoredPhotoBytes(userPhoto);
+      } catch (error) {
+        await this.prisma.clientInstance.deletionEvent.create({
+          data: {
+            userId,
+            stage: "assets_delete_failed"
+          }
+        });
+        throw error;
+      }
     }
 
     await this.prisma.clientInstance.$transaction(async (tx) => {
@@ -146,7 +156,17 @@ export class PrivacyRuntimeService {
     const peerNotifications: Array<{ telegramUserId: string; peerName?: string }> = [];
 
     if (userPhoto) {
-      await this.media.deleteStoredPhotoBytes(userPhoto);
+      try {
+        await this.media.deleteStoredPhotoBytes(userPhoto);
+      } catch (error) {
+        await this.prisma.clientInstance.deletionEvent.create({
+          data: {
+            userId: user.id,
+            stage: "reset_assets_delete_failed"
+          }
+        });
+        throw error;
+      }
     }
 
     await this.prisma.clientInstance.$transaction(async (tx) => {

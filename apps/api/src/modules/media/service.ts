@@ -4,6 +4,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   ServiceUnavailableException
 } from "@nestjs/common";
@@ -59,6 +60,8 @@ type B2UploadUrlResponse = {
 
 @Injectable()
 export class MediaService {
+  private readonly logger = new Logger(MediaService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly profiles: ProfilesService,
@@ -462,7 +465,7 @@ export class MediaService {
     try {
       const env = this.requireStorageConfig();
       const authorization = await this.authorizeAccount(env);
-      await fetch(`${authorization.apiUrl}/b2api/v2/b2_delete_file_version`, {
+      const response = await fetch(`${authorization.apiUrl}/b2api/v2/b2_delete_file_version`, {
         method: "POST",
         headers: {
           authorization: authorization.authorizationToken,
@@ -473,8 +476,15 @@ export class MediaService {
           fileId: photo.objectVersionId
         })
       });
-    } catch {
-      // Access disappears immediately once metadata is removed; byte cleanup can lag without user impact.
+
+      if (!response.ok) {
+        throw new ServiceUnavailableException("Photo storage delete failed");
+      }
+    } catch (error) {
+      this.logger.warn("Photo byte deletion failed before metadata cleanup");
+      throw error instanceof Error
+        ? error
+        : new ServiceUnavailableException("Photo storage delete failed");
     }
   }
 

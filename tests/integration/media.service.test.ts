@@ -301,4 +301,43 @@ describe("MediaService", () => {
     expect(ready.state).toBe("ready");
     expect(ready.imageUrl).toContain("/api/media/photo/access?token=");
   });
+
+  it("fails when storage byte deletion fails", async () => {
+    const fixture = createMediaFixture();
+    fixture.photos.push({
+      userId: "user-1",
+      objectKey: "user-photo/user-1/photo.jpg",
+      objectVersionId: "file-1",
+      mimeType: "image/jpeg",
+      sizeBytes: 1024,
+      status: "ready",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    global.fetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            apiUrl: "https://api.b2.example.com",
+            authorizationToken: "account-token",
+            downloadUrl: "https://download.b2.example.com"
+          }),
+          { status: 200 }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ message: "boom" }), { status: 503 })
+      ) as typeof fetch;
+
+    await expect(
+      fixture.media.deletePhoto({
+        id: "user-1",
+        sessionId: "session-1",
+        telegramUserId: "42",
+        telegramUsername: "eugene"
+      })
+    ).rejects.toThrow("Photo storage delete failed");
+  });
 });
