@@ -6,7 +6,7 @@ const miniAppCsp = [
   "object-src 'none'",
   "form-action 'self'",
   "frame-ancestors https://web.telegram.org https://*.telegram.org",
-  "script-src 'self' https://telegram.org",
+  "script-src 'self' 'unsafe-inline' https://telegram.org",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
