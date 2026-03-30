@@ -3,30 +3,21 @@ import type { ConnectionSummary } from "@corens/domain";
 import { MatchingController } from "../../apps/api/src/matching.controller";
 import type { MatchingRuntimeService } from "../../apps/api/src/modules/matching/runtime.service";
 
-function createResponseDouble() {
-  return {
-    type: vi.fn(),
-    send: vi.fn()
-  };
-}
-
 describe("MatchingController", () => {
-  it("serializes a missing current connection as JSON null", async () => {
+  it("returns the current connection list", async () => {
+    const connections: ConnectionSummary[] = [];
     const matching = {
-      getCurrentConnection: vi.fn().mockResolvedValue(null)
+      getConnections: vi.fn().mockResolvedValue(connections)
     } as unknown as MatchingRuntimeService;
     const controller = new MatchingController(matching);
-    const response = createResponseDouble();
 
-    await controller.getCurrentConnection({ id: "user-1" } as never, response as never);
-
-    expect(response.type).toHaveBeenCalledWith("application/json");
-    expect(response.send).toHaveBeenCalledWith("null");
+    await expect(controller.getConnections({ id: "user-1" } as never)).resolves.toEqual(connections);
   });
 
-  it("serializes an active connection as JSON", async () => {
+  it("returns a connection by id", async () => {
     const connection: ConnectionSummary = {
       kind: "active",
+      id: "match-1",
       displayName: "Alex",
       matchScore: 87,
       trustLevel: 3,
@@ -45,13 +36,12 @@ describe("MatchingController", () => {
       }
     };
     const matching = {
-      getCurrentConnection: vi.fn().mockResolvedValue(connection)
+      getConnectionById: vi.fn().mockResolvedValue(connection)
     } as unknown as MatchingRuntimeService;
     const controller = new MatchingController(matching);
-    const response = createResponseDouble();
 
-    await controller.getCurrentConnection({ id: "user-1" } as never, response as never);
-
-    expect(response.send).toHaveBeenCalledWith(JSON.stringify(connection));
+    await expect(
+      controller.getConnectionById({ id: "user-1" } as never, "match-1")
+    ).resolves.toEqual(connection);
   });
 });

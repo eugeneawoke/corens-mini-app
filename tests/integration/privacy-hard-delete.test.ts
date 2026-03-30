@@ -649,6 +649,15 @@ function createHardDeleteFixture() {
         noConnectionsBonus: 2,
         recentMoodBonus: 1
       },
+      freshness: {
+        moodHours: 24
+      },
+      cooldowns: {
+        pairRematchHours: 24
+      },
+      timers: {
+        activeMatchHours: 24
+      },
       limits: {
         activeConnections: 1
       }
@@ -757,12 +766,13 @@ describe("hard delete flow", () => {
       ])
     );
 
-    const peerConnection = await fixture.matching.getCurrentConnection({
+    const peerConnections = await fixture.matching.getConnections({
       id: "user-2",
       sessionId: "session-peer",
       telegramUserId: "84",
       telegramUsername: "peer"
     });
+    const peerConnection = peerConnections[0];
 
     expect(peerConnection).toEqual(
       expect.objectContaining({
