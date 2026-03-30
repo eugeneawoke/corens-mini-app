@@ -256,13 +256,13 @@ export async function devResetAction(): Promise<void> {
     method: "POST"
   });
 
-  const cookieStore = await cookies();
-  cookieStore.delete(MINIAPP_SESSION_COOKIE);
   revalidateTag("profile");
   revalidatePath("/");
   revalidatePath("/profile");
   revalidatePath("/connection");
-  redirect("/");
+  revalidatePath("/privacy");
+  revalidatePath("/delete");
+  redirect("/onboarding/intro");
 }
 
 export async function reportConnectionAction(connectionId: string, formData: FormData): Promise<void> {

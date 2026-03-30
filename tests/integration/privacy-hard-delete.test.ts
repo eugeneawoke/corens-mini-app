@@ -24,6 +24,7 @@ function createHardDeleteFixture() {
   let userSeq = 3;
   let sessionSeq = 2;
   let deletionSeq = 1;
+  const closedNotifications: Array<{ telegramUserId: string; peerName?: string }> = [];
 
   const users: User[] = [
     {
@@ -312,6 +313,17 @@ function createHardDeleteFixture() {
             ...data
           };
           profiles.push(profile);
+          return profile;
+        },
+        update: async ({
+          where,
+          data
+        }: {
+          where: { userId: string };
+          data: Partial<Profile>;
+        }) => {
+          const profile = profiles.find((item) => item.userId === where.userId)!;
+          Object.assign(profile, data, { updatedAt: new Date() });
           return profile;
         },
         deleteMany: async ({ where }: { where: { userId: string } }) => {
@@ -680,14 +692,23 @@ function createHardDeleteFixture() {
   const media = {
     deleteStoredPhotoBytes: async () => undefined
   } as unknown as MediaService;
+  const notifications = {
+    notifyConnectionClosed: async (telegramUserId: string, peerName?: string) => {
+      closedNotifications.push({ telegramUserId, peerName });
+    },
+    notifyConnectionCreated: async () => undefined,
+    notifyContactRequest: async () => undefined,
+    notifyPhotoRequest: async () => undefined
+  };
 
-  const privacy = new PrivacyRuntimeService(prisma, policyConfig as never, media);
-  const consents = new ConsentRuntimeService(prisma, profilesService, policyConfig as never);
+  const privacy = new PrivacyRuntimeService(prisma, policyConfig as never, media, notifications as never);
+  const consents = new ConsentRuntimeService(prisma, profilesService, policyConfig as never, notifications as never);
   const matching = new MatchingRuntimeService(
     prisma,
     profilesService,
     policyConfig as never,
-    consents
+    consents,
+    notifications as never
   );
   const auth = new AuthService(prisma, profilesService, privacy);
 
@@ -702,6 +723,7 @@ function createHardDeleteFixture() {
     moderationEvents,
     deletionEvents,
     userPhotos,
+    closedNotifications,
     privacy,
     consents,
     matching,
@@ -793,6 +815,13 @@ describe("hard delete flow", () => {
 
     expect(peerConsent.status).toBe("declined");
     expect(peerConsent.warnings).toContain("peer_deleted");
+    expect(fixture.closedNotifications).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          telegramUserId: "84"
+        })
+      ])
+    );
 
     const rawInitData = createTelegramInitData({
       botToken: process.env.TELEGRAM_BOT_TOKEN!,
@@ -807,5 +836,59 @@ describe("hard delete flow", () => {
     expect(bootstrap.user.telegramUserId).toBe("42");
     expect(bootstrap.profile.onboardingCompleted).toBe(false);
     expect(fixture.users.filter((user) => user.telegramUserId === "42")).toHaveLength(1);
+  });
+
+  it("resets profile data without deleting the user or current session", async () => {
+    const fixture = createHardDeleteFixture();
+
+    await fixture.privacy.devReset({
+      id: "user-1",
+      sessionId: "session-1",
+      telegramUserId: "42",
+      telegramUsername: "eugene"
+    });
+
+    expect(fixture.users.find((user) => user.id === "user-1")).toEqual(
+      expect.objectContaining({
+        id: "user-1",
+        telegramUserId: "42",
+        status: "active"
+      })
+    );
+    expect(fixture.sessions.filter((session) => session.userId === "user-1")).toHaveLength(1);
+    expect(fixture.userPhotos.filter((photo) => photo.userId === "user-1")).toHaveLength(0);
+    expect(fixture.beaconSessions).toHaveLength(0);
+    expect(fixture.contactConsents).toHaveLength(0);
+    expect(fixture.photoConsents).toHaveLength(0);
+    expect(fixture.moderationEvents).toHaveLength(0);
+    expect(fixture.matchSessions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "match-1",
+          status: "closed_manual"
+        })
+      ])
+    );
+    expect(fixture.profiles.find((profile) => profile.userId === "user-1")).toEqual(
+      expect.objectContaining({
+        displayName: "eugene",
+        gender: "",
+        about: null,
+        stateKey: "calm",
+        intentKey: "",
+        trustKeys: [],
+        visibilityStatus: "active",
+        matchingEnabled: true,
+        onboardingCompleted: false,
+        onboardingStartedAt: null
+      })
+    );
+    expect(fixture.closedNotifications).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          telegramUserId: "84"
+        })
+      ])
+    );
   });
 });

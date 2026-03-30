@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import type { PrismaClient } from "@corens/db";
 import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
+import { BotNotificationService } from "../../telegram/bot-notification.service";
 import type { AuthenticatedUserContext } from "../auth/service";
 import { MediaService } from "../media/service";
 
@@ -15,7 +16,8 @@ export class PrivacyRuntimeService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly policyConfig: PolicyConfigService,
-    private readonly media: MediaService
+    private readonly media: MediaService,
+    private readonly notifications: BotNotificationService
   ) {}
 
   async requestDeletion(user: AuthenticatedUserContext, confirmation: string): Promise<void> {
@@ -27,7 +29,7 @@ export class PrivacyRuntimeService {
   }
 
   async devReset(user: AuthenticatedUserContext): Promise<void> {
-    await this.hardDeleteByUserId(user.id);
+    await this.resetUserData(user);
   }
 
   async hardDeleteByUserId(
@@ -49,13 +51,18 @@ export class PrivacyRuntimeService {
 
     const now = new Date();
     const trackAggregateAnalytics = options?.trackAggregateAnalytics ?? true;
+    const peerNotifications: Array<{ telegramUserId: string }> = [];
 
     await this.policyConfig.getPrivacyRules();
+
+    if (userPhoto) {
+      await this.media.deleteStoredPhotoBytes(userPhoto);
+    }
 
     await this.prisma.clientInstance.$transaction(async (tx) => {
       const matchIds = await this.matchIdsForUser(tx, userId);
 
-      await this.closeMatchesForDeletedUser(tx, userId, now, matchIds);
+      peerNotifications.push(...(await this.closeMatchesForDeletedUser(tx, userId, now, matchIds)));
 
       await tx.contactConsent.deleteMany({
         where: {
@@ -83,10 +90,6 @@ export class PrivacyRuntimeService {
         where: { userId }
       });
 
-      await tx.deletionEvent.deleteMany({
-        where: { userId }
-      });
-
       await tx.session.deleteMany({
         where: { userId }
       });
@@ -103,6 +106,14 @@ export class PrivacyRuntimeService {
         where: { id: userId }
       });
 
+      await tx.deletionEvent.create({
+        data: {
+          userId,
+          stage: "hard_delete_completed",
+          completedAt: now
+        }
+      });
+
       if (trackAggregateAnalytics) {
         await tx.deletionEvent.create({
           data: {
@@ -114,8 +125,87 @@ export class PrivacyRuntimeService {
       }
     });
 
+    for (const peer of peerNotifications) {
+      void this.notifications.notifyConnectionClosed(peer.telegramUserId);
+    }
+  }
+
+  async resetUserData(user: AuthenticatedUserContext): Promise<void> {
+    const record = await this.prisma.clientInstance.user.findUnique({
+      where: { id: user.id }
+    });
+    const userPhoto = await this.prisma.clientInstance.userPhoto.findUnique({
+      where: { userId: user.id }
+    });
+
+    if (!record) {
+      return;
+    }
+
+    const now = new Date();
+    const peerNotifications: Array<{ telegramUserId: string; peerName?: string }> = [];
+
     if (userPhoto) {
       await this.media.deleteStoredPhotoBytes(userPhoto);
+    }
+
+    await this.prisma.clientInstance.$transaction(async (tx) => {
+      const matchIds = await this.matchIdsForUser(tx, user.id);
+
+      peerNotifications.push(...(await this.closeMatchesForReset(tx, user.id, now, matchIds)));
+
+      await tx.contactConsent.deleteMany({
+        where: {
+          OR: [{ matchSessionId: { in: matchIds } }, { requestedBy: user.id }]
+        }
+      });
+
+      await tx.photoRevealConsent.deleteMany({
+        where: {
+          OR: [{ matchSessionId: { in: matchIds } }, { requestedBy: user.id }]
+        }
+      });
+
+      await tx.moderationEvent.deleteMany({
+        where: {
+          OR: [
+            { actorUserId: user.id },
+            { targetUserId: user.id },
+            { matchSessionId: { in: matchIds } }
+          ]
+        }
+      });
+
+      await tx.beaconSession.deleteMany({
+        where: { userId: user.id }
+      });
+
+      await tx.userPhoto.deleteMany({
+        where: { userId: user.id }
+      });
+
+      await tx.profile.update({
+        where: { userId: user.id },
+        data: {
+          displayName: record.telegramUsername ?? "Новый профиль",
+          gender: "",
+          partnerGender: "opposite",
+          about: null,
+          stateKey: "calm",
+          intentKey: "",
+          trustKeys: [],
+          trustKeysUpdatedAt: null,
+          photoCount: 0,
+          visibilityStatus: "active",
+          matchingEnabled: true,
+          onboardingCompleted: false,
+          onboardingStartedAt: null
+        }
+      });
+    });
+
+    for (const peer of peerNotifications) {
+      void this.notifications.notifyConnectionClosed(peer.telegramUserId, peer.peerName);
     }
   }
 
@@ -164,12 +254,13 @@ export class PrivacyRuntimeService {
     userId: string,
     now: Date,
     matchIds: string[]
-  ): Promise<void> {
+  ): Promise<Array<{ telegramUserId: string }>> {
     const matches = await tx.matchSession.findMany({
       where: {
         id: { in: matchIds }
       }
     });
+    const peerNotifications: Array<{ telegramUserId: string }> = [];
 
     for (const match of matches) {
       const peerUserId = match.userAId === userId ? match.userBId : match.userAId;
@@ -178,6 +269,7 @@ export class PrivacyRuntimeService {
       });
 
       if (peerUser?.status === "active") {
+        peerNotifications.push({ telegramUserId: peerUser.telegramUserId });
         await tx.matchSession.update({
           where: { id: match.id },
           data: {
@@ -196,6 +288,45 @@ export class PrivacyRuntimeService {
         where: { id: match.id }
       });
     }
+
+    return peerNotifications;
+  }
+
+  private async closeMatchesForReset(
+    tx: TransactionClient,
+    userId: string,
+    now: Date,
+    matchIds: string[]
+  ): Promise<Array<{ telegramUserId: string; peerName?: string }>> {
+    const matches = await tx.matchSession.findMany({
+      where: {
+        id: { in: matchIds }
+      }
+    });
+    const peerNotifications: Array<{ telegramUserId: string; peerName?: string }> = [];
+
+    for (const match of matches) {
+      const peerUserId = match.userAId === userId ? match.userBId : match.userAId;
+      const peerUser = await tx.user.findUnique({
+        where: { id: peerUserId }
+      });
+
+      if (peerUser?.status === "active") {
+        peerNotifications.push({
+          telegramUserId: peerUser.telegramUserId
+        });
+      }
+
+      await tx.matchSession.update({
+        where: { id: match.id },
+        data: {
+          status: "closed_manual",
+          expiresAt: now
+        }
+      });
+    }
+
+    return peerNotifications;
   }
 
   private async matchIdsForUser(tx: TransactionClient, userId: string): Promise<string[]> {
