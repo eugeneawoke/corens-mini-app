@@ -62,6 +62,7 @@ export class BeaconService {
   }
 
   async activate(user: AuthenticatedUserContext, requestedDuration?: number): Promise<BeaconSummary> {
+    await this.expireStaleSessions();
     const record = await this.profiles.getCurrentProfileRecord(user);
     const rules = await this.policyConfig.getBeaconRules();
 
@@ -70,6 +71,18 @@ export class BeaconService {
     }
 
     const now = new Date();
+    const cooldownSession = await this.prisma.clientInstance.beaconSession.findFirst({
+      where: {
+        userId: record.user.id,
+        cooldownUntil: { gt: now }
+      },
+      orderBy: { cooldownUntil: "desc" }
+    });
+
+    if (cooldownSession) {
+      return this.getSummary(user);
+    }
+
     const durationMinutes = this.selectDuration(rules, requestedDuration);
     const expiresAt = new Date(now.getTime() + durationMinutes * 60_000);
     const cooldownUntil = new Date(expiresAt.getTime() + rules.cooldownMinutes * 60_000);
@@ -130,9 +143,15 @@ export class BeaconService {
 
   async deactivate(user: AuthenticatedUserContext): Promise<void> {
     const record = await this.profiles.getCurrentProfileRecord(user);
+    const rules = await this.policyConfig.getBeaconRules();
+    const now = new Date();
     await this.prisma.clientInstance.beaconSession.updateMany({
       where: { userId: record.user.id, status: "active" },
-      data: { status: "expired" }
+      data: {
+        status: "expired",
+        expiresAt: now,
+        cooldownUntil: new Date(now.getTime() + rules.cooldownMinutes * 60_000)
+      }
     });
   }
 
