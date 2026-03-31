@@ -8,6 +8,7 @@
     "dev": "corepack pnpm -r --parallel --if-present dev",
     "lint": "corepack pnpm -r --if-present lint",
     "prisma:generate": "corepack pnpm --filter @corens/db exec prisma generate",
+    "reset:user": "corepack pnpm --filter @corens/api exec tsx src/scripts/reset-user.ts",
     "test": "vitest run tests/unit tests/contract tests/integration",
     "test:unit": "vitest run tests/unit",
     "test:contract": "vitest run tests/contract",

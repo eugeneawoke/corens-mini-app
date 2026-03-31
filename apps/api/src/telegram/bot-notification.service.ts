@@ -56,6 +56,15 @@ export class BotNotificationService {
     );
   }
 
+  async sendOneOffServiceMessage(
+    telegramUserId: string,
+    text: string,
+    url = this.miniAppUrl
+  ): Promise<void> {
+    await this.cleanupNotifications(telegramUserId);
+    await this.send(telegramUserId, text, url);
+  }
+
   async cleanupNotifications(telegramUserId: string): Promise<void> {
     const messages = await this.prisma.clientInstance.botNotificationMessage.findMany({
       where: { telegramUserId }

@@ -29,7 +29,7 @@ export class PrivacyRuntimeService {
   }
 
   async devReset(user: AuthenticatedUserContext): Promise<void> {
-    await this.resetUserData(user);
+    await this.resetUserById(user.id);
   }
 
   async hardDeleteByUserId(
@@ -140,12 +140,15 @@ export class PrivacyRuntimeService {
     }
   }
 
-  async resetUserData(user: AuthenticatedUserContext): Promise<void> {
+  async resetUserById(userId: string): Promise<void> {
     const record = await this.prisma.clientInstance.user.findUnique({
-      where: { id: user.id }
+      where: { id: userId }
+    });
+    const profile = await this.prisma.clientInstance.profile.findUnique({
+      where: { userId }
     });
     const userPhoto = await this.prisma.clientInstance.userPhoto.findUnique({
-      where: { userId: user.id }
+      where: { userId }
     });
 
     if (!record) {
@@ -161,7 +164,7 @@ export class PrivacyRuntimeService {
       } catch (error) {
         await this.prisma.clientInstance.deletionEvent.create({
           data: {
-            userId: user.id,
+            userId,
             stage: "reset_assets_delete_failed"
           }
         });
@@ -170,44 +173,48 @@ export class PrivacyRuntimeService {
     }
 
     await this.prisma.clientInstance.$transaction(async (tx) => {
-      const matchIds = await this.matchIdsForUser(tx, user.id);
+      const matchIds = await this.matchIdsForUser(tx, userId);
 
-      peerNotifications.push(...(await this.closeMatchesForReset(tx, user.id, now, matchIds)));
+      peerNotifications.push(...(await this.closeMatchesForReset(tx, userId, now, matchIds)));
 
       await tx.contactConsent.deleteMany({
         where: {
-          OR: [{ matchSessionId: { in: matchIds } }, { requestedBy: user.id }]
+          OR: [{ matchSessionId: { in: matchIds } }, { requestedBy: userId }]
         }
       });
 
       await tx.photoRevealConsent.deleteMany({
         where: {
-          OR: [{ matchSessionId: { in: matchIds } }, { requestedBy: user.id }]
+          OR: [{ matchSessionId: { in: matchIds } }, { requestedBy: userId }]
         }
       });
 
       await tx.moderationEvent.deleteMany({
         where: {
           OR: [
-            { actorUserId: user.id },
-            { targetUserId: user.id },
+            { actorUserId: userId },
+            { targetUserId: userId },
             { matchSessionId: { in: matchIds } }
           ]
         }
       });
 
       await tx.beaconSession.deleteMany({
-        where: { userId: user.id }
+        where: { userId }
+      });
+
+      await tx.session.deleteMany({
+        where: { userId }
       });
 
       await tx.userPhoto.deleteMany({
-        where: { userId: user.id }
+        where: { userId }
       });
 
       await tx.profile.update({
-        where: { userId: user.id },
+        where: { userId },
         data: {
-          displayName: record.telegramUsername ?? "Новый профиль",
+          displayName: profile?.displayName?.trim() || record.telegramUsername || "Новый профиль",
           gender: "",
           partnerGender: "opposite",
           about: null,
@@ -227,6 +234,10 @@ export class PrivacyRuntimeService {
     for (const peer of peerNotifications) {
       void this.notifications.notifyConnectionClosed(peer.telegramUserId, peer.peerName);
     }
+  }
+
+  async resetUserData(user: AuthenticatedUserContext): Promise<void> {
+    await this.resetUserById(user.id);
   }
 
   async cleanupRetention(): Promise<void> {

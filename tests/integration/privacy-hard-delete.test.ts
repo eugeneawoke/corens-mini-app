@@ -838,7 +838,7 @@ describe("hard delete flow", () => {
     expect(fixture.users.filter((user) => user.telegramUserId === "42")).toHaveLength(1);
   });
 
-  it("resets profile data without deleting the user or current session", async () => {
+  it("resets profile data without deleting the user and clears all active sessions", async () => {
     const fixture = createHardDeleteFixture();
 
     await fixture.privacy.devReset({
@@ -855,7 +855,7 @@ describe("hard delete flow", () => {
         status: "active"
       })
     );
-    expect(fixture.sessions.filter((session) => session.userId === "user-1")).toHaveLength(1);
+    expect(fixture.sessions.filter((session) => session.userId === "user-1")).toHaveLength(0);
     expect(fixture.userPhotos.filter((photo) => photo.userId === "user-1")).toHaveLength(0);
     expect(fixture.beaconSessions).toHaveLength(0);
     expect(fixture.contactConsents).toHaveLength(0);
@@ -871,7 +871,7 @@ describe("hard delete flow", () => {
     );
     expect(fixture.profiles.find((profile) => profile.userId === "user-1")).toEqual(
       expect.objectContaining({
-        displayName: "eugene",
+        displayName: "Eugene",
         gender: "",
         about: null,
         stateKey: "calm",
@@ -889,6 +889,38 @@ describe("hard delete flow", () => {
           telegramUserId: "84"
         })
       ])
+    );
+  });
+
+  it("resets the user by internal userId", async () => {
+    const fixture = createHardDeleteFixture();
+
+    await fixture.privacy.resetUserById("user-1");
+
+    expect(fixture.users.find((user) => user.id === "user-1")).toEqual(
+      expect.objectContaining({
+        id: "user-1",
+        status: "active"
+      })
+    );
+    expect(fixture.sessions.filter((session) => session.userId === "user-1")).toHaveLength(0);
+    expect(fixture.contactConsents).toHaveLength(0);
+    expect(fixture.photoConsents).toHaveLength(0);
+    expect(fixture.beaconSessions).toHaveLength(0);
+    expect(fixture.matchSessions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "match-1",
+          status: "closed_manual"
+        })
+      ])
+    );
+    expect(fixture.profiles.find((profile) => profile.userId === "user-1")).toEqual(
+      expect.objectContaining({
+        displayName: "Eugene",
+        onboardingCompleted: false,
+        onboardingStartedAt: null
+      })
     );
   });
 });
