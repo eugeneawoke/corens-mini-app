@@ -1648,6 +1648,36 @@ select.corens-field {
     monospace;
 }
 
+.corens-beacon-timer {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--corens-beacon);
+}
+
+.corens-beacon-timer-emphasized {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 108px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(196, 129, 26, 0.12);
+  border: 1px solid rgba(196, 129, 26, 0.24);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.corens-beacon-cooldown-card {
+  margin-top: 8px;
+}
+
+.corens-beacon-cooldown-value {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
 /* When page has a fixed bottom bar, add enough padding to avoid overlap */
 .corens-app:has(.corens-bottom-bar) {
   padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));

@@ -4,7 +4,7 @@ intervals_minutes:
   - 30
   - 45
   - 60
-cooldown_minutes: 30
+cooldown_minutes: 15
 activations_per_day: 4
 rules:
   forbid_reactivation_while_active: true

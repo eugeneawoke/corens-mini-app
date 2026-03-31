@@ -92,6 +92,7 @@ export interface BeaconSummary {
   description: string;
   durationLabel: string;
   expiresAt?: string;
+  cooldownUntil?: string;
   cooldownLabel?: string;
 }
 

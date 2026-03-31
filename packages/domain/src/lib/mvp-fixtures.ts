@@ -81,6 +81,7 @@ export interface DemoConnectionState {
 export interface DemoBeaconState {
   status: BeaconStatus;
   remainingLabel: string;
+  cooldownUntil?: string;
   cooldownLabel?: string;
 }
 
@@ -208,6 +209,7 @@ export function createBeaconSummary(state: DemoMvpState): BeaconSummary {
     description:
       "Режим ручного поиска включается на фиксированное время и не заменяет автоматический matching.",
     durationLabel: "2 часа",
+    cooldownUntil: state.beacon.cooldownUntil,
     cooldownLabel: state.beacon.cooldownLabel
   };
 }

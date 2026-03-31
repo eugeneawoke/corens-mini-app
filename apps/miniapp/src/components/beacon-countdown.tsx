@@ -13,31 +13,32 @@ function formatCountdown(target: Date): string {
 }
 
 type Props = {
-  expiresAt?: string;
+  targetAt?: string;
   fallbackLabel: string;
+  emphasized?: boolean;
 };
 
-export function BeaconCountdown({ expiresAt, fallbackLabel }: Props) {
+export function BeaconCountdown({ targetAt, fallbackLabel, emphasized = false }: Props) {
   const router = useRouter();
   const [label, setLabel] = useState(
-    expiresAt ? formatCountdown(new Date(expiresAt)) : fallbackLabel
+    targetAt ? formatCountdown(new Date(targetAt)) : fallbackLabel
   );
 
   useEffect(() => {
-    if (!expiresAt) {
+    if (!targetAt) {
       setLabel(fallbackLabel);
       return;
     }
 
-    const target = new Date(expiresAt);
-    const expiresAtMs = target.getTime();
+    const target = new Date(targetAt);
+    const targetAtMs = target.getTime();
     let didRefresh = false;
 
     const tick = () => {
       const nextLabel = formatCountdown(target);
       setLabel(nextLabel);
 
-      if (!didRefresh && Date.now() >= expiresAtMs) {
+      if (!didRefresh && Date.now() >= targetAtMs) {
         didRefresh = true;
         router.refresh();
       }
@@ -49,12 +50,11 @@ export function BeaconCountdown({ expiresAt, fallbackLabel }: Props) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [expiresAt, fallbackLabel, router]);
+  }, [targetAt, fallbackLabel, router]);
 
   return (
     <span
-      className="corens-eyebrow corens-mono"
-      style={{ fontSize: "22px", fontWeight: 600, letterSpacing: "0.04em", color: "var(--corens-beacon)" }}
+      className={`corens-eyebrow corens-mono ${emphasized ? "corens-beacon-timer corens-beacon-timer-emphasized" : "corens-beacon-timer"}`}
     >
       {label}
     </span>

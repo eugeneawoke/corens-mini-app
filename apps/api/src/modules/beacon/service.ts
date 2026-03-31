@@ -54,6 +54,7 @@ export class BeaconService {
         ? "Маяк отдыхает — скоро можно будет зажечь снова."
         : "Маяк не горит — поиск продолжается в обычном режиме. Зажгите, чтобы стать чуть заметнее.",
       durationLabel: this.formatMinutes(this.defaultDurationMinutes(rules)),
+      cooldownUntil: cooldownSession?.cooldownUntil?.toISOString(),
       cooldownLabel: cooldownSession?.cooldownUntil
         ? this.formatRemaining(cooldownSession.cooldownUntil, now)
         : undefined
@@ -109,11 +110,10 @@ export class BeaconService {
   private formatRemaining(target: Date, now: Date): string {
     const diffMs = Math.max(target.getTime() - now.getTime(), 0);
     const totalSeconds = Math.floor(diffMs / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
 
-    return [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   }
 
   async expireStaleSessions(): Promise<void> {
@@ -148,10 +148,6 @@ export class BeaconService {
   }
 
   private formatMinutes(minutes: number): string {
-    if (minutes >= 60 && minutes % 60 === 0) {
-      return `${minutes / 60} ч`;
-    }
-
     return `${minutes} мин`;
   }
 }

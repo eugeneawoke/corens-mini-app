@@ -183,7 +183,7 @@ export default async function ConnectionPage() {
                 </p>
               </div>
               {beacon.status === "active" && (
-                <BeaconCountdown expiresAt={beacon.expiresAt} fallbackLabel={beacon.remainingLabel} />
+                <BeaconCountdown targetAt={beacon.expiresAt} fallbackLabel={beacon.remainingLabel} />
               )}
             </div>
             {beacon.status === "active" ? (

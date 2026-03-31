@@ -63,6 +63,7 @@ describe("reset-user script", () => {
     expect(message).toContain("😉");
     expect(message).toContain("🙂");
     expect(message).toContain("🙏");
+    expect(message).toContain("убрал лишние или запутывающие элементы из пути пользователя");
     expect(message).toContain("улучшил Telegram-уведомления и открытие контактов внутри mini app");
   });
 });
