@@ -9,9 +9,16 @@ type Props = {
 
 export function BeaconActivateForm({ isCooldown }: Props) {
   const scrollToCooldown = useCallback(() => {
-    document.getElementById("beacon-cooldown-card")?.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
+    const target = document.getElementById("beacon-cooldown-card");
+
+    if (!target) {
+      return;
+    }
+
+    const top = target.getBoundingClientRect().top + window.scrollY - 88;
+    window.scrollTo({
+      top: Math.max(top, 0),
+      behavior: "smooth"
     });
   }, []);
 
