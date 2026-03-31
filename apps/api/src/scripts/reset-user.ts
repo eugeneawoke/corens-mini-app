@@ -1,8 +1,9 @@
 import "reflect-metadata";
-import { NestFactory } from "@nestjs/core";
-import { AppModule } from "../app.module";
 import { PrivacyRuntimeService } from "../modules/privacy/runtime.service";
+import { MediaService } from "../modules/media/service";
 import { PrismaService } from "../prisma.service";
+import { PolicyConfigService } from "../policy-config.service";
+import { BotWebhookService } from "../telegram/bot-webhook.service";
 import { BotNotificationService } from "../telegram/bot-notification.service";
 
 type ResetTarget = {
@@ -90,12 +91,12 @@ export async function runResetUserCommand(
 }
 
 async function createCommandDeps(): Promise<ResetUserCommandDeps & { close(): Promise<void> }> {
-  const app = await NestFactory.createApplicationContext(AppModule, {
-    logger: ["error", "warn", "log"]
-  });
-  const prisma = app.get(PrismaService);
-  const privacy = app.get(PrivacyRuntimeService);
-  const notifications = app.get(BotNotificationService);
+  const prisma = new PrismaService();
+  const policyConfig = new PolicyConfigService();
+  const botWebhook = new BotWebhookService();
+  const notifications = new BotNotificationService(botWebhook, prisma);
+  const media = new MediaService(prisma, {} as never, {} as never);
+  const privacy = new PrivacyRuntimeService(prisma, policyConfig, media, notifications);
 
   return {
     findTargetById: async (userId: string) => {
@@ -128,7 +129,7 @@ async function createCommandDeps(): Promise<ResetUserCommandDeps & { close(): Pr
       console.log(message);
     },
     close: async () => {
-      await app.close();
+      await prisma.onModuleDestroy();
     }
   };
 }
