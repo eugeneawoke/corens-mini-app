@@ -54,9 +54,15 @@ export default async function ContactConsentPage({
             <Shield size={28} />
           </div>
           <span className="corens-eyebrow">Взаимное согласие</span>
-          <h1 className="corens-section-title">Написать друг другу?</h1>
+          <h1 className="corens-section-title">
+            {resolution?.peerRequested && resolution?.myDecision === "pending"
+              ? "Вам хотят написать"
+              : "Написать друг другу?"}
+          </h1>
           <p className="corens-copy corens-copy-muted">
-            Ссылка для общения откроется только после взаимного согласия. Ничего лишнего не передаётся.
+            {resolution?.peerRequested && resolution?.myDecision === "pending"
+              ? "Другой человек уже запросил контакт. Если согласитесь, ссылка для общения откроется сразу."
+              : "Ссылка для общения откроется только после взаимного согласия. Ничего лишнего не передаётся."}
           </p>
         </div>
 
@@ -67,6 +73,8 @@ export default async function ContactConsentPage({
               ? "Другой человек удалил аккаунт. Эта связь закрыта, и написать уже не получится."
               : resolution?.warnings.includes("telegram_handoff_warning_required")
                 ? "Прежде чем продолжить, убедитесь, что вы готовы к этому шагу."
+                : resolution?.peerRequested && resolution?.myDecision === "pending"
+                  ? "Сейчас решение за вами."
                 : "Ждём, пока другой человек примет решение."
           }
           tone={resolution?.warnings.includes("peer_deleted") ? "danger" : "warning"}
@@ -97,7 +105,9 @@ export default async function ContactConsentPage({
           ) : (
             <>
               <form action={approveConsentAction.bind(null, "contact", connectionId)}>
-                <Button variant="success">Да, хочу написать</Button>
+                <Button variant="success">
+                  {resolution?.peerRequested ? "Да, открыть контакт" : "Да, хочу написать"}
+                </Button>
               </form>
               <form action={declineConsentAction.bind(null, "contact", connectionId)}>
                 <Button variant="danger">Пока нет</Button>

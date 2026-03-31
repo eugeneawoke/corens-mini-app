@@ -27,11 +27,15 @@ describe("MatchingController", () => {
       contactConsent: {
         channel: "contact",
         status: "pending",
+        myDecision: "pending",
+        peerRequested: false,
         warnings: []
       },
       photoConsent: {
         channel: "photo",
         status: "pending",
+        myDecision: "pending",
+        peerRequested: false,
         warnings: []
       }
     };

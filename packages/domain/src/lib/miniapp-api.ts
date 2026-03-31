@@ -57,6 +57,7 @@ export interface ConsentStatusView {
   channel: ConsentChannel;
   status: "pending" | "approved" | "declined";
   myDecision: "pending" | "approved" | "declined";
+  peerRequested: boolean;
   warnings: string[];
   artifactType?: "telegram_deep_link" | "photo_asset";
   artifactValue?: string;

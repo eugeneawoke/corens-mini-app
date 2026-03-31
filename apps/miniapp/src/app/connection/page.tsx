@@ -104,7 +104,13 @@ export default async function ConnectionPage() {
                 <Link
                   key={connection.id}
                   href={`/connection/${connection.id}`}
-                  className="corens-connection-card"
+                  className={`corens-connection-card ${
+                    connection.contactConsent.status === "pending" &&
+                    connection.contactConsent.myDecision === "pending" &&
+                    connection.contactConsent.peerRequested
+                      ? "corens-connection-card-incoming"
+                      : ""
+                  }`}
                   style={{ animationDelay: `${index * 0.5}s` }}
                 >
                   <div className="corens-connection-card-inner">

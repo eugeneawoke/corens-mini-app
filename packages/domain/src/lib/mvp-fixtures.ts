@@ -233,6 +233,7 @@ export function createConsentStatus(
     channel,
     status: resolution.status,
     myDecision: actorDecision,
+    peerRequested: peerDecision !== "pending",
     warnings: resolution.warnings,
     artifactType: resolution.artifact?.artifactType
   };

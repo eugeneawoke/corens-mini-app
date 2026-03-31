@@ -152,6 +152,8 @@ function createMediaFixture() {
     getStatus: async () => ({
       channel: "photo" as const,
       status: consentStatus,
+      myDecision: "pending" as const,
+      peerRequested: false,
       warnings: []
     })
   } as unknown as ConsentRuntimeService;

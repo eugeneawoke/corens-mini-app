@@ -22,19 +22,27 @@ export class BotNotificationService {
     );
   }
 
-  async notifyContactRequest(telegramUserId: string, peerName: string): Promise<void> {
+  async notifyContactRequest(
+    telegramUserId: string,
+    peerName: string,
+    connectionId?: string
+  ): Promise<void> {
     await this.send(
       telegramUserId,
       `${peerName} хочет обменяться контактами. Ответьте в приложении.`,
-      this.notificationUrl()
+      this.notificationUrl(connectionId)
     );
   }
 
-  async notifyPhotoRequest(telegramUserId: string, peerName: string): Promise<void> {
+  async notifyPhotoRequest(
+    telegramUserId: string,
+    peerName: string,
+    connectionId?: string
+  ): Promise<void> {
     await this.send(
       telegramUserId,
       `${peerName} хочет увидеть ваше фото. Ответьте в приложении.`,
-      this.notificationUrl()
+      this.notificationUrl(connectionId)
     );
   }
 
@@ -66,8 +74,10 @@ export class BotNotificationService {
     );
   }
 
-  private notificationUrl(): string {
-    return this.buildMiniAppUrl("/connection");
+  private notificationUrl(connectionId?: string): string {
+    return connectionId
+      ? this.buildMiniAppUrl(`/connection/${encodeURIComponent(connectionId)}`)
+      : this.buildMiniAppUrl("/connection");
   }
 
   private buildMiniAppUrl(pathname: string): string {

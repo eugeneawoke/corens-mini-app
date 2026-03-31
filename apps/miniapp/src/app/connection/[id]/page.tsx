@@ -170,6 +170,9 @@ export default async function ConnectionDetailPage({
                   <span className="corens-list-description">
                     {connection.contactConsent.status === "approved"
                       ? "Оба согласились — можно написать напрямую."
+                      : connection.contactConsent.myDecision === "pending" &&
+                          connection.contactConsent.peerRequested
+                        ? "Этот человек уже хочет обменяться контактами. Осталось ваше решение."
                       : connection.contactConsent.myDecision === "approved"
                         ? "Вы согласились. Ждём ответа другого человека."
                         : "Ссылка для общения откроется только после взаимного согласия."}
@@ -181,6 +184,11 @@ export default async function ConnectionDetailPage({
                   {statusLabel(connection.contactConsent.status)}
                 </StatusBadge>
               )}
+              {connection.contactConsent.status === "pending" &&
+                connection.contactConsent.myDecision === "pending" &&
+                connection.contactConsent.peerRequested && (
+                  <StatusBadge tone="warning">Входящий запрос</StatusBadge>
+                )}
             </div>
             {connection.contactConsent.status === "approved" && connection.contactConsent.artifactValue ? (
               <ButtonLink href={connection.contactConsent.artifactValue} variant="success">
@@ -191,7 +199,7 @@ export default async function ConnectionDetailPage({
               <StatusBadge tone="warning">Ждём ответа</StatusBadge>
             ) : (
               <ButtonLink href={`/contact-consent?id=${id}`} variant="secondary">
-                Обменяться контактами
+                {connection.contactConsent.peerRequested ? "Ответить на запрос" : "Обменяться контактами"}
               </ButtonLink>
             )}
           </div>

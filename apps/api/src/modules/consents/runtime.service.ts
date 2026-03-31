@@ -91,9 +91,17 @@ export class ConsentRuntimeService {
       });
       const selfName = selfProfile?.displayName ?? "Ваш собеседник";
       if (channel === "contact") {
-        void this.notifications.notifyContactRequest(match.peerTelegram.telegramUserId, selfName);
+        void this.notifications.notifyContactRequest(
+          match.peerTelegram.telegramUserId,
+          selfName,
+          match.id
+        );
       } else {
-        void this.notifications.notifyPhotoRequest(match.peerTelegram.telegramUserId, selfName);
+        void this.notifications.notifyPhotoRequest(
+          match.peerTelegram.telegramUserId,
+          selfName,
+          match.id
+        );
       }
     }
 
@@ -178,6 +186,7 @@ export class ConsentRuntimeService {
       channel,
       status: resolution.status,
       myDecision: selfDecision as "pending" | "approved" | "declined",
+      peerRequested: peerDecision !== "pending",
       warnings: resolution.warnings,
       artifactType: resolution.artifact?.artifactType,
       artifactValue:
@@ -245,6 +254,7 @@ export class ConsentRuntimeService {
       channel,
       status: "declined",
       myDecision: "declined",
+      peerRequested: false,
       warnings: ["peer_deleted"]
     };
   }
