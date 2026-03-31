@@ -1,5 +1,6 @@
 import type { BeaconSummary } from "@corens/domain";
 import { CircleUserRound, User, UserRound } from "lucide-react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   AppSurface,
@@ -16,8 +17,8 @@ import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import { BeaconHero } from "../../components/beacon-hero";
 import { BeaconCountdown } from "../../components/beacon-countdown";
+import { NotificationCleanup } from "../../components/notification-cleanup";
 import {
-  cleanupBotNotifications,
   getBeaconSummary,
   getConnections,
   getProfileSummary,
@@ -32,12 +33,7 @@ const FALLBACK_BEACON: BeaconSummary = {
   durationLabel: "Недоступно"
 };
 
-export default async function ConnectionPage({
-  searchParams
-}: {
-  searchParams: Promise<{ from?: string }>;
-}) {
-  const { from } = await searchParams;
+export default async function ConnectionPage() {
   let profile;
 
   try {
@@ -56,10 +52,6 @@ export default async function ConnectionPage({
 
   if (!profile.onboardingCompleted) {
     redirect("/onboarding/intro");
-  }
-
-  if (from === "notification") {
-    await cleanupBotNotifications();
   }
 
   const [connectionsResult, beaconResult] = await Promise.allSettled([
@@ -86,12 +78,13 @@ export default async function ConnectionPage({
 
   return (
     <AppSurface>
+      <NotificationCleanup />
       <TopBar
         title="Рядом"
         action={
-          <a className="corens-icon-button" href="/profile" aria-label="Профиль">
+          <Link className="corens-icon-button" href="/profile" aria-label="Профиль">
             {profile.profile.gender === "female" ? <UserRound size={18} /> : <User size={18} />}
-          </a>
+          </Link>
         }
       />
 
@@ -108,7 +101,7 @@ export default async function ConnectionPage({
             {activeConnections.map((connection, index) => {
               if (connection.kind !== "active") return null;
               return (
-                <a
+                <Link
                   key={connection.id}
                   href={`/connection/${connection.id}`}
                   className="corens-connection-card"
@@ -128,7 +121,7 @@ export default async function ConnectionPage({
                       )}
                     </div>
                   </div>
-                </a>
+                </Link>
               );
             })}
           </div>

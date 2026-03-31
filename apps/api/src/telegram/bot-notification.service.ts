@@ -67,8 +67,13 @@ export class BotNotificationService {
   }
 
   private notificationUrl(): string {
+    return this.buildMiniAppUrl("/connection");
+  }
+
+  private buildMiniAppUrl(pathname: string): string {
     const url = new URL(this.miniAppUrl);
-    url.searchParams.set("from", "notification");
+    url.pathname = pathname;
+    url.search = "";
     return url.toString();
   }
 

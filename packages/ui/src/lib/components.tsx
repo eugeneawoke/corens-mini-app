@@ -6,9 +6,14 @@ import type {
   TextareaHTMLAttributes
 } from "react";
 import { ArrowLeft, ChevronRight, type LucideIcon } from "lucide-react";
+import Link from "next/link";
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
+}
+
+function isInternalHref(href: string): boolean {
+  return href.startsWith("/") && !href.startsWith("//");
 }
 
 type ButtonVariant =
@@ -84,9 +89,15 @@ export function TopBar({
     <header className="corens-topbar">
       <div className="corens-topbar-side">
         {backHref ? (
-          <a className="corens-icon-button" href={backHref} aria-label="Назад">
-            <ArrowLeft size={18} />
-          </a>
+          isInternalHref(backHref) ? (
+            <Link className="corens-icon-button" href={backHref} aria-label="Назад">
+              <ArrowLeft size={18} />
+            </Link>
+          ) : (
+            <a className="corens-icon-button" href={backHref} aria-label="Назад">
+              <ArrowLeft size={18} />
+            </a>
+          )
         ) : (
           <div className="corens-topbar-placeholder" />
         )}
@@ -158,7 +169,11 @@ export function ButtonLink({
   className?: string;
   variant?: ButtonVariant;
 }) {
-  return (
+  return isInternalHref(href) ? (
+    <Link className={cn(buttonVariantClassName[variant], className)} href={href}>
+      {children}
+    </Link>
+  ) : (
     <a className={cn(buttonVariantClassName[variant], className)} href={href}>
       {children}
     </a>
@@ -224,7 +239,11 @@ export function ListRow({
   );
 
   if (href) {
-    return (
+    return isInternalHref(href) ? (
+      <Link className="corens-list-row" href={href}>
+        {content}
+      </Link>
+    ) : (
       <a className="corens-list-row" href={href}>
         {content}
       </a>

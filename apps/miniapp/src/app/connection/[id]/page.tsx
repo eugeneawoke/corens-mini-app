@@ -1,4 +1,5 @@
 import { ExternalLink, Shield, Unlink2 } from "lucide-react";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
   AppSurface,
@@ -87,9 +88,9 @@ export default async function ConnectionDetailPage({
         <TopBar
           title="Ваша связь"
           action={
-            <a className="corens-icon-button" href="/connection" aria-label="Назад">
+            <Link className="corens-icon-button" href="/connection" aria-label="Назад">
               ←
-            </a>
+            </Link>
           }
         />
 

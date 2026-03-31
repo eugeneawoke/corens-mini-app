@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button, NoticeCard, Panel } from "@corens/ui";
 import { bootstrapMiniAppSession } from "../lib/bootstrap-client";
 
@@ -17,6 +18,7 @@ declare global {
 }
 
 export function AuthBootstrapScreen() {
+  const router = useRouter();
   const [status, setStatus] = useState<"bootstrapping" | "failed">("bootstrapping");
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export function AuthBootstrapScreen() {
         await bootstrapMiniAppSession(initData);
 
         if (!cancelled) {
-          window.location.reload();
+          router.refresh();
         }
       } catch {
         if (!cancelled) {
@@ -50,7 +52,7 @@ export function AuthBootstrapScreen() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [router]);
 
   return (
     <div className="corens-sheet-layout">
@@ -70,7 +72,7 @@ export function AuthBootstrapScreen() {
         />
 
         {status === "failed" ? (
-          <Button type="button" onClick={() => window.location.reload()}>
+          <Button type="button" onClick={() => router.refresh()}>
             Попробовать снова
           </Button>
         ) : null}

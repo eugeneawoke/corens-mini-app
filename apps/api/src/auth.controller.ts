@@ -4,15 +4,27 @@ import { AuthService } from "./modules/auth/service";
 import type { AuthenticatedUserContext } from "./modules/auth/service";
 import { SessionAuthGuard } from "./modules/auth/session.guard";
 import { parseAuthBootstrapRequest } from "./request-validation";
+import { BotNotificationService } from "./telegram/bot-notification.service";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
+  constructor(
+    private readonly auth: AuthService,
+    private readonly notifications: BotNotificationService
+  ) {}
 
   @Post("bootstrap")
-  bootstrap(@Body() body: unknown) {
+  async bootstrap(@Body() body: unknown) {
     const input = parseAuthBootstrapRequest(body);
-    return this.auth.bootstrap(input.initData);
+    const response = await this.auth.bootstrap(input.initData);
+
+    try {
+      await this.notifications.cleanupNotifications(response.user.telegramUserId);
+    } catch {
+      // Best-effort: notification cleanup must not block session bootstrap.
+    }
+
+    return response;
   }
 
   @Get("session")

@@ -15,7 +15,10 @@ export class BotWebhookService {
 
   constructor() {
     this.bot.command("start", async (context) => {
-      const keyboard = new InlineKeyboard().webApp("Open Mini App", this.env.TELEGRAM_MINI_APP_URL);
+      const url = new URL(this.env.TELEGRAM_MINI_APP_URL);
+      url.pathname = "/connection";
+      url.search = "";
+      const keyboard = new InlineKeyboard().webApp("Open Mini App", url.toString());
 
       await context.reply("corens bot foundation is running.", {
         reply_markup: keyboard
