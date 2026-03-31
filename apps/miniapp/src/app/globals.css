@@ -1678,6 +1678,10 @@ select.corens-field {
   scroll-margin-top: 96px;
 }
 
+.corens-beacon-cooldown-card-flash {
+  animation: corens-beacon-cooldown-flash 1.2s ease;
+}
+
 .corens-beacon-cooldown-inline {
   display: flex;
   align-items: baseline;
@@ -1689,6 +1693,15 @@ select.corens-field {
   opacity: 0.62;
   filter: saturate(0.72);
   cursor: pointer;
+}
+
+@keyframes corens-beacon-cooldown-flash {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(196, 129, 26, 0);
+  }
+  30%, 60% {
+    box-shadow: 0 0 0 4px rgba(196, 129, 26, 0.16);
+  }
 }
 
 /* When page has a fixed bottom bar, add enough padding to avoid overlap */

@@ -15,10 +15,22 @@ export function BeaconActivateForm({ isCooldown }: Props) {
       return;
     }
 
-    const top = target.getBoundingClientRect().top + window.scrollY - 88;
-    window.scrollTo({
+    target.classList.remove("corens-beacon-cooldown-card-flash");
+
+    const scroller = document.scrollingElement ?? document.documentElement;
+    const scrollTop = scroller.scrollTop || window.scrollY;
+    const top = target.getBoundingClientRect().top + scrollTop - 88;
+
+    scroller.scrollTo({
       top: Math.max(top, 0),
       behavior: "smooth"
+    });
+
+    requestAnimationFrame(() => {
+      target.classList.add("corens-beacon-cooldown-card-flash");
+      window.setTimeout(() => {
+        target.classList.remove("corens-beacon-cooldown-card-flash");
+      }, 1200);
     });
   }, []);
 
