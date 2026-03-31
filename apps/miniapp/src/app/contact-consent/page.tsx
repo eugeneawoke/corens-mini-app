@@ -5,6 +5,7 @@ import { Button, ButtonLink, NoticeCard, StatusBadge } from "@corens/ui";
 import { approveConsentAction, declineConsentAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
+import { TelegramLinkButton } from "../../components/telegram-link-button";
 import {
   getConsentStatus,
   getProfileSummary,
@@ -84,9 +85,9 @@ export default async function ContactConsentPage({
           {resolution?.warnings.includes("peer_deleted") ? null : resolution?.status === "approved" && resolution.artifactValue ? (
             <>
               <StatusBadge tone="success">Контакт открыт</StatusBadge>
-              <ButtonLink href={resolution.artifactValue} variant="success">
+              <TelegramLinkButton href={resolution.artifactValue} variant="success">
                 Написать в Telegram
-              </ButtonLink>
+              </TelegramLinkButton>
             </>
           ) : resolution?.myDecision === "approved" ? (
             <>

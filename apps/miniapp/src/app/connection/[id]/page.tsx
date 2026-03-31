@@ -15,6 +15,7 @@ import { closeConnectionAction } from "../../actions";
 import { LockStatusHint } from "../../../components/lock-status-hint";
 import { AuthBootstrapScreen } from "../../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../../components/backend-unavailable";
+import { TelegramLinkButton } from "../../../components/telegram-link-button";
 import {
   getConnectionById,
   getProfileSummary,
@@ -186,10 +187,10 @@ export default async function ConnectionDetailPage({
               )}
             </div>
             {connection.contactConsent.status === "approved" && connection.contactConsent.artifactValue ? (
-              <ButtonLink href={connection.contactConsent.artifactValue} variant="success">
+              <TelegramLinkButton href={connection.contactConsent.artifactValue} variant="success">
                 <ExternalLink size={16} />
                 Написать в Telegram
-              </ButtonLink>
+              </TelegramLinkButton>
             ) : connection.contactConsent.myDecision === "approved" ? (
               <StatusBadge tone="warning">Ждём ответа</StatusBadge>
             ) : (
