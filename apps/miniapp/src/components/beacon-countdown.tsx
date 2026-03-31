@@ -15,10 +15,10 @@ function formatCountdown(target: Date): string {
 type Props = {
   targetAt?: string;
   fallbackLabel: string;
-  emphasized?: boolean;
+  variant?: "default" | "emphasized" | "inline";
 };
 
-export function BeaconCountdown({ targetAt, fallbackLabel, emphasized = false }: Props) {
+export function BeaconCountdown({ targetAt, fallbackLabel, variant = "default" }: Props) {
   const router = useRouter();
   const [label, setLabel] = useState(
     targetAt ? formatCountdown(new Date(targetAt)) : fallbackLabel
@@ -54,7 +54,13 @@ export function BeaconCountdown({ targetAt, fallbackLabel, emphasized = false }:
 
   return (
     <span
-      className={`corens-eyebrow corens-mono ${emphasized ? "corens-beacon-timer corens-beacon-timer-emphasized" : "corens-beacon-timer"}`}
+      className={`corens-eyebrow corens-mono corens-beacon-timer${
+        variant === "emphasized"
+          ? " corens-beacon-timer-emphasized"
+          : variant === "inline"
+            ? " corens-beacon-timer-inline"
+            : ""
+      }`}
     >
       {label}
     </span>

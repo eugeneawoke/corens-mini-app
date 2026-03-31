@@ -1,6 +1,7 @@
 import { Radio, TimerReset } from "lucide-react";
 import { redirect } from "next/navigation";
 import { AppSurface, Panel, Section, TopBar } from "@corens/ui";
+import { BeaconActivateForm } from "../../components/beacon-activate-form";
 import { BeaconButton } from "../../components/beacon-button";
 
 import { activateBeaconAction, deactivateBeaconAction } from "../actions";
@@ -63,25 +64,14 @@ export default async function BeaconPage() {
 
         {isActive ? (
           <div className="corens-stack corens-gap-sm">
-            <BeaconCountdown targetAt={snapshot.expiresAt} fallbackLabel={snapshot.remainingLabel} emphasized />
+            <BeaconCountdown targetAt={snapshot.expiresAt} fallbackLabel={snapshot.remainingLabel} variant="emphasized" />
             <form action={deactivateBeaconAction}>
               <BeaconButton kind="deactivate" />
             </form>
           </div>
         ) : (
           <form action={activateBeaconAction} className="corens-stack corens-gap-sm">
-            <div className="corens-field-wrap">
-              <label className="corens-field-label" htmlFor="beacon-duration">
-                Время маяка
-              </label>
-              <select id="beacon-duration" name="durationMinutes" className="corens-field">
-                <option value="15">15 минут</option>
-                <option value="30">30 минут</option>
-                <option value="45">45 минут</option>
-                <option value="60">1 час</option>
-              </select>
-            </div>
-            <BeaconButton kind="activate" />
+            <BeaconActivateForm isCooldown={snapshot.status === "cooldown"} />
           </form>
         )}
       </Panel>
@@ -102,6 +92,7 @@ export default async function BeaconPage() {
       </Section>
 
       <Panel
+        id="beacon-cooldown-card"
         tone={snapshot.status === "cooldown" ? "warning" : "muted"}
         className={snapshot.status === "cooldown" ? "corens-beacon-cooldown-card" : undefined}
       >
@@ -116,12 +107,12 @@ export default async function BeaconPage() {
               : "Если выключить маяк, следующее включение будет доступно через 15 минут."}
           </p>
           {snapshot.status === "cooldown" && snapshot.cooldownUntil ? (
-            <div className="corens-beacon-cooldown-value">
-              <span className="corens-eyebrow">Можно включить через</span>
+            <div className="corens-beacon-cooldown-inline">
+              <span className="corens-copy corens-copy-muted">Можно включить через</span>
               <BeaconCountdown
                 targetAt={snapshot.cooldownUntil}
                 fallbackLabel={snapshot.cooldownLabel ?? "15:00"}
-                emphasized
+                variant="inline"
               />
             </div>
           ) : null}

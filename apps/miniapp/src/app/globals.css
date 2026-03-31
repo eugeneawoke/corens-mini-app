@@ -1667,15 +1667,28 @@ select.corens-field {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
-.corens-beacon-cooldown-card {
-  margin-top: 8px;
+.corens-beacon-timer-inline {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
-.corens-beacon-cooldown-value {
+.corens-beacon-cooldown-card {
+  margin-top: 8px;
+  scroll-margin-top: 96px;
+}
+
+.corens-beacon-cooldown-inline {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
   gap: 8px;
-  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.corens-button-disabled-look {
+  opacity: 0.62;
+  filter: saturate(0.72);
+  cursor: pointer;
 }
 
 /* When page has a fixed bottom bar, add enough padding to avoid overlap */
