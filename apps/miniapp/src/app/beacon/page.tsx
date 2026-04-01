@@ -1,4 +1,4 @@
-import { Radio, TimerReset } from "lucide-react";
+import { Radio } from "lucide-react";
 import { redirect } from "next/navigation";
 import { AppSurface, Panel, Section, TopBar } from "@corens/ui";
 import { BeaconActivateForm } from "../../components/beacon-activate-form";
@@ -60,6 +60,22 @@ export default async function BeaconPage() {
             <h2 className="corens-section-title">{isActive ? "Маяк горит" : "Побыть заметнее"}</h2>
           </div>
           <p className="corens-copy corens-copy-muted">{snapshot.description}</p>
+          <p className={`corens-beacon-footnote ${snapshot.status === "cooldown" ? "corens-beacon-footnote-cooldown" : ""}`}>
+            <span className="corens-beacon-footnote-mark">*</span>
+            <span className="corens-beacon-footnote-label">Пауза между включениями:</span>{" "}
+            {snapshot.status === "cooldown" && snapshot.cooldownUntil ? (
+              <>
+                можно включить снова через{" "}
+                <BeaconCountdown
+                  targetAt={snapshot.cooldownUntil}
+                  fallbackLabel={snapshot.cooldownLabel ?? "15:00"}
+                  variant="inline"
+                />
+              </>
+            ) : (
+              "после выключения маяка следующее включение будет доступно через 15 минут."
+            )}
+          </p>
         </div>
 
         {isActive ? (
@@ -91,33 +107,6 @@ export default async function BeaconPage() {
         </Panel>
       </Section>
 
-      <Panel
-        id="beacon-cooldown-card"
-        tone={snapshot.status === "cooldown" ? "warning" : "muted"}
-        className={snapshot.status === "cooldown" ? "corens-beacon-cooldown-card" : undefined}
-      >
-        <div className="corens-stack corens-gap-sm">
-          <div className="corens-inline-head">
-            <TimerReset size={18} />
-            <h3 className="corens-card-title">Пауза между включениями</h3>
-          </div>
-          <p className="corens-copy corens-copy-muted">
-            {snapshot.status === "cooldown"
-              ? "После выключения маяка нужна короткая пауза. Следующее включение станет доступно совсем скоро."
-              : "Если выключить маяк, следующее включение будет доступно через 15 минут."}
-          </p>
-          {snapshot.status === "cooldown" && snapshot.cooldownUntil ? (
-            <div className="corens-beacon-cooldown-inline">
-              <span className="corens-copy corens-copy-muted">Можно включить через</span>
-              <BeaconCountdown
-                targetAt={snapshot.cooldownUntil}
-                fallbackLabel={snapshot.cooldownLabel ?? "15:00"}
-                variant="inline"
-              />
-            </div>
-          ) : null}
-        </div>
-      </Panel>
     </AppSurface>
   );
 }

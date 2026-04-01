@@ -1673,20 +1673,22 @@ select.corens-field {
   letter-spacing: 0.02em;
 }
 
-.corens-beacon-cooldown-card {
-  margin-top: 8px;
-  scroll-margin-top: 96px;
+.corens-beacon-footnote {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--corens-text-secondary);
 }
 
-.corens-beacon-cooldown-card-flash {
-  animation: corens-beacon-cooldown-flash 1.2s ease;
+.corens-beacon-footnote-mark {
+  color: var(--corens-warning);
+  font-weight: 700;
+  margin-right: 4px;
 }
 
-.corens-beacon-cooldown-inline {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
+.corens-beacon-footnote-label {
+  color: var(--corens-text);
+  font-weight: 600;
 }
 
 .corens-button-disabled-look {
@@ -1695,12 +1697,16 @@ select.corens-field {
   cursor: pointer;
 }
 
-@keyframes corens-beacon-cooldown-flash {
+.corens-beacon-footnote-cooldown {
+  animation: corens-beacon-footnote-shimmer 2.8s ease-in-out infinite;
+}
+
+@keyframes corens-beacon-footnote-shimmer {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(196, 129, 26, 0);
+    color: var(--corens-text-secondary);
   }
-  30%, 60% {
-    box-shadow: 0 0 0 4px rgba(196, 129, 26, 0.16);
+  50% {
+    color: #9d6a1d;
   }
 }
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback } from "react";
 import { BeaconButton } from "./beacon-button";
 
 type Props = {
@@ -8,32 +7,6 @@ type Props = {
 };
 
 export function BeaconActivateForm({ isCooldown }: Props) {
-  const scrollToCooldown = useCallback(() => {
-    const target = document.getElementById("beacon-cooldown-card");
-
-    if (!target) {
-      return;
-    }
-
-    target.classList.remove("corens-beacon-cooldown-card-flash");
-
-    const scroller = document.scrollingElement ?? document.documentElement;
-    const scrollTop = scroller.scrollTop || window.scrollY;
-    const top = target.getBoundingClientRect().top + scrollTop - 88;
-
-    scroller.scrollTo({
-      top: Math.max(top, 0),
-      behavior: "smooth"
-    });
-
-    requestAnimationFrame(() => {
-      target.classList.add("corens-beacon-cooldown-card-flash");
-      window.setTimeout(() => {
-        target.classList.remove("corens-beacon-cooldown-card-flash");
-      }, 1200);
-    });
-  }, []);
-
   return (
     <div className="corens-stack corens-gap-sm">
       <div className="corens-field-wrap">
@@ -58,7 +31,6 @@ export function BeaconActivateForm({ isCooldown }: Props) {
           type="button"
           className="corens-button corens-button-beacon corens-button-disabled-look"
           aria-disabled="true"
-          onClick={scrollToCooldown}
         >
           Зажечь маяк
         </button>
