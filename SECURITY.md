@@ -10,6 +10,8 @@ Top-level security and privacy guardrails for the MVP scaffold.
 - Improper exposure of consent-gated contact or photo data
 - Abuse through repeated state, intent, trust-key, or Beacon changes
 - Leakage of sensitive artifacts into logs or analytics
+- Accidental collection of private Telegram conversation content during outcome validation
+- Feedback spoofing across participants or match sessions
 - Incomplete deletion or lingering access after deletion starts
 
 ## Sensitive Data Rules
@@ -23,6 +25,8 @@ Never log:
 - Telegram deep-link artifacts
 - session tokens/cookies or other session secrets
 - raw report notes in ordinary application logs
+- private Telegram message text, screenshots, or inferred conversation content
+- raw conversation-feedback callback payloads when they contain internal match identifiers
 
 Treat as sensitive:
 
@@ -30,6 +34,19 @@ Treat as sensitive:
 - contact-reveal artifacts
 - media storage metadata
 - audit metadata that can identify actors
+- match-scoped conversation-feedback records and contact-open timestamps
+
+## Conversation Feedback Rules
+
+- Resolve every bot answer to the authenticated Telegram actor and verify that actor belongs to the referenced match session.
+- Never combine approvals or feedback from different match sessions.
+- Store only allowlisted categorical answers in the validation release; no required free text.
+- Use an opaque feedback token in Telegram callback data; never encode a Telegram identifier or raw match id there.
+- Feedback persistence stores a unique server-generated opaque token and has no field for private message content or Telegram deep links.
+- Feedback rows are foreign-keyed to the participant and match session with cascade deletion.
+- Record contact handoff without logging or submitting the Telegram deep link itself.
+- Analytics exports must exclude Telegram ids, usernames, links, raw callback data, and private message content.
+- Delete or minimize feedback records through the same account-deletion and retention guarantees as other match-scoped data.
 
 ## Deletion Rules
 

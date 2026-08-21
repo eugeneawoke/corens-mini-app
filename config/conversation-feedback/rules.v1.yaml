@@ -1,0 +1,11 @@
+version: v1
+timing:
+  after_contact_open_hours: 24
+  without_contact_open_hours: 48
+  expires_after_days: 7
+delivery:
+  reminder_enabled: false
+  max_prompt_attempts: 3
+notes:
+  - contact opening is a proxy and never proof of conversation
+  - callback data uses an opaque feedback token

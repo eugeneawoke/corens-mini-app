@@ -3,144 +3,170 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model User {
-  id                String   @id @default(cuid())
-  telegramUserId    String   @unique
-  telegramUsername  String?
-  status            String
-  firstSeenAt       DateTime @default(now())
-  lastSeenAt        DateTime @updatedAt
-  profile           Profile?
-  photo             UserPhoto?
-  sessions          Session[]
+  id                   String                 @id @default(cuid())
+  telegramUserId       String                 @unique
+  telegramUsername     String?
+  status               String
+  firstSeenAt          DateTime               @default(now())
+  lastSeenAt           DateTime               @updatedAt
+  profile              Profile?
+  photo                UserPhoto?
+  sessions             Session[]
+  conversationFeedback ConversationFeedback[]
 }
 
 model Profile {
-  userId            String   @id
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  displayName       String
-  gender            String   @default("")
-  partnerGender     String   @default("opposite")
-  about             String?
-  stateKey          String   @default("calm")
-  intentKey         String   @default("")
-  trustKeys         String[] @default([])
-  trustKeysUpdatedAt DateTime?
-  photoCount        Int      @default(0)
-  visibilityStatus  String
-  matchingEnabled   Boolean  @default(true)
-  onboardingCompleted Boolean @default(false)
+  userId              String    @id
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName         String
+  gender              String    @default("")
+  partnerGender       String    @default("opposite")
+  about               String?
+  stateKey            String    @default("calm")
+  intentKey           String    @default("")
+  trustKeys           String[]  @default([])
+  trustKeysUpdatedAt  DateTime?
+  photoCount          Int       @default(0)
+  visibilityStatus    String
+  matchingEnabled     Boolean   @default(true)
+  onboardingCompleted Boolean   @default(false)
   onboardingStartedAt DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }
 
 model UserPhoto {
-  userId            String   @id
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  objectKey         String   @unique
-  objectVersionId   String
-  mimeType          String
-  sizeBytes         Int
-  status            String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  userId          String   @id
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  objectKey       String   @unique
+  objectVersionId String
+  mimeType        String
+  sizeBytes       Int
+  status          String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([status, updatedAt])
 }
 
 model MatchSession {
-  id                String   @id @default(cuid())
-  pairKey           String
-  userAId           String
-  userBId           String
-  origin            String
-  status            String
-  score             Int?
-  createdAt         DateTime @default(now())
-  expiresAt         DateTime?
+  id                   String                 @id @default(cuid())
+  pairKey              String
+  userAId              String
+  userBId              String
+  origin               String
+  status               String
+  score                Int?
+  createdAt            DateTime               @default(now())
+  expiresAt            DateTime?
+  conversationFeedback ConversationFeedback[]
 
   @@index([pairKey, status])
   @@index([userAId, status])
   @@index([userBId, status])
 }
 
-model ContactConsent {
-  id                String   @id @default(cuid())
+model ConversationFeedback {
+  id                String       @id
   matchSessionId    String
-  requestedBy       String
-  requestStatus     String
-  resolvedAt        DateTime?
+  matchSession      MatchSession @relation(fields: [matchSessionId], references: [id], onDelete: Cascade)
+  participantUserId String
+  participant       User         @relation(fields: [participantUserId], references: [id], onDelete: Cascade)
+  callbackToken     String       @unique
+  contactOpenedAt   DateTime?
+  promptDueAt       DateTime
+  promptedAt        DateTime?
+  promptAttempts    Int          @default(0)
+  outcome           String?
+  value             String?
+  obstacle          String?
+  nextIntent        String?
+  completedAt       DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@unique([matchSessionId, participantUserId])
+  @@index([promptDueAt, promptedAt])
+  @@index([matchSessionId])
+}
+
+model ContactConsent {
+  id             String    @id @default(cuid())
+  matchSessionId String
+  requestedBy    String
+  requestStatus  String
+  resolvedAt     DateTime?
 
   @@index([matchSessionId])
 }
 
 model PhotoRevealConsent {
-  id                String   @id @default(cuid())
-  matchSessionId    String
-  requestedBy       String
-  requestStatus     String
-  resolvedAt        DateTime?
+  id             String    @id @default(cuid())
+  matchSessionId String
+  requestedBy    String
+  requestStatus  String
+  resolvedAt     DateTime?
 
   @@index([matchSessionId])
 }
 
 model BeaconSession {
-  id                String   @id @default(cuid())
-  userId            String
-  status            String
-  durationMinutes   Int
-  activatedAt       DateTime @default(now())
-  expiresAt         DateTime
-  cooldownUntil     DateTime?
+  id              String    @id @default(cuid())
+  userId          String
+  status          String
+  durationMinutes Int
+  activatedAt     DateTime  @default(now())
+  expiresAt       DateTime
+  cooldownUntil   DateTime?
 
   @@index([userId])
   @@index([status, expiresAt])
 }
 
 model DeletionEvent {
-  id                String   @id @default(cuid())
-  userId            String
-  stage             String
-  requestedAt       DateTime @default(now())
-  completedAt       DateTime?
+  id          String    @id @default(cuid())
+  userId      String
+  stage       String
+  requestedAt DateTime  @default(now())
+  completedAt DateTime?
 }
 
 model ModerationEvent {
-  id                String   @id @default(cuid())
-  matchSessionId    String?
-  actorUserId       String
-  targetUserId      String?
-  eventType         String
-  note              String?
-  createdAt         DateTime @default(now())
+  id             String   @id @default(cuid())
+  matchSessionId String?
+  actorUserId    String
+  targetUserId   String?
+  eventType      String
+  note           String?
+  createdAt      DateTime @default(now())
 
   @@index([actorUserId, eventType, createdAt])
 }
 
 model Session {
-  id                String   @id @default(cuid())
-  userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash         String
-  expiresAt         DateTime
-  revokedAt         DateTime?
-  createdAt         DateTime @default(now())
-  lastSeenAt        DateTime @updatedAt
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @updatedAt
 
   @@index([userId, expiresAt])
 }
 
 model BotNotificationMessage {
-  id              String   @id @default(cuid())
-  telegramUserId  String
-  messageId       Int
-  createdAt       DateTime @default(now())
+  id             String   @id @default(cuid())
+  telegramUserId String
+  messageId      Int
+  createdAt      DateTime @default(now())
 
   @@index([telegramUserId])
 }

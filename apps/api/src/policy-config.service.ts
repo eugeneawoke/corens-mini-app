@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { Injectable } from "@nestjs/common";
 import type {
   BeaconRulesConfig,
+  ConversationFeedbackRulesConfig,
   MatchingIntentMatrixConfig,
   MatchingScoringConfig,
   MatchingStateMatrixConfig,
@@ -22,6 +23,7 @@ export class PolicyConfigService {
   private revealRulesPromise: Promise<RevealRulesConfig> | undefined;
   private retentionPoliciesPromise: Promise<RetentionPoliciesConfig> | undefined;
   private moderationRulesPromise: Promise<{ reportRequestsPerDay: number }> | undefined;
+  private conversationFeedbackRulesPromise: Promise<ConversationFeedbackRulesConfig> | undefined;
 
   getMatchingScoring(): Promise<MatchingScoringConfig> {
     this.matchingScoringPromise ??= this.memoizeWithRetry(
@@ -101,6 +103,16 @@ export class PolicyConfigService {
       }
     );
     return this.moderationRulesPromise;
+  }
+
+  getConversationFeedbackRules(): Promise<ConversationFeedbackRulesConfig> {
+    this.conversationFeedbackRulesPromise ??= this.memoizeWithRetry(
+      () => this.loadConversationFeedbackRules(),
+      () => {
+        this.conversationFeedbackRulesPromise = undefined;
+      }
+    );
+    return this.conversationFeedbackRulesPromise;
   }
 
   private memoizeWithRetry<T>(
@@ -241,6 +253,23 @@ export class PolicyConfigService {
 
     return {
       reportRequestsPerDay: this.readNumber(raw, "limits.report_requests_per_day")
+    };
+  }
+
+  private async loadConversationFeedbackRules(): Promise<ConversationFeedbackRulesConfig> {
+    const raw = await this.readLines("config/conversation-feedback/rules.v1.yaml");
+
+    return {
+      version: this.readScalar(raw, "version") ?? "v1",
+      timing: {
+        afterContactOpenHours: this.readNumber(raw, "timing.after_contact_open_hours"),
+        withoutContactOpenHours: this.readNumber(raw, "timing.without_contact_open_hours"),
+        expiresAfterDays: this.readNumber(raw, "timing.expires_after_days")
+      },
+      delivery: {
+        reminderEnabled: this.readScalar(raw, "delivery.reminder_enabled") === "true",
+        maxPromptAttempts: this.readNumber(raw, "delivery.max_prompt_attempts")
+      }
     };
   }
 

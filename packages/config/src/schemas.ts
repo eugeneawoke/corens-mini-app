@@ -69,3 +69,16 @@ export interface PrivacyRulesConfig {
     closeOpenConsentsImmediately: boolean;
   };
 }
+
+export interface ConversationFeedbackRulesConfig {
+  version: string;
+  timing: {
+    afterContactOpenHours: number;
+    withoutContactOpenHours: number;
+    expiresAfterDays: number;
+  };
+  delivery: {
+    reminderEnabled: boolean;
+    maxPromptAttempts: number;
+  };
+}

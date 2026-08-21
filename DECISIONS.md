@@ -55,3 +55,45 @@ _Store accepted decisions only. Hypotheses stay out until validated._
 
 **Decision:** No internal chat, no extra v2 features, no implicit architecture changes without updating this file and an ADR when needed.  
 **Why:** Prevents scope drift and conflicting implementations.
+
+### Conversation-focused validation wedge
+
+**Decision:** The next validation release focuses Corens on helping one person find one suitable person for the conversation they need now. This is a product wedge inside the existing vision, not a replacement product.
+
+**Why:** Existing qualitative feedback supports the importance of the problem, while the missing evidence concerns whether the current product reliably produces real, useful conversations.
+
+### Preserve the contextual matching signals
+
+**Decision:** Keep current intent, current state, and Trust Keys in the validation release. Treat intent as the primary current request, state as emotional context, and Trust Keys as stable fit and safety signals.
+
+**Why:** The goal is to simplify access and language without removing the context and trust thesis before behavioral evidence shows that a signal is harmful.
+
+### Bot, Mini App, and Telegram responsibilities
+
+**Decision:** Keep the Telegram Bot plus Mini App architecture. The bot owns entry and follow-up notifications; the Mini App owns context, match explanation, consent, and safety; the actual conversation remains a private Telegram direct message.
+
+**Why:** This preserves the existing privacy-first architecture and keeps the conversation in the channel users already use.
+
+### Conversation outcome feedback
+
+**Decision:** Validate post-handoff outcomes through a match-scoped, three-question bot sequence sent independently to both participants. The sequence records outcome, value or obstacle, and next-conversation intent, then thanks the participant.
+
+**Why:** Contact reveal and link opening are behavioral proxies but cannot prove that a private Telegram conversation occurred.
+
+### Mutual conversation confirmation
+
+**Decision:** Count a conversation as mutually confirmed only when both participants in the same `matchSessionId` independently report that it happened.
+
+**Why:** Corens cannot and must not inspect private Telegram messages; independent pair-level self-report is the strongest privacy-preserving evidence available.
+
+### Validation North Star
+
+**Decision:** Use mutually confirmed conversations per week as the North Star for the closed validation cohort. Use onboarding, match, consent, contact-open, one-sided report, value, and repeat intent as diagnostic funnel measures.
+
+**Why:** Registrations, matches, and contact reveals measure progress toward value, not the delivered human outcome itself.
+
+### Universal conversation starters
+
+**Decision:** After mutual contact approval, show one optional opening-message suggestion selected from the approved universal copy pool. Selection must not depend on inferred experience, conversation topic, current state, intent, Trust Keys, profile text, or private message content.
+
+**Why:** A concrete first phrase can reduce the friction between opening a contact and starting a conversation, while universal wording avoids making unsupported claims such as `я тебя понимаю` or `у меня был похожий опыт`.

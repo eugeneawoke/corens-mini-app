@@ -18,6 +18,7 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 - `matching/*`: current connection card, continue/skip, no-match state
 - `beacon/*`: activate, inspect active session, inspect cooldown
 - `consents/*`: contact consent and photo reveal actions
+- `conversation-feedback/*`: planned match-scoped contact-open and participant feedback actions for the validation release
 - `privacy/*`: hide, restore, delete request
 - `health/*`: readiness and liveness
 
@@ -50,6 +51,15 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 - The route shapes are intended to stay stable while matching and consent move from placeholders to real persistence-backed orchestration
 - `/connection` is the canonical user surface after `/home` was removed to eliminate demo fallbacks
 - Auth bootstrap/session guards anchor every Mini App request, and falling back to fabricated state is not permitted
+
+## Planned Conversation Validation Boundary
+
+- `POST /api/conversation-feedback/:connectionId/contact-opened`: record an authenticated participant's first Telegram handoff click without accepting or persisting the deep link itself
+- Bot callback writes resolve an opaque feedback token plus Telegram actor to a Corens participant, verify membership in the associated match session, and accept only allowlisted answers for the current feedback step
+- Feedback records are unique per `(matchSessionId, participantUserId)`
+- Pair-level mutual confirmation is derived only from two distinct `talked` reports in the same match session
+- The shared categorical request/response types, pair-status derivation, Prisma model, migration, policy loader, and persistence service are implemented; no route, callback, prompt delivery, or contact-open runtime wiring is implemented yet
+- The planned routes and callbacks must not be recorded as implemented evidence until their tests pass
 
 ## Auth
 

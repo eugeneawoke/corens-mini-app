@@ -8,6 +8,16 @@ Build `corens` v1 as a modular backend that serves Telegram Bot and Telegram Min
 
 - `apps/api`: source-of-truth HTTP/API boundary plus Telegram bot webhook runtime
 - `apps/miniapp`: primary user interface
+- Telegram direct messages: private conversation surface after mutual contact approval; not observed by Corens
+
+## Validation Flow
+
+`Bot entry/notification → Mini App context and consent → Telegram contact handoff → private direct message → Bot outcome feedback`
+
+- The bot owns entry, notifications, and post-handoff feedback.
+- The Mini App owns context, match explanation, mutual consent, and safety controls.
+- Conversation feedback is scoped to participant plus match session.
+- Delayed prompts reuse the in-process maintenance baseline; no standalone worker runtime is introduced.
 
 ## Deployment Baseline
 
@@ -30,5 +40,7 @@ Build `corens` v1 as a modular backend that serves Telegram Bot and Telegram Min
 - auto-matching stays backend-driven
 - Beacon is temporary and manual
 - contact and photo reveal remain separate flows
+- contact approvals and conversation feedback remain scoped to one match session
+- private Telegram message content is never collected
 - privacy and access control override speed of implementation
 - deployment stays compatible with a zero-cost baseline by avoiding a dedicated worker runtime

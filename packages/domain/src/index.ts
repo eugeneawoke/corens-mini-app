@@ -8,3 +8,4 @@ export * from "./lib/consent-policy";
 export * from "./lib/privacy-policy";
 export * from "./lib/miniapp-api";
 export * from "./lib/profile-options";
+export * from "./lib/conversation-feedback";
