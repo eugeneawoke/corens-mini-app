@@ -156,7 +156,8 @@ function createFixture() {
       },
       delivery: {
         reminderEnabled: false,
-        maxPromptAttempts: 3
+        maxPromptAttempts: 3,
+        claimLeaseMinutes: 15
       }
     })
   } as PolicyConfigService;

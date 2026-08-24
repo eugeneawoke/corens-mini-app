@@ -38,6 +38,14 @@ export interface ConversationFeedbackBotSubmitResult {
   nextStep: ConversationFeedbackBotNextStep | null;
 }
 
+export interface DueConversationFeedbackPrompt {
+  id: string;
+  telegramUserId: string;
+  callbackToken: string;
+  promptClaimedAt: Date | null;
+  promptAttempts: number;
+}
+
 function isAllowedValue<T extends readonly string[]>(
   values: T,
   candidate: string
@@ -147,6 +155,108 @@ export class ConversationFeedbackService {
       });
 
       return { recorded: true };
+    });
+  }
+
+  async findDuePrompts(now = new Date()): Promise<DueConversationFeedbackPrompt[]> {
+    const rules = await this.policyConfig.getConversationFeedbackRules();
+    const expiresBefore = new Date(
+      now.getTime() - rules.timing.expiresAfterDays * 24 * 60 * 60 * 1000
+    );
+    const claimExpiredBefore = new Date(
+      now.getTime() - rules.delivery.claimLeaseMinutes * 60 * 1000
+    );
+    const feedback = await this.prisma.clientInstance.conversationFeedback.findMany({
+      where: {
+        promptDueAt: {
+          lte: now,
+          gt: expiresBefore
+        },
+        promptedAt: null,
+        completedAt: null,
+        promptAttempts: { lt: rules.delivery.maxPromptAttempts },
+        OR: [
+          { promptClaimedAt: null },
+          { promptClaimedAt: { lte: claimExpiredBefore } }
+        ]
+      },
+      include: {
+        participant: {
+          select: { telegramUserId: true }
+        }
+      },
+      orderBy: [{ promptDueAt: "asc" }, { id: "asc" }]
+    });
+
+    return feedback.map((item) => ({
+      id: item.id,
+      telegramUserId: item.participant.telegramUserId,
+      callbackToken: item.callbackToken,
+      promptClaimedAt: item.promptClaimedAt,
+      promptAttempts: item.promptAttempts
+    }));
+  }
+
+  async claimPromptDelivery(
+    prompt: DueConversationFeedbackPrompt,
+    now = new Date()
+  ): Promise<boolean> {
+    const rules = await this.policyConfig.getConversationFeedbackRules();
+    const expiresBefore = new Date(
+      now.getTime() - rules.timing.expiresAfterDays * 24 * 60 * 60 * 1000
+    );
+    const claimed = await this.prisma.clientInstance.conversationFeedback.updateMany({
+      where: {
+        id: prompt.id,
+        promptDueAt: {
+          lte: now,
+          gt: expiresBefore
+        },
+        promptedAt: null,
+        completedAt: null,
+        promptClaimedAt: prompt.promptClaimedAt,
+        promptAttempts: prompt.promptAttempts
+      },
+      data: {
+        promptClaimedAt: now,
+        promptAttempts: { increment: 1 }
+      }
+    });
+
+    return claimed.count === 1;
+  }
+
+  async markPromptDelivered(
+    prompt: DueConversationFeedbackPrompt,
+    claimedAt: Date,
+    deliveredAt = new Date()
+  ): Promise<void> {
+    await this.prisma.clientInstance.conversationFeedback.updateMany({
+      where: {
+        id: prompt.id,
+        promptClaimedAt: claimedAt,
+        promptedAt: null,
+        promptAttempts: prompt.promptAttempts + 1
+      },
+      data: {
+        promptClaimedAt: null,
+        promptedAt: deliveredAt
+      }
+    });
+  }
+
+  async releasePromptDelivery(
+    prompt: DueConversationFeedbackPrompt,
+    claimedAt: Date
+  ): Promise<void> {
+    await this.prisma.clientInstance.conversationFeedback.updateMany({
+      where: {
+        id: prompt.id,
+        promptClaimedAt: claimedAt,
+        promptedAt: null,
+        promptAttempts: prompt.promptAttempts + 1
+      },
+      data: { promptClaimedAt: null }
     });
   }
 

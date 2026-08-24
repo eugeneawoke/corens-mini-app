@@ -39,7 +39,7 @@ The validation release does not replace the current architecture or remove state
 ## Phase E Definition Of Done
 
 - [x] The runtime records match-scoped mutual contact approval and first contact-handoff open without logging the deep link.
-- [ ] Both participants receive at most one active feedback sequence for a match session.
+- [x] Both participants receive at most one active feedback sequence for a match session.
 - [x] The bot implements the three-question branching sequence and final thank-you.
 - [ ] Pair aggregation distinguishes one-sided report, conflicting report, and mutual confirmation.
 - [ ] Analytics events and persistence contain no private Telegram message content, usernames, user ids, or deep-link artifacts in exported properties.
@@ -61,7 +61,7 @@ The validation release does not replace the current architecture or remove state
 - `/connection` remains the primary Mini App process surface; the actual chat remains in Telegram.
 - Matching, consent, Beacon, feedback timing, deletion, and moderation transitions remain deterministic and policy-backed.
 - Auth and privacy controls remain release blockers, not optional polish.
-- Existing user changes in matching and bot notifications must be preserved and impact-analysed before implementation.
+- Existing user-owned worktree changes must be preserved and excluded from unrelated session commits.
 - Each implementation task runs in a separate fresh session using `MASTER_PROMPT.md`.
 
 ## Acceptance Notes

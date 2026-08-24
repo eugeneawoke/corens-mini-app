@@ -80,5 +80,6 @@ export interface ConversationFeedbackRulesConfig {
   delivery: {
     reminderEnabled: boolean;
     maxPromptAttempts: number;
+    claimLeaseMinutes: number;
   };
 }

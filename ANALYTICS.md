@@ -61,6 +61,8 @@ The sequence ends with a thank-you. The validation release does not require free
 
 - First prompt due 24 hours after the first recorded contact-handoff click.
 - Fallback due 48 hours after mutual contact approval when no click is recorded.
+- The configured expiry window is measured from each participant's `promptDueAt`.
+- A delivery claim is recoverable after the config-backed 15-minute lease; `promptedAt` records confirmed Telegram delivery rather than claim acquisition.
 - One active feedback sequence per participant and match session.
 - Timing, reminder, retry, and expiry use the dedicated versioned `config/conversation-feedback/rules.v1.yaml` policy before runtime wiring.
 
@@ -70,7 +72,8 @@ The sequence ends with a thank-you. The validation release does not require free
 - Same-match mutual contact approval creates the two participant feedback records, and the runtime records only the first match-scoped handoff open.
 - Contact opening advances both pending feedback due times to no later than 24 hours after the first open and never delays an earlier due time.
 - The bot callback runtime now handles the three-question value/obstacle sequence and final thank-you with actor-bound opaque tokens and idempotent categorical writes.
-- The runtime does not yet emit feedback analytics events or select and deliver due prompts through the maintenance sweep.
+- The in-process maintenance sweep now leases and delivers due participant prompts through the existing bot handler, suppresses concurrent claims, recovers abandoned claims after 15 minutes, retries up to the configured attempt limit, and excludes expired prompts.
+- The runtime does not yet emit feedback analytics events.
 
 ## Interpretation Rules
 

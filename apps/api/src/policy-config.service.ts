@@ -268,7 +268,8 @@ export class PolicyConfigService {
       },
       delivery: {
         reminderEnabled: this.readScalar(raw, "delivery.reminder_enabled") === "true",
-        maxPromptAttempts: this.readNumber(raw, "delivery.max_prompt_attempts")
+        maxPromptAttempts: this.readNumber(raw, "delivery.max_prompt_attempts"),
+        claimLeaseMinutes: this.readNumber(raw, "delivery.claim_lease_minutes")
       }
     };
   }

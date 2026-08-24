@@ -12,6 +12,7 @@ function createBotFeedbackFixture() {
     callbackToken: "abcdefghijklmnopqrstuvwxyzABCDEF",
     contactOpenedAt: null,
     promptDueAt: new Date("2026-08-24T09:00:00.000Z"),
+    promptClaimedAt: null,
     promptedAt: new Date("2026-08-24T09:00:00.000Z"),
     promptAttempts: 1,
     outcome: null,

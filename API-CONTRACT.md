@@ -61,7 +61,8 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 - Pair-level mutual confirmation is derived only from two distinct `talked` reports in the same match session
 - The shared categorical request/response types, pair-status derivation, Prisma model, migration, policy loader, persistence service, mutual-approval wiring, contact-open route, and bot callback runtime are implemented
 - Bot callbacks use compact allowlisted step/answer codes plus the opaque feedback token, authenticate the Telegram actor against the feedback participant, and reject malformed, stale, wrong-branch, duplicate, or foreign-actor input with a generic unavailable response
-- Due prompt selection, delivery attempts, retry, and expiry remain planned for the in-process maintenance sweep
+- The in-process maintenance sweep selects due uncompleted participant records, acquires a guarded config-backed lease before invoking the existing bot outcome-prompt handler, writes `promptedAt` only after Telegram accepts delivery, recovers leases that are at least 15 minutes old, retries thrown or abandoned attempts up to the configured limit, and excludes expired records
+- Delivery is bounded at-least-once rather than exactly-once across PostgreSQL and Telegram; every retry reuses the same opaque callback token so a rare duplicate message still addresses one logical feedback sequence
 
 ## Auth
 

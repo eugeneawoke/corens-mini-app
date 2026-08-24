@@ -4,16 +4,15 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 
 ## Active Task
 
-- [ ] Phase E / Session 4 — Due feedback prompt maintenance
-  - extend the existing in-process maintenance sweep to claim due participant feedback records
-  - send the outcome prompt through the existing bot handler at most once per active sequence
-  - enforce the config-backed retry, attempt, and expiry policy idempotently
-  - add focused maintenance and prompt-delivery tests
+- [ ] Phase E / Session 5 — Conversation-focused product copy and opening-message suggestion
+  - rewrite intro, onboarding, connection, Beacon, and notification copy around a needed conversation
+  - add the approved universal opening-message suggestion after mutual contact approval
+  - preserve state, intent, Trust Keys, Beacon, consent, and the Telegram handoff
+  - add focused copy, deterministic-selection, and mobile UI coverage
 
 ## Up Next — One Fresh Session Each
 
-1. Phase E / Session 5 — Rewrite intro, onboarding, connection, Beacon, and notification copy around a needed conversation; add the approved universal opening-message suggestion after mutual contact approval without removing state, intent, or Trust Keys.
-2. Phase E / Session 6 — Add end-to-end validation, pilot export, privacy audit, and release evidence.
+1. Phase E / Session 6 — Add end-to-end validation, pilot export, privacy audit, and release evidence.
 
 ## Backlog
 
@@ -25,7 +24,7 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 
 ## Current Constraints
 
-- Preserve the existing uncommitted matching and bot-notification changes.
+- Preserve the existing user-owned `.claude/settings.local.json` change and exclude it from unrelated session commits.
 - Run GitNexus impact analysis before editing every symbol and `gitnexus_detect_changes()` before committing.
 - Do not read or store private Telegram conversation content.
 - Do not count contact open or one-sided feedback as a mutually confirmed conversation.
@@ -47,3 +46,4 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 | 2026-08-21 | Added and verified the conversation-feedback domain, policy, persistence model, migration, service, and pair-status rules before runtime wiring |
 | 2026-08-21 | Wired same-match mutual contact approval to feedback creation and added first contact-handoff tracking without submitting or storing the Telegram link |
 | 2026-08-24 | Added and verified the three-question Telegram bot feedback sequence with opaque callbacks, actor binding, branch validation, idempotent writes, and final thank-you |
+| 2026-08-24 | Added and verified due feedback prompt delivery through the in-process maintenance sweep with recoverable guarded leases, bounded retry, and expiry |

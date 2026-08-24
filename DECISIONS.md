@@ -80,6 +80,12 @@ _Store accepted decisions only. Hypotheses stay out until validated._
 
 **Why:** Contact reveal and link opening are behavioral proxies but cannot prove that a private Telegram conversation occurred.
 
+### Feedback prompt delivery guarantee
+
+**Decision:** Use a config-backed database lease for bounded at-least-once feedback-prompt delivery. A claim that is at least 15 minutes old may be recovered by another in-process maintenance sweep, attempts remain capped at three, and every retry reuses the same opaque callback token. `promptedAt` means confirmed Telegram delivery; `promptClaimedAt` is only a temporary claim.
+
+**Why:** A pre-send permanent marker can silently lose pilot feedback after a process restart. PostgreSQL and Telegram do not share a transaction, so recovery prioritizes avoiding silent loss while accepting a rare duplicate message that still addresses one idempotent feedback sequence.
+
 ### Mutual conversation confirmation
 
 **Decision:** Count a conversation as mutually confirmed only when both participants in the same `matchSessionId` independently report that it happened.

@@ -81,6 +81,7 @@ model ConversationFeedback {
   callbackToken     String       @unique
   contactOpenedAt   DateTime?
   promptDueAt       DateTime
+  promptClaimedAt   DateTime?
   promptedAt        DateTime?
   promptAttempts    Int          @default(0)
   outcome           String?
@@ -93,6 +94,7 @@ model ConversationFeedback {
 
   @@unique([matchSessionId, participantUserId])
   @@index([promptDueAt, promptedAt])
+  @@index([promptDueAt, promptedAt, promptClaimedAt])
   @@index([matchSessionId])
 }
 

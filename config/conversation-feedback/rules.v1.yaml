@@ -6,6 +6,7 @@ timing:
 delivery:
   reminder_enabled: false
   max_prompt_attempts: 3
+  claim_lease_minutes: 15
 notes:
   - contact opening is a proxy and never proof of conversation
   - callback data uses an opaque feedback token
