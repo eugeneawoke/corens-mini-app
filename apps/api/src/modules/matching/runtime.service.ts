@@ -549,7 +549,7 @@ export class MatchingRuntimeService {
 
     const [userAId, userBId] = [self.userId, bestMatch.candidateUserId].sort();
 
-    let isNewMatch = false;
+    let newMatchId: string | null = null;
 
     await this.prisma.clientInstance.$transaction(async (tx) => {
       const activePair = await tx.matchSession.findFirst({
@@ -564,7 +564,7 @@ export class MatchingRuntimeService {
       }
 
       try {
-        await tx.matchSession.create({
+        const created = await tx.matchSession.create({
           data: {
             pairKey: `${userAId}:${userBId}`,
             userAId,
@@ -577,7 +577,7 @@ export class MatchingRuntimeService {
             )
           }
         });
-        isNewMatch = true;
+        newMatchId = created.id;
       } catch (error) {
         if (
           error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -590,13 +590,13 @@ export class MatchingRuntimeService {
       }
     });
 
-    if (isNewMatch) {
+    if (newMatchId) {
       const [profileA, profileB] = await Promise.all([
         this.prisma.clientInstance.profile.findUnique({ where: { userId: userAId }, select: { displayName: true, user: { select: { telegramUserId: true } } } }),
         this.prisma.clientInstance.profile.findUnique({ where: { userId: userBId }, select: { displayName: true, user: { select: { telegramUserId: true } } } })
       ]);
-      if (profileA) void this.notifications.notifyConnectionCreated(profileA.user.telegramUserId, profileB?.displayName ?? "Кто-то");
-      if (profileB) void this.notifications.notifyConnectionCreated(profileB.user.telegramUserId, profileA?.displayName ?? "Кто-то");
+      if (profileA) void this.notifications.notifyConnectionCreated(profileA.user.telegramUserId, profileB?.displayName ?? "Кто-то", newMatchId);
+      if (profileB) void this.notifications.notifyConnectionCreated(profileB.user.telegramUserId, profileA?.displayName ?? "Кто-то", newMatchId);
     }
   }
 

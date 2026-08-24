@@ -14,11 +14,15 @@ export class BotNotificationService {
     private readonly prisma: PrismaService
   ) {}
 
-  async notifyConnectionCreated(telegramUserId: string, peerName: string): Promise<void> {
+  async notifyConnectionCreated(
+    telegramUserId: string,
+    peerName: string,
+    connectionId?: string
+  ): Promise<void> {
     await this.send(
       telegramUserId,
       `У вас новая связь с ${peerName}. Загляните в приложение.`,
-      this.notificationUrl()
+      this.notificationUrl(connectionId)
     );
   }
 
