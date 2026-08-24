@@ -47,6 +47,6 @@ This document tracks human-readable analytics event definitions. The machine-rea
 ## Notes
 
 - Do not store deep links, signed URLs, or raw init-data in analytics payloads.
-- Conversation-feedback persistence is implemented, but these events are planned and are not emitted by the current runtime yet.
+- Conversation-feedback persistence, first contact-handoff-open recording, and categorical bot callback handling are implemented, but the listed analytics events are not emitted by the current runtime yet.
 - Every feedback event is scoped internally to a match session and participant, but exported analytics must use non-contact identifiers and must not contain Telegram usernames or ids.
 - `feedback.conversation_mutually_confirmed` is derived only when both distinct participants in the same match session report a conversation.

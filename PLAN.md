@@ -38,9 +38,9 @@ The validation release does not replace the current architecture or remove state
 
 ## Phase E Definition Of Done
 
-- [ ] The runtime records match-scoped mutual contact approval and first contact-handoff open without logging the deep link.
+- [x] The runtime records match-scoped mutual contact approval and first contact-handoff open without logging the deep link.
 - [ ] Both participants receive at most one active feedback sequence for a match session.
-- [ ] The bot implements the three-question branching sequence and final thank-you.
+- [x] The bot implements the three-question branching sequence and final thank-you.
 - [ ] Pair aggregation distinguishes one-sided report, conflicting report, and mutual confirmation.
 - [ ] Analytics events and persistence contain no private Telegram message content, usernames, user ids, or deep-link artifacts in exported properties.
 - [ ] Conversation-focused intro/onboarding and connection copy are understandable without removing existing context signals.

@@ -127,6 +127,18 @@ function createFixture() {
           if (!existing) throw new Error("Feedback not found");
           Object.assign(existing, data, { updatedAt: new Date() });
           return existing;
+        },
+        updateMany: async ({ where, data }: { where: Record<string, unknown>; data: Record<string, unknown> }) => {
+          const records = feedback.filter(
+            (item) =>
+              item.matchSessionId === where.matchSessionId &&
+              (where.contactOpenedAt !== null || item.contactOpenedAt === null) &&
+              (where.promptedAt !== null || item.promptedAt === null) &&
+              (!where.promptDueAt ||
+                item.promptDueAt > (where.promptDueAt as { gt: Date }).gt)
+          );
+          records.forEach((item) => Object.assign(item, data, { updatedAt: new Date() }));
+          return { count: records.length };
         }
       },
       $transaction: async <T>(operation: (transaction: unknown) => Promise<T>) =>
@@ -189,6 +201,76 @@ describe("ConversationFeedbackService", () => {
       )
     ).rejects.toThrow("Mutual contact approval required");
     expect(fixture.feedback).toHaveLength(0);
+  });
+
+  it("records only the first match handoff open and advances both pending prompts", async () => {
+    const fixture = createFixture();
+    await fixture.service.ensureForMutualApproval(
+      "match-1",
+      new Date("2026-08-21T09:00:00.000Z")
+    );
+
+    await expect(
+      fixture.service.recordContactOpened(
+        "match-1",
+        "user-a",
+        new Date("2026-08-21T10:00:00.000Z")
+      )
+    ).resolves.toEqual({ recorded: true });
+    await expect(
+      fixture.service.recordContactOpened(
+        "match-1",
+        "user-b",
+        new Date("2026-08-21T11:00:00.000Z")
+      )
+    ).resolves.toEqual({ recorded: false });
+
+    expect(fixture.feedback.find((item) => item.participantUserId === "user-a")?.contactOpenedAt)
+      .toEqual(new Date("2026-08-21T10:00:00.000Z"));
+    expect(fixture.feedback.find((item) => item.participantUserId === "user-b")?.contactOpenedAt)
+      .toEqual(new Date("2026-08-21T10:00:00.000Z"));
+    expect(
+      fixture.feedback.every(
+        (item) => item.promptDueAt.toISOString() === "2026-08-22T10:00:00.000Z"
+      )
+    ).toBe(true);
+  });
+
+  it("rejects contact-open tracking by a user outside the match", async () => {
+    const fixture = createFixture();
+    await fixture.service.ensureForMutualApproval(
+      "match-1",
+      new Date("2026-08-21T09:00:00.000Z")
+    );
+
+    await expect(
+      fixture.service.recordContactOpened(
+        "match-1",
+        "user-c",
+        new Date("2026-08-21T10:00:00.000Z")
+      )
+    ).rejects.toThrow("Feedback not found");
+  });
+
+  it("does not delay a pending prompt that is already due sooner than 24 hours", async () => {
+    const fixture = createFixture();
+    await fixture.service.ensureForMutualApproval(
+      "match-1",
+      new Date("2026-08-21T09:00:00.000Z")
+    );
+    const userBFeedback = fixture.feedback.find(
+      (item) => item.participantUserId === "user-b"
+    );
+    if (!userBFeedback) throw new Error("Fixture feedback missing");
+    userBFeedback.promptDueAt = new Date("2026-08-21T18:00:00.000Z");
+
+    await fixture.service.recordContactOpened(
+      "match-1",
+      "user-a",
+      new Date("2026-08-21T10:00:00.000Z")
+    );
+
+    expect(userBFeedback.promptDueAt).toEqual(new Date("2026-08-21T18:00:00.000Z"));
   });
 
   it("rejects a feedback write by a user outside the match", async () => {

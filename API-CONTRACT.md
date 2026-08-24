@@ -38,6 +38,7 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 - `POST /api/consents/contact`: update the local actor decision for contact consent
 - `GET /api/consents/photo`: current photo reveal status for the active connection
 - `POST /api/consents/photo`: update the local actor decision for photo reveal
+- `POST /api/conversation-feedback/:connectionId/contact-opened`: record the authenticated participant's first match-scoped Telegram handoff open; the request has no body and accepts no link value
 
 ## First-Pass Payload Notes
 
@@ -54,12 +55,13 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 
 ## Planned Conversation Validation Boundary
 
-- `POST /api/conversation-feedback/:connectionId/contact-opened`: record an authenticated participant's first Telegram handoff click without accepting or persisting the deep link itself
+- `POST /api/conversation-feedback/:connectionId/contact-opened` is implemented and records only the first match-scoped handoff open without accepting or persisting the deep link itself
 - Bot callback writes resolve an opaque feedback token plus Telegram actor to a Corens participant, verify membership in the associated match session, and accept only allowlisted answers for the current feedback step
 - Feedback records are unique per `(matchSessionId, participantUserId)`
 - Pair-level mutual confirmation is derived only from two distinct `talked` reports in the same match session
-- The shared categorical request/response types, pair-status derivation, Prisma model, migration, policy loader, and persistence service are implemented; no route, callback, prompt delivery, or contact-open runtime wiring is implemented yet
-- The planned routes and callbacks must not be recorded as implemented evidence until their tests pass
+- The shared categorical request/response types, pair-status derivation, Prisma model, migration, policy loader, persistence service, mutual-approval wiring, contact-open route, and bot callback runtime are implemented
+- Bot callbacks use compact allowlisted step/answer codes plus the opaque feedback token, authenticate the Telegram actor against the feedback participant, and reject malformed, stale, wrong-branch, duplicate, or foreign-actor input with a generic unavailable response
+- Due prompt selection, delivery attempts, retry, and expiry remain planned for the in-process maintenance sweep
 
 ## Auth
 

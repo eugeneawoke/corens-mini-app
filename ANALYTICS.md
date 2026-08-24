@@ -67,7 +67,10 @@ The sequence ends with a thank-you. The validation release does not require free
 ## Implementation Status
 
 - Match-scoped participant feedback persistence and pair-status derivation are implemented.
-- The runtime does not yet record handoff opens, emit feedback analytics events, deliver prompts, or handle bot answers.
+- Same-match mutual contact approval creates the two participant feedback records, and the runtime records only the first match-scoped handoff open.
+- Contact opening advances both pending feedback due times to no later than 24 hours after the first open and never delays an earlier due time.
+- The bot callback runtime now handles the three-question value/obstacle sequence and final thank-you with actor-bound opaque tokens and idempotent categorical writes.
+- The runtime does not yet emit feedback analytics events or select and deliver due prompts through the maintenance sweep.
 
 ## Interpretation Rules
 

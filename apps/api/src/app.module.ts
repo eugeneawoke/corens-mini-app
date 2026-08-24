@@ -23,6 +23,9 @@ import { PolicyConfigService } from "./policy-config.service";
 import { MatchingRuntimeService } from "./modules/matching/runtime.service";
 import { AuthService } from "./modules/auth/service";
 import { SessionAuthGuard } from "./modules/auth/session.guard";
+import { ConversationFeedbackController } from "./conversation-feedback.controller";
+import { ConversationFeedbackService } from "./modules/conversation-feedback/service";
+import { ConversationFeedbackBotHandlerService } from "./modules/conversation-feedback/bot-handler.service";
 
 @Module({
   imports: [
@@ -40,6 +43,7 @@ import { SessionAuthGuard } from "./modules/auth/session.guard";
     BeaconController,
     MatchingController,
     ConsentsController,
+    ConversationFeedbackController,
     MediaController
   ],
   providers: [
@@ -49,6 +53,8 @@ import { SessionAuthGuard } from "./modules/auth/session.guard";
     MaintenanceService,
     BeaconService,
     ConsentRuntimeService,
+    ConversationFeedbackService,
+    ConversationFeedbackBotHandlerService,
     MediaService,
     ModerationRuntimeService,
     PrivacyRuntimeService,
@@ -65,6 +71,8 @@ import { SessionAuthGuard } from "./modules/auth/session.guard";
     MaintenanceService,
     BeaconService,
     ConsentRuntimeService,
+    ConversationFeedbackService,
+    ConversationFeedbackBotHandlerService,
     MediaService,
     ModerationRuntimeService,
     PrivacyRuntimeService,

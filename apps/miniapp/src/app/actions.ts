@@ -96,6 +96,12 @@ export async function declineConsentAction(channel: "contact" | "photo", connect
   redirect(`/connection/${connectionId}`);
 }
 
+export async function recordContactOpenedAction(connectionId: string): Promise<void> {
+  await sendApiMutation(`/api/conversation-feedback/${encodeURIComponent(connectionId)}/contact-opened`, {
+    method: "POST"
+  });
+}
+
 export async function completeOnboardingAction(formData: FormData): Promise<void> {
   const displayName = String(formData.get("displayName") ?? "")
     .trim()

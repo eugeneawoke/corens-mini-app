@@ -4,19 +4,16 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 
 ## Active Task
 
-- [ ] Phase E / Session 2 — Mutual contact approval and contact-handoff tracking
-  - create the two feedback records only after same-match mutual contact approval
-  - add an authenticated match-scoped contact-open endpoint that accepts no Telegram link value
-  - record only the first handoff open and move both prompt due times to no later than 24 hours after it
-  - keep tracking failure non-blocking for the Telegram handoff
-  - add focused consent, controller, and handoff integration tests
+- [ ] Phase E / Session 4 — Due feedback prompt maintenance
+  - extend the existing in-process maintenance sweep to claim due participant feedback records
+  - send the outcome prompt through the existing bot handler at most once per active sequence
+  - enforce the config-backed retry, attempt, and expiry policy idempotently
+  - add focused maintenance and prompt-delivery tests
 
 ## Up Next — One Fresh Session Each
 
-1. Phase E / Session 3 — Implement bot prompts, callback handling, branching question two, question three, and final thank-you.
-2. Phase E / Session 4 — Extend the in-process maintenance sweep for due prompts, idempotency, retry, and expiry policy.
-3. Phase E / Session 5 — Rewrite intro, onboarding, connection, Beacon, and notification copy around a needed conversation; add the approved universal opening-message suggestion after mutual contact approval without removing state, intent, or Trust Keys.
-4. Phase E / Session 6 — Add end-to-end validation, pilot export, privacy audit, and release evidence.
+1. Phase E / Session 5 — Rewrite intro, onboarding, connection, Beacon, and notification copy around a needed conversation; add the approved universal opening-message suggestion after mutual contact approval without removing state, intent, or Trust Keys.
+2. Phase E / Session 6 — Add end-to-end validation, pilot export, privacy audit, and release evidence.
 
 ## Backlog
 
@@ -48,3 +45,5 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 | 2026-03-17 | Added Vitest-backed unit, contract, and integration suites so `pnpm test` runs meaningful checks |
 | 2026-08-14 | Fixed the conversation-validation contract, evidence ladder, feedback sequence, session master prompt, and re-baselined implementation plan |
 | 2026-08-21 | Added and verified the conversation-feedback domain, policy, persistence model, migration, service, and pair-status rules before runtime wiring |
+| 2026-08-21 | Wired same-match mutual contact approval to feedback creation and added first contact-handoff tracking without submitting or storing the Telegram link |
+| 2026-08-24 | Added and verified the three-question Telegram bot feedback sequence with opaque callbacks, actor binding, branch validation, idempotent writes, and final thank-you |

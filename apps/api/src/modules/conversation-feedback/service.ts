@@ -1,6 +1,10 @@
 import { randomBytes } from "node:crypto";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import {
+  CONVERSATION_OBSTACLES,
+  CONVERSATION_OUTCOMES,
+  CONVERSATION_VALUES,
+  NEXT_CONVERSATION_INTENTS,
   deriveConversationPairStatus,
   type ConversationFeedbackResponse,
   type ConversationObstacle,
@@ -12,6 +16,34 @@ import {
 import type { ConversationFeedback } from "@corens/db";
 import { PolicyConfigService } from "../../policy-config.service";
 import { PrismaService } from "../../prisma.service";
+
+export type ConversationFeedbackBotStep =
+  | "outcome"
+  | "value"
+  | "obstacle"
+  | "next_intent";
+
+export type ConversationFeedbackBotAnswer =
+  | { step: "outcome"; value: ConversationOutcome }
+  | { step: "value"; value: ConversationValue }
+  | { step: "obstacle"; value: ConversationObstacle }
+  | { step: "next_intent"; value: NextConversationIntent };
+
+export type ConversationFeedbackBotNextStep =
+  | ConversationFeedbackBotStep
+  | "completed";
+
+export interface ConversationFeedbackBotSubmitResult {
+  accepted: boolean;
+  nextStep: ConversationFeedbackBotNextStep | null;
+}
+
+function isAllowedValue<T extends readonly string[]>(
+  values: T,
+  candidate: string
+): candidate is T[number] {
+  return values.includes(candidate as T[number]);
+}
 
 @Injectable()
 export class ConversationFeedbackService {
@@ -77,6 +109,145 @@ export class ConversationFeedbackService {
         )
       );
     });
+  }
+
+  async recordContactOpened(
+    matchSessionId: string,
+    participantUserId: string,
+    now = new Date()
+  ): Promise<{ recorded: boolean }> {
+    await this.getFeedback(matchSessionId, participantUserId);
+    const rules = await this.policyConfig.getConversationFeedbackRules();
+    const promptDueAt = new Date(
+      now.getTime() + rules.timing.afterContactOpenHours * 60 * 60 * 1000
+    );
+
+    return this.prisma.clientInstance.$transaction(async (transaction) => {
+      const recorded = await transaction.conversationFeedback.updateMany({
+        where: {
+          matchSessionId,
+          contactOpenedAt: null
+        },
+        data: {
+          contactOpenedAt: now
+        }
+      });
+
+      if (recorded.count === 0) {
+        return { recorded: false };
+      }
+
+      await transaction.conversationFeedback.updateMany({
+        where: {
+          matchSessionId,
+          promptedAt: null,
+          promptDueAt: { gt: promptDueAt }
+        },
+        data: { promptDueAt }
+      });
+
+      return { recorded: true };
+    });
+  }
+
+  async submitBotAnswer(
+    callbackToken: string,
+    telegramUserId: string,
+    answer: ConversationFeedbackBotAnswer,
+    now = new Date()
+  ): Promise<ConversationFeedbackBotSubmitResult> {
+    const feedback = await this.prisma.clientInstance.conversationFeedback.findUnique({
+      where: { callbackToken },
+      include: {
+        participant: {
+          select: { telegramUserId: true }
+        }
+      }
+    });
+
+    if (!feedback || feedback.participant.telegramUserId !== telegramUserId) {
+      return { accepted: false, nextStep: null };
+    }
+
+    const currentStep = this.getBotStep(feedback);
+    if (currentStep !== answer.step || !this.isAllowedBotAnswer(answer)) {
+      return { accepted: false, nextStep: currentStep };
+    }
+
+    let write: { count: number };
+    let nextStep: ConversationFeedbackBotNextStep;
+
+    switch (answer.step) {
+      case "outcome":
+        write = await this.prisma.clientInstance.conversationFeedback.updateMany({
+          where: {
+            id: feedback.id,
+            outcome: null,
+            completedAt: null
+          },
+          data: {
+            outcome: answer.value,
+            value: null,
+            obstacle: null,
+            nextIntent: null,
+            completedAt: null
+          }
+        });
+        nextStep = answer.value === "talked" ? "value" : "obstacle";
+        break;
+      case "value":
+        write = await this.prisma.clientInstance.conversationFeedback.updateMany({
+          where: {
+            id: feedback.id,
+            outcome: "talked",
+            value: null,
+            completedAt: null
+          },
+          data: {
+            value: answer.value,
+            obstacle: null
+          }
+        });
+        nextStep = "next_intent";
+        break;
+      case "obstacle":
+        write = await this.prisma.clientInstance.conversationFeedback.updateMany({
+          where: {
+            id: feedback.id,
+            outcome: feedback.outcome,
+            obstacle: null,
+            completedAt: null
+          },
+          data: {
+            obstacle: answer.value,
+            value: null
+          }
+        });
+        nextStep = "next_intent";
+        break;
+      case "next_intent":
+        write = await this.prisma.clientInstance.conversationFeedback.updateMany({
+          where: {
+            id: feedback.id,
+            outcome: feedback.outcome,
+            ...(feedback.outcome === "talked"
+              ? { value: feedback.value }
+              : { obstacle: feedback.obstacle }),
+            nextIntent: null,
+            completedAt: null
+          },
+          data: {
+            nextIntent: answer.value,
+            completedAt: now
+          }
+        });
+        nextStep = "completed";
+        break;
+    }
+
+    return write.count === 1
+      ? { accepted: true, nextStep }
+      : { accepted: false, nextStep: currentStep };
   }
 
   async recordOutcome(
@@ -214,6 +385,39 @@ export class ConversationFeedbackService {
     }
 
     return feedback;
+  }
+
+  private getBotStep(feedback: ConversationFeedback): ConversationFeedbackBotNextStep {
+    if (feedback.completedAt || feedback.nextIntent) {
+      return "completed";
+    }
+
+    if (!feedback.outcome) {
+      return "outcome";
+    }
+
+    if (feedback.outcome === "talked" && !feedback.value) {
+      return "value";
+    }
+
+    if (feedback.outcome !== "talked" && !feedback.obstacle) {
+      return "obstacle";
+    }
+
+    return "next_intent";
+  }
+
+  private isAllowedBotAnswer(answer: ConversationFeedbackBotAnswer): boolean {
+    switch (answer.step) {
+      case "outcome":
+        return isAllowedValue(CONVERSATION_OUTCOMES, answer.value);
+      case "value":
+        return isAllowedValue(CONVERSATION_VALUES, answer.value);
+      case "obstacle":
+        return isAllowedValue(CONVERSATION_OBSTACLES, answer.value);
+      case "next_intent":
+        return isAllowedValue(NEXT_CONVERSATION_INTENTS, answer.value);
+    }
   }
 
   private toResponse(feedback: ConversationFeedback): ConversationFeedbackResponse {

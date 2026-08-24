@@ -6,6 +6,7 @@ import { PolicyConfigService } from "../../policy-config.service";
 import type { AuthenticatedUserContext } from "../auth/service";
 import { ProfilesService } from "../profiles";
 import { BotNotificationService } from "../../telegram/bot-notification.service";
+import { ConversationFeedbackService } from "../conversation-feedback/service";
 
 @Injectable()
 export class ConsentRuntimeService {
@@ -13,7 +14,8 @@ export class ConsentRuntimeService {
     private readonly prisma: PrismaService,
     private readonly profiles: ProfilesService,
     private readonly policyConfig: PolicyConfigService,
-    private readonly notifications: BotNotificationService
+    private readonly notifications: BotNotificationService,
+    private readonly conversationFeedback: ConversationFeedbackService
   ) {}
 
   async getStatus(
@@ -105,7 +107,18 @@ export class ConsentRuntimeService {
       }
     }
 
-    return this.resolveStatus(match.id, match.selfUserId, match.peerUserId, channel);
+    const status = await this.resolveStatus(
+      match.id,
+      match.selfUserId,
+      match.peerUserId,
+      channel
+    );
+
+    if (channel === "contact" && status.status === "approved") {
+      await this.conversationFeedback.ensureForMutualApproval(match.id);
+    }
+
+    return status;
   }
 
   async buildStatusForMatch(

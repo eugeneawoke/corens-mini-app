@@ -5,6 +5,7 @@ import type { INestApplication } from "@nestjs/common";
 import { readAppEnv } from "@corens/config";
 import { verifyTelegramWebhookSecret } from "@corens/telegram";
 import { Bot, InlineKeyboard, webhookCallback } from "grammy";
+import { ConversationFeedbackBotHandlerService } from "../modules/conversation-feedback/bot-handler.service";
 
 @Injectable()
 export class BotWebhookService {
@@ -34,6 +35,9 @@ export class BotWebhookService {
     if (this.mounted) {
       return;
     }
+
+    const feedbackBotHandler = app.get(ConversationFeedbackBotHandlerService);
+    feedbackBotHandler.register(this.bot);
 
     const instance = app.getHttpAdapter().getInstance();
     const webhook = webhookCallback(this.bot, "express");
