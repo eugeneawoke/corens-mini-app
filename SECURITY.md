@@ -46,6 +46,9 @@ Treat as sensitive:
 - Feedback rows are foreign-keyed to the participant and match session with cascade deletion.
 - Record contact handoff without logging or submitting the Telegram deep link itself.
 - Analytics exports must exclude Telegram ids, usernames, links, raw callback data, and private message content.
+- The pilot evidence export is a local read-only stdout command, not an HTTP route. It requires a secret of at least 32 characters and derives stable match pseudonyms with HMAC-SHA-256.
+- Pilot export cohort labels are restricted to short slugs so operator-supplied labels cannot become a free-text data channel.
+- The pilot export database query allowlists only match membership/timestamps, onboarding completion, consent status, contact-open timestamps, and categorical feedback fields.
 - Delete or minimize feedback records through the same account-deletion and retention guarantees as other match-scoped data.
 
 ## Deletion Rules

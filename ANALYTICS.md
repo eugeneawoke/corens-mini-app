@@ -74,6 +74,9 @@ The sequence ends with a thank-you. The validation release does not require free
 - The bot callback runtime now handles the three-question value/obstacle sequence and final thank-you with actor-bound opaque tokens and idempotent categorical writes.
 - The in-process maintenance sweep now leases and delivers due participant prompts through the existing bot handler, suppresses concurrent claims, recovers abandoned claims after 15 minutes, retries up to the configured attempt limit, and excludes expired prompts.
 - The runtime does not yet emit feedback analytics events.
+- A read-only operational CLI now exports the diagnostic funnel, categorical answer aggregates, pair-status counts, and pair-level stage flags for a match-created cohort window.
+- Exported pair rows use HMAC-pseudonymous match identifiers. The export query does not select Telegram identifiers, usernames, links, callback tokens, profile text, or private message content.
+- Weekly North Star buckets in the current export are explicitly grouped by match-created cohort week because the schema does not store an immutable mutual-confirmation timestamp. They must not be presented as the exact week in which feedback confirmation occurred.
 
 ## Interpretation Rules
 

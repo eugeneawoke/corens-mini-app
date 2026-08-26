@@ -4,15 +4,15 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 
 ## Active Task
 
-- [ ] Phase E / Session 6 — End-to-end validation, pilot export, privacy audit, and release evidence
-  - prove the critical same-match consent, handoff, feedback, and mutual-confirmation path end to end
-  - add a privacy-safe read-only pilot export for the diagnostic funnel and North Star
-  - audit exported properties and analytics for identifiers, links, and private content
-  - record release evidence only after the full verification loop passes
+- [ ] Phase F / Session 1 — Closed-cohort runbook and privacy-safe sampling record
+  - define the coordinated pilot window, participant eligibility, and pairing readiness checks
+  - define a local sampling record that uses Corens user ids only operationally and is never included in the pilot evidence export
+  - specify consent, support, incident, and stop criteria before any invitations are sent
+  - do not invite, message, deploy, or mutate external systems in this preparation session
 
 ## Up Next — One Fresh Session Each
 
-1. Phase F — Prepare and run the coordinated closed cohort after Session 6 establishes release readiness.
+1. Phase F / Session 2 — Recruit the approved cohort only after the runbook and sampling record are reviewed.
 
 ## Backlog
 
@@ -48,3 +48,4 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 | 2026-08-24 | Added and verified the three-question Telegram bot feedback sequence with opaque callbacks, actor binding, branch validation, idempotent writes, and final thank-you |
 | 2026-08-24 | Added and verified due feedback prompt delivery through the in-process maintenance sweep with recoverable guarded leases, bounded retry, and expiry |
 | 2026-08-26 | Reframed entry, onboarding, connection, Beacon, and bot copy around a present conversation need and added the approved stable universal starter after mutual contact approval |
+| 2026-08-26 | Verified the complete same-match conversation-feedback path and added a privacy-safe read-only pilot export with HMAC-pseudonymous match identifiers |
