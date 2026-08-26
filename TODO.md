@@ -4,15 +4,15 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 
 ## Active Task
 
-- [ ] Phase E / Session 5 — Conversation-focused product copy and opening-message suggestion
-  - rewrite intro, onboarding, connection, Beacon, and notification copy around a needed conversation
-  - add the approved universal opening-message suggestion after mutual contact approval
-  - preserve state, intent, Trust Keys, Beacon, consent, and the Telegram handoff
-  - add focused copy, deterministic-selection, and mobile UI coverage
+- [ ] Phase E / Session 6 — End-to-end validation, pilot export, privacy audit, and release evidence
+  - prove the critical same-match consent, handoff, feedback, and mutual-confirmation path end to end
+  - add a privacy-safe read-only pilot export for the diagnostic funnel and North Star
+  - audit exported properties and analytics for identifiers, links, and private content
+  - record release evidence only after the full verification loop passes
 
 ## Up Next — One Fresh Session Each
 
-1. Phase E / Session 6 — Add end-to-end validation, pilot export, privacy audit, and release evidence.
+1. Phase F — Prepare and run the coordinated closed cohort after Session 6 establishes release readiness.
 
 ## Backlog
 
@@ -47,3 +47,4 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 | 2026-08-21 | Wired same-match mutual contact approval to feedback creation and added first contact-handoff tracking without submitting or storing the Telegram link |
 | 2026-08-24 | Added and verified the three-question Telegram bot feedback sequence with opaque callbacks, actor binding, branch validation, idempotent writes, and final thank-you |
 | 2026-08-24 | Added and verified due feedback prompt delivery through the in-process maintenance sweep with recoverable guarded leases, bounded retry, and expiry |
+| 2026-08-26 | Reframed entry, onboarding, connection, Beacon, and bot copy around a present conversation need and added the approved stable universal starter after mutual contact approval |

@@ -248,6 +248,56 @@ textarea:focus-visible,
   border-color: rgba(155, 107, 196, 0.18);
 }
 
+.corens-starter-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(108, 106, 196, 0.18);
+  border-radius: var(--corens-radius-card);
+  background: rgba(108, 106, 196, 0.055);
+}
+
+.corens-starter-text {
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 3px solid rgba(108, 106, 196, 0.55);
+  border-radius: 0 var(--corens-radius-control) var(--corens-radius-control) 0;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--corens-text-primary);
+  font-size: 15px;
+  line-height: 1.55;
+  user-select: text;
+}
+
+.corens-starter-copy {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid rgba(108, 106, 196, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--corens-accent);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.corens-starter-copy:active {
+  transform: translateY(1px);
+}
+
+.corens-starter-status {
+  min-height: 20px;
+  margin: -4px 0 0;
+  color: var(--corens-text-secondary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .corens-hero-card {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;

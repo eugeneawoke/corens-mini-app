@@ -19,11 +19,14 @@ export class BotWebhookService {
       const url = new URL(this.env.TELEGRAM_MINI_APP_URL);
       url.pathname = "/connection";
       url.search = "";
-      const keyboard = new InlineKeyboard().webApp("Open Mini App", url.toString());
+      const keyboard = new InlineKeyboard().webApp("Открыть Corens", url.toString());
 
-      await context.reply("corens bot foundation is running.", {
-        reply_markup: keyboard
-      });
+      await context.reply(
+        "Какого разговора тебе сейчас не хватает?\n\nCorens помогает найти человека, с которым такой разговор может состояться.",
+        {
+          reply_markup: keyboard
+        }
+      );
     });
   }
 

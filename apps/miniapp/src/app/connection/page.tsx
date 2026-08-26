@@ -25,6 +25,7 @@ import {
   MiniAppBackendUnavailableError,
   MiniAppSessionRequiredError
 } from "../../lib/api";
+import { CONVERSATION_COPY } from "../../lib/conversation-copy";
 
 const FALLBACK_BEACON: BeaconSummary = {
   status: "inactive" as const,
@@ -80,7 +81,7 @@ export default async function ConnectionPage() {
     <AppSurface>
       <NotificationCleanup />
       <TopBar
-        title="Рядом"
+        title="Разговоры"
         action={
           <Link className="corens-icon-button" href="/profile" aria-label="Профиль">
             {profile.profile.gender === "female" ? <UserRound size={18} /> : <User size={18} />}
@@ -90,10 +91,10 @@ export default async function ConnectionPage() {
 
       {activeConnections.length > 0 ? (
         <Section
-          title="Ваши связи"
+          title="Подходящие разговоры"
           description={
             isAtLimit
-              ? `Все ${CONNECTION_LIMIT} места заняты. Новая связь появится когда закроется одна из текущих.`
+              ? `Все ${CONNECTION_LIMIT} места заняты. Новый разговор появится, когда завершится один из текущих.`
               : undefined
           }
         >
@@ -136,7 +137,7 @@ export default async function ConnectionPage() {
         <div className="corens-empty-state">
           <span className="corens-eyebrow">Пока тихо</span>
           <p className="corens-copy corens-copy-muted">
-            Поиск идёт по вашим ключам и состоянию. Связь появится, когда найдётся подходящий человек рядом.
+            Corens ищет человека для нужного вам разговора, учитывая намерение, состояние и ключи доверия.
           </p>
         </div>
       )}
@@ -176,10 +177,10 @@ export default async function ConnectionPage() {
                 </div>
                 <p className="corens-copy corens-copy-muted">
                   {beacon.status === "active"
-                    ? "Вы чуть заметнее для тех, кто сейчас рядом."
+                    ? CONVERSATION_COPY.beaconActive
                     : activeConnections.length === 0
-                      ? "Зажгите маяк — люди с похожим состоянием рядом смогут вас заметить. Так проще найти первый контакт."
-                      : "Хотите встретить ещё кого-то? Маяк сделает вас заметнее для тех, у кого похожее состояние и ключи доверия."}
+                      ? CONVERSATION_COPY.beaconInactive
+                      : CONVERSATION_COPY.beaconIntro}
                 </p>
               </div>
               {beacon.status === "active" && (

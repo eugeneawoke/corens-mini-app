@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { useFormStatus } from "react-dom";
 import { Loader2 } from "lucide-react";
+import { CONVERSATION_COPY } from "../lib/conversation-copy";
 
 type TrustKeyGroup = {
   title: string;
@@ -128,7 +129,7 @@ export function OnboardingFormActions({ groups, selected }: Props) {
 
         <div className="corens-panel corens-stack corens-gap-sm">
           <p style={{ margin: 0, fontSize: "14px", color: "var(--corens-text-secondary)", lineHeight: 1.5 }}>
-            Выберите хотя бы один ключ в каждой группе — это поможет найти человека, близкого по духу
+            {CONVERSATION_COPY.trustKeysExplanation}
           </p>
           {groups.map((group, gi) => {
             const limit = GROUP_LIMITS[gi] ?? 3;
@@ -188,7 +189,7 @@ export function OnboardingFormActions({ groups, selected }: Props) {
           <div className="corens-notice-copy">
             <strong className="corens-card-title">После этого</strong>
             <p className="corens-copy corens-copy-muted">
-              Мы начнём искать человека с совместимым состоянием, хотя бы одним общим ключом и подходящим ритмом контакта.
+              Corens начнёт искать человека, учитывая выбранный разговор, текущее состояние и ключи доверия.
             </p>
           </div>
         </div>

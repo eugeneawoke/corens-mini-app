@@ -15,6 +15,7 @@ import {
   MiniAppBackendUnavailableError,
   MiniAppSessionRequiredError
 } from "../../lib/api";
+import { CONVERSATION_COPY } from "../../lib/conversation-copy";
 
 export default async function BeaconPage() {
   // Fetch profile and beacon status in parallel
@@ -96,12 +97,10 @@ export default async function BeaconPage() {
         <Panel>
           <div className="corens-stack corens-gap-sm">
             <p className="corens-copy corens-copy-muted">
-              На короткое время вы становитесь чуть заметнее для тех, кто сейчас рядом. Это мягкий способ
-              дать поиску больше шансов, когда хочется не ждать слишком долго.
+              {CONVERSATION_COPY.beaconIntro}
             </p>
             <p className="corens-copy corens-copy-muted">
-              Маяк ничего не навязывает и не открывает лишнего. Он просто бережно помогает тем, кто вам подходит,
-              заметить вас немного раньше.
+              Маяк не открывает контакт или фото и не меняет ваши настройки согласия. Он влияет только на приоритет поиска.
             </p>
           </div>
         </Panel>

@@ -13,6 +13,7 @@ import {
   MiniAppBackendUnavailableError,
   MiniAppSessionRequiredError
 } from "../../lib/api";
+import { CONVERSATION_COPY } from "../../lib/conversation-copy";
 
 const optionIcons = [Heart, MoonStar, Sparkle, Orbit];
 
@@ -51,9 +52,9 @@ export default async function OnboardingPage() {
       <Panel className="corens-hero-card">
         <div className="corens-hero-copy">
           <span className="corens-eyebrow">Первый шаг</span>
-          <h2 className="corens-hero-title">Расскажите немного о себе</h2>
+          <h2 className="corens-hero-title">{CONVERSATION_COPY.entryQuestion}</h2>
           <p className="corens-copy corens-copy-muted">
-            Пока вы не заполнили профиль, поиск близкого человека не начнётся.
+            {CONVERSATION_COPY.entryPromise}
           </p>
         </div>
         <div className="corens-hero-orbit">
@@ -101,7 +102,7 @@ export default async function OnboardingPage() {
           </div>
         </Section>
 
-        <Section title="Как вы сейчас?">
+        <Section title="Как вы сейчас?" description={CONVERSATION_COPY.stateExplanation}>
           <div className="corens-stack corens-gap-sm" data-onboarding="state-section">
             <div className="corens-choice-section">
               <span className="corens-eyebrow">Светлые состояния</span>
@@ -165,7 +166,10 @@ export default async function OnboardingPage() {
           </div>
         </Section>
 
-        <Section title="Какое общение вам близко?">
+        <Section
+          title="Какого разговора вам хочется?"
+          description={CONVERSATION_COPY.intentExplanation}
+        >
           <div className="corens-choice-grid corens-choice-grid-bento">
             {snapshot.intent.options.map((option, index) => {
               const Icon = optionIcons[(index + 1) % optionIcons.length];

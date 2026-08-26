@@ -43,8 +43,8 @@ The validation release does not replace the current architecture or remove state
 - [x] The bot implements the three-question branching sequence and final thank-you.
 - [ ] Pair aggregation distinguishes one-sided report, conflicting report, and mutual confirmation.
 - [ ] Analytics events and persistence contain no private Telegram message content, usernames, user ids, or deep-link artifacts in exported properties.
-- [ ] Conversation-focused intro/onboarding and connection copy are understandable without removing existing context signals.
-- [ ] The connection screen offers one stable universal opening-message suggestion after mutual contact approval without blocking the Telegram handoff.
+- [x] Conversation-focused intro/onboarding and connection copy are understandable without removing existing context signals.
+- [x] The connection screen offers one stable universal opening-message suggestion after mutual contact approval without blocking the Telegram handoff.
 - [ ] Unit, contract, integration, and critical Telegram callback/e2e paths pass.
 - [ ] A minimal pilot export or operational view can report the diagnostic funnel and North Star by cohort and match session.
 

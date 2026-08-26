@@ -21,7 +21,7 @@ export class BotNotificationService {
   ): Promise<void> {
     await this.send(
       telegramUserId,
-      `У вас новая связь с ${peerName}. Загляните в приложение.`,
+      `Новый подходящий разговор: ${peerName}. Посмотрите, почему Corens предложил вам поговорить.`,
       this.notificationUrl(connectionId)
     );
   }
@@ -33,7 +33,7 @@ export class BotNotificationService {
   ): Promise<void> {
     await this.send(
       telegramUserId,
-      `${peerName} хочет обменяться контактами. Ответьте в приложении.`,
+      `${peerName}: контакт для разговора готов к взаимному открытию. Решение остаётся за вами.`,
       this.notificationUrl(connectionId)
     );
   }
@@ -45,7 +45,7 @@ export class BotNotificationService {
   ): Promise<void> {
     await this.send(
       telegramUserId,
-      `${peerName} хочет увидеть ваше фото. Ответьте в приложении.`,
+      `${peerName}: есть запрос на открытие фото. Это отдельное решение и не влияет на согласие открыть контакт.`,
       this.notificationUrl(connectionId)
     );
   }
@@ -54,8 +54,8 @@ export class BotNotificationService {
     await this.send(
       telegramUserId,
       peerName
-        ? `Связь с ${peerName} завершилась. Не переживайте — новая встреча уже ищется.`
-        : "Эта связь завершилась. Не переживайте — новая встреча уже ищется.",
+        ? `Этот разговор больше не активен (${peerName}). Corens продолжит искать следующий подходящий контакт.`
+        : "Этот разговор больше не активен. Corens продолжит искать следующий подходящий контакт.",
       this.notificationUrl()
     );
   }

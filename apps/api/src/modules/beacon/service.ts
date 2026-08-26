@@ -32,7 +32,7 @@ export class BeaconService {
         status: "active",
         remainingLabel: this.formatRemaining(activeSession.expiresAt, now),
         description:
-          "Вы чуть заметнее для тех, кто сейчас рядом.",
+          "Ваш запрос временно заметнее для подходящих людей, которые тоже готовы к разговору сейчас.",
         durationLabel: this.formatMinutes(activeSession.durationMinutes),
         expiresAt: activeSession.expiresAt.toISOString()
       };
@@ -52,7 +52,7 @@ export class BeaconService {
       remainingLabel: this.formatMinutes(this.defaultDurationMinutes(rules)),
       description: isCooldown
         ? "Маяк отдыхает — скоро можно будет зажечь снова."
-        : "Маяк не горит — поиск продолжается в обычном режиме. Зажгите, чтобы стать чуть заметнее.",
+        : "Обычный поиск продолжается. Включите Маяк, если готовы к разговору сейчас и хотите ускорить поиск.",
       durationLabel: this.formatMinutes(this.defaultDurationMinutes(rules)),
       cooldownUntil: cooldownSession?.cooldownUntil?.toISOString(),
       cooldownLabel: cooldownSession?.cooldownUntil

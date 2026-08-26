@@ -16,12 +16,14 @@ import { LockStatusHint } from "../../../components/lock-status-hint";
 import { AuthBootstrapScreen } from "../../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../../components/backend-unavailable";
 import { ContactHandoffButton } from "../../../components/contact-handoff-button";
+import { ConversationStarterCard } from "../../../components/conversation-starter-card";
 import {
   getConnectionById,
   getProfileSummary,
   MiniAppBackendUnavailableError,
   MiniAppSessionRequiredError
 } from "../../../lib/api";
+import { selectConversationStarter } from "../../../lib/conversation-starters";
 
 function toneForStatus(status: "pending" | "approved" | "declined") {
   if (status === "approved") return "success" as const;
@@ -122,14 +124,14 @@ export default async function ConnectionDetailPage({
   return (
     <AppSurface>
       <TopBar
-        title="Связь"
+        title="Разговор"
         backHref="/connection"
       />
 
       <Panel className="corens-stack corens-gap-sm">
         <div className="corens-row corens-row-between">
           <div className="corens-stack corens-gap-xs">
-            <span className="corens-eyebrow">О человеке рядом</span>
+            <span className="corens-eyebrow">Человек для разговора</span>
             <h2 className="corens-section-title">{connection.displayName}</h2>
             <p className="corens-copy corens-copy-muted">
               Способ связаться откроется только если вы оба захотите.
@@ -148,11 +150,11 @@ export default async function ConnectionDetailPage({
         </div>
       </Panel>
 
-      <Section title="Почему вы рядом">
+      <Section title="Почему Corens предложил вам поговорить">
         <Panel>
           <div className="corens-stack corens-gap-sm">
             <div>
-              <h3 className="corens-card-title">Общее между вами</h3>
+              <h3 className="corens-card-title">Контекст совпадения</h3>
               <p className="corens-copy corens-copy-muted">{connection.sharedState}</p>
             </div>
             <p className="corens-copy corens-copy-muted">{connection.statusCopy}</p>
@@ -160,7 +162,7 @@ export default async function ConnectionDetailPage({
         </Panel>
       </Section>
 
-      <Section title="Открыться навстречу">
+      <Section title="Открыть контакт для разговора">
         <Panel>
           <div className="corens-stack corens-gap-sm">
             <div className="corens-row corens-row-between">
@@ -187,14 +189,17 @@ export default async function ConnectionDetailPage({
               )}
             </div>
             {connection.contactConsent.status === "approved" && connection.contactConsent.artifactValue ? (
-              <ContactHandoffButton
-                connectionId={id}
-                href={connection.contactConsent.artifactValue}
-                variant="success"
-              >
-                <ExternalLink size={16} />
-                Написать в Telegram
-              </ContactHandoffButton>
+              <>
+                <ContactHandoffButton
+                  connectionId={id}
+                  href={connection.contactConsent.artifactValue}
+                  variant="success"
+                >
+                  <ExternalLink size={16} />
+                  Написать в Telegram
+                </ContactHandoffButton>
+                <ConversationStarterCard text={selectConversationStarter(id)} />
+              </>
             ) : connection.contactConsent.myDecision === "approved" ? (
               <StatusBadge tone="warning">Ждём ответа</StatusBadge>
             ) : (
