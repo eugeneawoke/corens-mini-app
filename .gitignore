@@ -15,3 +15,4 @@ logs/*
 # Local GitNexus/Claude Code memory and generated skills stay on disk.
 CLAUDE.md
 .claude/skills/gitnexus/
+.vercel

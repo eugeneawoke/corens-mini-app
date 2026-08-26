@@ -89,7 +89,7 @@ export const intentOptions: ReadonlyArray<SelectOption> = [
 export const optionalIntentOption: SelectOption = {
   key: "",
   label: "Пока без намерения",
-  description: "Можно пропустить этот слой, матчинг всё равно продолжится."
+  description: "Можно пропустить этот шаг — Corens всё равно продолжит искать подходящего человека."
 };
 
 export const trustKeyGroups = [

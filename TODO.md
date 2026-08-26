@@ -49,3 +49,4 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 | 2026-08-24 | Added and verified due feedback prompt delivery through the in-process maintenance sweep with recoverable guarded leases, bounded retry, and expiry |
 | 2026-08-26 | Reframed entry, onboarding, connection, Beacon, and bot copy around a present conversation need and added the approved stable universal starter after mutual contact approval |
 | 2026-08-26 | Verified the complete same-match conversation-feedback path and added a privacy-safe read-only pilot export with HMAC-pseudonymous match identifiers |
+| 2026-08-26 | Rebuilt onboarding as a button-controlled four-card form with explicit required/optional rules, compact selected-option explanations, one neutral state selector without light/shadow grouping, and full-card fit at 390×844 |

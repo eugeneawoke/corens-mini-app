@@ -664,6 +664,712 @@ textarea:focus-visible,
   color: var(--corens-text-secondary);
 }
 
+/* Onboarding — a calm, button-driven editorial card flow. */
+.corens-app:has(.corens-onboarding-flow) {
+  height: 100dvh;
+  min-height: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+
+.corens-page:has(.corens-onboarding-flow) {
+  height: 100dvh;
+  min-height: 0;
+  gap: 10px;
+  padding: calc(10px + env(safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px)) 14px
+    calc(10px + env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
+}
+
+.corens-onboarding-hero {
+  position: relative;
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 11px;
+  row-gap: 2px;
+  padding: 11px 13px;
+  overflow: hidden;
+  border: 1px solid rgba(169, 120, 73, 0.18);
+  border-radius: 22px 22px 22px 7px;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(169, 120, 73, 0.14), transparent 34%),
+    linear-gradient(145deg, rgba(255, 252, 247, 0.98), rgba(248, 246, 241, 0.9));
+}
+
+.corens-onboarding-hero::after {
+  content: "";
+  position: absolute;
+  width: 148px;
+  height: 148px;
+  right: -82px;
+  bottom: -96px;
+  border: 1px solid rgba(108, 106, 196, 0.15);
+  border-radius: 999px;
+}
+
+.corens-onboarding-hero-mark {
+  grid-row: 1 / -1;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(169, 120, 73, 0.24);
+  border-radius: 14px 14px 14px 5px;
+  background: rgba(255, 255, 255, 0.74);
+  color: #8c613b;
+}
+
+.corens-onboarding-title {
+  max-width: 330px;
+  margin: 0;
+  font-family: Satoshi, "Avenir Next", Inter, sans-serif;
+  font-size: clamp(20px, 5.7vw, 24px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+}
+
+.corens-onboarding-form {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.corens-onboarding-flow {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.corens-onboarding-progress {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding-inline: 4px;
+}
+
+.corens-onboarding-progress-count {
+  color: #8c613b;
+  font-family: Satoshi, "Avenir Next", Inter, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.corens-onboarding-progress-count small {
+  color: var(--corens-text-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.corens-onboarding-progress-track {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(140, 97, 59, 0.1);
+}
+
+.corens-onboarding-progress-track > span {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #a97849, #756fd0);
+  transition: width 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.corens-onboarding-deck {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  isolation: isolate;
+  padding-bottom: 10px;
+}
+
+.corens-onboarding-deck::before,
+.corens-onboarding-deck::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border: 1px solid rgba(229, 229, 234, 0.88);
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.corens-onboarding-deck::before {
+  z-index: 0;
+  inset: 11px 10px 7px;
+  border-radius: 25px;
+  transform: translateY(8px) scale(0.97);
+  box-shadow: 0 10px 26px rgba(48, 43, 35, 0.025);
+}
+
+.corens-onboarding-deck::after {
+  z-index: 1;
+  inset: 6px 5px 11px;
+  border-radius: 25px;
+  transform: translateY(4px) scale(0.985);
+}
+
+.corens-onboarding-step {
+  height: 100%;
+  min-height: 0;
+  position: relative;
+  z-index: 2;
+  transform-origin: 50% 100%;
+}
+
+.corens-onboarding-deck[data-direction="forward"] .corens-onboarding-step:not([hidden]) {
+  animation: corens-onboarding-enter-forward 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.corens-onboarding-deck[data-direction="back"] .corens-onboarding-step:not([hidden]) {
+  animation: corens-onboarding-enter-back 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes corens-onboarding-enter-forward {
+  from {
+    opacity: 0;
+    transform: translateX(34px) rotate(1.2deg) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) rotate(0) scale(1);
+  }
+}
+
+@keyframes corens-onboarding-enter-back {
+  from {
+    opacity: 0;
+    transform: translateX(-28px) rotate(-1deg) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) rotate(0) scale(1);
+  }
+}
+
+.corens-onboarding-navigation {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(92px, 1fr) auto minmax(92px, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 2px 4px 0;
+}
+
+.corens-onboarding-navigation-button {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 14px;
+  border: 1px solid var(--corens-border);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--corens-text-primary);
+  font-size: 14px;
+  font-weight: 650;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.corens-onboarding-navigation-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.corens-onboarding-navigation-button:focus-visible {
+  outline: 3px solid rgba(108, 106, 196, 0.25);
+  outline-offset: 2px;
+}
+
+.corens-onboarding-navigation-button:disabled {
+  cursor: default;
+  opacity: 0.28;
+}
+
+.corens-onboarding-navigation-next {
+  justify-self: stretch;
+  border-color: rgba(108, 106, 196, 0.2);
+  background: rgba(108, 106, 196, 0.1);
+  color: #5551aa;
+}
+
+.corens-onboarding-navigation-back {
+  justify-self: stretch;
+}
+
+.corens-onboarding-navigation-position {
+  color: var(--corens-text-tertiary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.corens-onboarding-navigation-end {
+  min-width: 92px;
+}
+
+.corens-onboarding-pending {
+  margin: 0;
+  color: var(--corens-text-secondary);
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.corens-onboarding-section {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  border: 1px solid rgba(229, 229, 234, 0.94);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 12px 36px rgba(48, 43, 35, 0.035);
+}
+
+.corens-onboarding-section::-webkit-scrollbar {
+  display: none;
+}
+
+.corens-onboarding-section-heading {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+}
+
+.corens-onboarding-section-number {
+  padding-top: 2px;
+  color: rgba(140, 97, 59, 0.48);
+  font-family: Satoshi, "Avenir Next", Inter, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.corens-onboarding-section-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.corens-onboarding-section-copy .corens-section-title {
+  font-size: 20px;
+  line-height: 1.16;
+}
+
+.corens-onboarding-section-copy .corens-copy {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.corens-onboarding-section-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.corens-requirement-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(169, 120, 73, 0.11);
+  color: #704a2b;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.corens-requirement-optional {
+  background: rgba(142, 142, 147, 0.11);
+  color: #626267;
+}
+
+.corens-onboarding-fieldset,
+.corens-onboarding-trust-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.corens-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.corens-onboarding-intent-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.corens-onboarding-intent-option {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.corens-onboarding-intent-pill {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border: 1px solid rgba(108, 106, 196, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #595793;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.corens-onboarding-intent-option[data-optional="true"] .corens-onboarding-intent-pill {
+  border-style: dashed;
+  border-color: rgba(142, 142, 147, 0.3);
+  color: #66666c;
+}
+
+.corens-onboarding-intent-option:active .corens-onboarding-intent-pill {
+  transform: scale(0.98);
+}
+
+.corens-onboarding-intent-option .corens-choice-input:checked + .corens-onboarding-intent-pill {
+  border-color: rgba(108, 106, 196, 0.62);
+  background: #6c6ac4;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(84, 81, 170, 0.2);
+}
+
+.corens-onboarding-intent-option .corens-choice-input:focus-visible + .corens-onboarding-intent-pill {
+  outline: 3px solid rgba(108, 106, 196, 0.28);
+  outline-offset: 2px;
+}
+
+.corens-onboarding-intent-readout {
+  position: relative;
+  min-height: 82px;
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 12px 14px 12px 17px;
+  overflow: hidden;
+  border: 1px solid rgba(108, 106, 196, 0.16);
+  border-radius: 7px 18px 18px 18px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(108, 106, 196, 0.11), transparent 42%),
+    rgba(248, 247, 252, 0.76);
+}
+
+.corens-onboarding-intent-readout::before {
+  content: "";
+  position: absolute;
+  inset: 12px auto 12px 0;
+  width: 3px;
+  border-radius: 999px;
+  background: rgba(108, 106, 196, 0.7);
+}
+
+.corens-onboarding-intent-readout strong {
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.corens-onboarding-intent-readout p {
+  margin: 0;
+  color: var(--corens-text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.corens-onboarding-state-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.corens-onboarding-state-option {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.corens-onboarding-state-pill {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border: 1px solid rgba(140, 97, 59, 0.17);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #65584c;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.corens-onboarding-state-option:active .corens-onboarding-state-pill {
+  transform: scale(0.98);
+}
+
+.corens-onboarding-state-option .corens-choice-input:checked + .corens-onboarding-state-pill {
+  border-color: rgba(140, 97, 59, 0.48);
+  background: #8c613b;
+  color: #fffdf9;
+  box-shadow: 0 8px 20px rgba(108, 73, 42, 0.18);
+}
+
+.corens-onboarding-state-option .corens-choice-input:focus-visible + .corens-onboarding-state-pill {
+  outline: 3px solid rgba(108, 106, 196, 0.28);
+  outline-offset: 2px;
+}
+
+.corens-onboarding-state-readout {
+  position: relative;
+  min-height: 74px;
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 10px 14px 10px 17px;
+  overflow: hidden;
+  border: 1px solid rgba(169, 120, 73, 0.16);
+  border-radius: 7px 20px 20px 20px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(169, 120, 73, 0.11), transparent 42%),
+    rgba(248, 247, 244, 0.72);
+}
+
+.corens-onboarding-state-readout::before {
+  content: "";
+  position: absolute;
+  inset: 12px auto 12px 0;
+  width: 3px;
+  border-radius: 999px;
+  background: rgba(140, 97, 59, 0.66);
+}
+
+.corens-onboarding-state-readout strong {
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.corens-onboarding-state-readout p {
+  margin: 0;
+  color: var(--corens-text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.corens-onboarding-trust-groups,
+.corens-onboarding-identity-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.corens-onboarding-trust-group {
+  padding: 11px;
+  border: 1px solid var(--corens-border);
+  border-radius: 18px;
+  background: rgba(248, 247, 244, 0.58);
+}
+
+.corens-onboarding-trust-group .corens-chip-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.corens-onboarding-trust-group .corens-chip-checkbox {
+  display: flex;
+}
+
+.corens-onboarding-trust-group .corens-chip {
+  width: 100%;
+  min-height: 40px;
+  justify-content: center;
+  padding: 6px 8px;
+  font-size: 12.5px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.corens-onboarding-group-rule {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 4px 0 8px;
+  color: var(--corens-text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.corens-onboarding-group-count {
+  flex-shrink: 0;
+  color: var(--corens-warning);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.corens-onboarding-group-count[data-complete="true"] {
+  color: var(--corens-success);
+}
+
+.corens-chip-checkbox[data-disabled="true"] {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.corens-onboarding-field-note {
+  display: block;
+  margin-top: 8px;
+  color: var(--corens-text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.corens-onboarding-gender-grid {
+  margin-top: 8px;
+}
+
+.corens-onboarding-submit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(108, 106, 196, 0.16);
+  border-radius: 8px 28px 28px 28px;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(108, 106, 196, 0.11), transparent 34%),
+    rgba(255, 255, 255, 0.88);
+}
+
+.corens-onboarding-submit-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.corens-onboarding-submit .corens-button {
+  min-height: 48px;
+}
+
+.corens-onboarding-identity-grid .corens-panel {
+  padding: 12px;
+}
+
+.corens-onboarding-submit .corens-copy {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+@media (hover: hover) {
+  .corens-choice-label:hover .corens-choice-card {
+    border-color: rgba(169, 120, 73, 0.28);
+  }
+
+  .corens-onboarding-navigation-button:hover:not(:disabled) {
+    border-color: rgba(140, 97, 59, 0.28);
+    background: rgba(250, 247, 243, 0.96);
+  }
+
+  .corens-onboarding-navigation-next:hover:not(:disabled) {
+    border-color: rgba(108, 106, 196, 0.28);
+    background: rgba(108, 106, 196, 0.15);
+  }
+
+  .corens-onboarding-intent-option:hover .corens-onboarding-intent-pill {
+    border-color: rgba(108, 106, 196, 0.42);
+    background: rgba(246, 245, 253, 0.96);
+  }
+
+  .corens-onboarding-intent-option:hover .corens-choice-input:checked + .corens-onboarding-intent-pill {
+    background: #5e5bb5;
+  }
+
+  .corens-onboarding-state-option:hover .corens-onboarding-state-pill {
+    border-color: rgba(140, 97, 59, 0.38);
+    background: rgba(250, 246, 240, 0.96);
+  }
+
+  .corens-onboarding-state-option:hover .corens-choice-input:checked + .corens-onboarding-state-pill {
+    background: #815733;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .corens-onboarding-step,
+  .corens-onboarding-progress-track > span {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .corens-onboarding-section {
+    padding-inline: 14px;
+  }
+
+  .corens-onboarding-section-heading {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .corens-onboarding-intent-pill,
+  .corens-onboarding-state-pill {
+    padding-inline: 11px;
+    font-size: 13px;
+  }
+}
+
 .corens-button {
   width: 100%;
   min-height: 48px;
