@@ -16,13 +16,46 @@ function createFixture() {
     { id: "user-b", telegramUserId: "tg-b", telegramUsername: "bob" },
     { id: "user-c", telegramUserId: "tg-c", telegramUsername: "cara" }
   ];
-  const consents: Array<{
+  type StoredConsent = {
     id: string;
     matchSessionId: string;
     requestedBy: string;
     requestStatus: string;
     resolvedAt: Date | null;
-  }> = [];
+  };
+  const contactConsents: StoredConsent[] = [];
+  const photoConsents: StoredConsent[] = [];
+  const consentRepository = (consents: StoredConsent[]) => ({
+    findUnique: async ({ where }: { where: { id: string } }) =>
+      consents.find((consent) => consent.id === where.id) ?? null,
+    upsert: async ({
+      where,
+      update,
+      create
+    }: {
+      where: { id: string };
+      update: { requestStatus: string; resolvedAt: Date | null };
+      create: StoredConsent;
+    }) => {
+      const existing = consents.find((consent) => consent.id === where.id);
+      if (existing) {
+        Object.assign(existing, update);
+        return existing;
+      }
+      consents.push(create);
+      return create;
+    },
+    findMany: async ({
+      where
+    }: {
+      where: { matchSessionId: string; requestedBy: { in: string[] } };
+    }) =>
+      consents.filter(
+        (consent) =>
+          consent.matchSessionId === where.matchSessionId &&
+          where.requestedBy.in.includes(consent.requestedBy)
+      )
+  });
   const currentUserId = { value: "user-a" };
   const ensureForMutualApproval = vi.fn().mockResolvedValue(undefined);
   const prisma = {
@@ -43,39 +76,8 @@ function createFixture() {
       profile: {
         findUnique: vi.fn().mockResolvedValue({ displayName: "Participant" })
       },
-      contactConsent: {
-        upsert: async ({
-          where,
-          update,
-          create
-        }: {
-          where: { id: string };
-          update: { requestStatus: string; resolvedAt: Date | null };
-          create: (typeof consents)[number];
-        }) => {
-          const existing = consents.find((consent) => consent.id === where.id);
-          if (existing) {
-            Object.assign(existing, update);
-            return existing;
-          }
-          consents.push(create);
-          return create;
-        },
-        findMany: async ({
-          where
-        }: {
-          where: { matchSessionId: string; requestedBy: { in: string[] } };
-        }) =>
-          consents.filter(
-            (consent) =>
-              consent.matchSessionId === where.matchSessionId &&
-              where.requestedBy.in.includes(consent.requestedBy)
-          )
-      },
-      photoRevealConsent: {
-        upsert: vi.fn(),
-        findMany: vi.fn().mockResolvedValue([])
-      }
+      contactConsent: consentRepository(contactConsents),
+      photoRevealConsent: consentRepository(photoConsents)
     }
   } as unknown as PrismaService;
   const profiles = {
@@ -96,9 +98,11 @@ function createFixture() {
       }
     })
   } as PolicyConfigService;
+  const notifyContactRequest = vi.fn().mockResolvedValue(undefined);
+  const notifyPhotoRequest = vi.fn().mockResolvedValue(undefined);
   const notifications = {
-    notifyContactRequest: vi.fn().mockResolvedValue(undefined),
-    notifyPhotoRequest: vi.fn().mockResolvedValue(undefined)
+    notifyContactRequest,
+    notifyPhotoRequest
   } as unknown as BotNotificationService;
   const feedback = { ensureForMutualApproval } as unknown as ConversationFeedbackService;
   const service = new ConsentRuntimeService(
@@ -109,7 +113,13 @@ function createFixture() {
     feedback
   );
 
-  return { service, currentUserId, ensureForMutualApproval };
+  return {
+    service,
+    currentUserId,
+    ensureForMutualApproval,
+    notifyContactRequest,
+    notifyPhotoRequest
+  };
 }
 
 describe("ConsentRuntimeService mutual contact approval wiring", () => {
@@ -126,5 +136,53 @@ describe("ConsentRuntimeService mutual contact approval wiring", () => {
     await fixture.service.updateStatus({ id: "user-b" } as never, "contact", "approved", "match-1");
     expect(fixture.ensureForMutualApproval).toHaveBeenCalledOnce();
     expect(fixture.ensureForMutualApproval).toHaveBeenCalledWith("match-1");
+  });
+
+  it("notifies the peer only once when contact approval is repeated", async () => {
+    const fixture = createFixture();
+
+    await fixture.service.updateStatus(
+      { id: "user-a" } as never,
+      "contact",
+      "approved",
+      "match-1"
+    );
+    await fixture.service.updateStatus(
+      { id: "user-a" } as never,
+      "contact",
+      "approved",
+      "match-1"
+    );
+
+    expect(fixture.notifyContactRequest).toHaveBeenCalledOnce();
+    expect(fixture.notifyContactRequest).toHaveBeenCalledWith(
+      "tg-b",
+      "Participant",
+      "match-1"
+    );
+  });
+
+  it("notifies the peer only once when photo approval is repeated", async () => {
+    const fixture = createFixture();
+
+    await fixture.service.updateStatus(
+      { id: "user-a" } as never,
+      "photo",
+      "approved",
+      "match-1"
+    );
+    await fixture.service.updateStatus(
+      { id: "user-a" } as never,
+      "photo",
+      "approved",
+      "match-1"
+    );
+
+    expect(fixture.notifyPhotoRequest).toHaveBeenCalledOnce();
+    expect(fixture.notifyPhotoRequest).toHaveBeenCalledWith(
+      "tg-b",
+      "Participant",
+      "match-1"
+    );
   });
 });

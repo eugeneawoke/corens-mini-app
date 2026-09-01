@@ -35,6 +35,14 @@ Treat as sensitive:
 - media storage metadata
 - audit metadata that can identify actors
 - match-scoped conversation-feedback records and contact-open timestamps
+- opaque Telegram-notification acknowledgement ids
+
+## Telegram Notification Rules
+
+- Notification acknowledgement ids are server-generated opaque UUIDs and never contain a Telegram identifier, username, or raw match id.
+- The cleanup route resolves a notification by both its opaque id and the authenticated participant's Telegram user id.
+- Well-formed stale or foreign notification ids are a no-op and must not reveal whether another user's message exists; malformed ids are rejected before lookup.
+- Routine Mini App authentication and navigation never perform blanket Telegram-message deletion.
 
 ## Conversation Feedback Rules
 

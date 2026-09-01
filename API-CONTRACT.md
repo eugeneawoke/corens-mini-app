@@ -28,6 +28,7 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 - `POST /api/auth/revoke`: expire the session and return an unauthenticated state
 - `GET /api/profile/summary`: aggregated profile payload for Profile, State/Intent, Trust Keys, Privacy, and Delete screens
 - `POST /api/profile/onboarding`: complete first-run onboarding and unlock the rest of the Mini App
+- `POST /api/profile/notifications/cleanup`: acknowledge one opened bot notification using `{ notificationId: <opaque UUID> }`; the authenticated actor may delete only the tracked Telegram message owned by their Telegram user id
 - `PATCH /api/profile/state-intent`: first-pass update shape for current `stateKey` and `intentKey`
 - `PATCH /api/profile/trust-keys`: first-pass update shape for selected trust keys
 - `PATCH /api/privacy/visibility`: hide or restore profile participation in new matching runs
@@ -52,6 +53,7 @@ This file is the top-level summary of planned API boundaries. Detailed implement
 - The route shapes are intended to stay stable while matching and consent move from placeholders to real persistence-backed orchestration
 - `/connection` is the canonical user surface after `/home` was removed to eliminate demo fallbacks
 - Auth bootstrap/session guards anchor every Mini App request, and falling back to fabricated state is not permitted
+- Auth bootstrap never performs blanket Telegram-notification cleanup; ordinary Mini App entry without an addressed `notificationId` leaves all bot messages intact
 
 ## Planned Conversation Validation Boundary
 

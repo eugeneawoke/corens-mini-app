@@ -17,6 +17,7 @@ import { AuthBootstrapScreen } from "../../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../../components/backend-unavailable";
 import { ContactHandoffButton } from "../../../components/contact-handoff-button";
 import { ConversationStarterCard } from "../../../components/conversation-starter-card";
+import { NotificationCleanup } from "../../../components/notification-cleanup";
 import {
   getConnectionById,
   getProfileSummary,
@@ -38,11 +39,14 @@ function statusLabel(status: "pending" | "approved" | "declined"): string | null
 }
 
 export default async function ConnectionDetailPage({
-  params
+  params,
+  searchParams
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ notificationId?: string }>;
 }) {
   const { id } = await params;
+  const { notificationId } = await searchParams;
   let profile;
 
   try {
@@ -88,6 +92,7 @@ export default async function ConnectionDetailPage({
           </ButtonLink>
         }
       >
+        <NotificationCleanup notificationId={notificationId} />
         <TopBar
           title="Ваша связь"
           action={
@@ -123,6 +128,7 @@ export default async function ConnectionDetailPage({
 
   return (
     <AppSurface>
+      <NotificationCleanup notificationId={notificationId} />
       <TopBar
         title="Разговор"
         backHref="/connection"

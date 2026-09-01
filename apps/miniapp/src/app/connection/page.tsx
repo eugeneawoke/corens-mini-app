@@ -34,7 +34,12 @@ const FALLBACK_BEACON: BeaconSummary = {
   durationLabel: "Недоступно"
 };
 
-export default async function ConnectionPage() {
+export default async function ConnectionPage({
+  searchParams
+}: {
+  searchParams: Promise<{ notificationId?: string }>;
+}) {
+  const { notificationId } = await searchParams;
   let profile;
 
   try {
@@ -79,7 +84,7 @@ export default async function ConnectionPage() {
 
   return (
     <AppSurface>
-      <NotificationCleanup />
+      <NotificationCleanup notificationId={notificationId} />
       <TopBar
         title="Разговоры"
         action={

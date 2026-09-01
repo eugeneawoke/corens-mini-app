@@ -329,7 +329,11 @@ export class MatchingRuntimeService {
           lte: now
         }
       },
-      select: { id: true }
+      select: {
+        id: true,
+        userAId: true,
+        userBId: true
+      }
     });
 
     for (const session of staleSessions) {
@@ -343,14 +347,22 @@ export class MatchingRuntimeService {
         continue;
       }
 
-      await this.prisma.clientInstance.$transaction(async (tx) => {
-        await tx.matchSession.update({
-          where: { id: session.id },
+      const closed = await this.prisma.clientInstance.$transaction(async (tx) => {
+        const transition = await tx.matchSession.updateMany({
+          where: {
+            id: session.id,
+            status: "active",
+            expiresAt: { lte: now }
+          },
           data: {
             status: "closed_expired",
             expiresAt: cooldownUntil
           }
         });
+
+        if (transition.count !== 1) {
+          return false;
+        }
 
         await tx.contactConsent.updateMany({
           where: {
@@ -373,7 +385,43 @@ export class MatchingRuntimeService {
             resolvedAt: now
           }
         });
+
+        return true;
       });
+
+      if (!closed) {
+        continue;
+      }
+
+      const [profileA, profileB] = await Promise.all([
+        this.prisma.clientInstance.profile.findUnique({
+          where: { userId: session.userAId },
+          select: {
+            displayName: true,
+            user: { select: { telegramUserId: true } }
+          }
+        }),
+        this.prisma.clientInstance.profile.findUnique({
+          where: { userId: session.userBId },
+          select: {
+            displayName: true,
+            user: { select: { telegramUserId: true } }
+          }
+        })
+      ]);
+
+      if (profileA) {
+        void this.notifications.notifyConnectionClosed(
+          profileA.user.telegramUserId,
+          profileB?.displayName
+        );
+      }
+      if (profileB) {
+        void this.notifications.notifyConnectionClosed(
+          profileB.user.telegramUserId,
+          profileA?.displayName
+        );
+      }
     }
   }
 
