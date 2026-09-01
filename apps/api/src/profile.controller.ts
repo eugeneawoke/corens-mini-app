@@ -12,6 +12,7 @@ import { SessionAuthGuard } from "./modules/auth/session.guard";
 import { ProfilesService } from "./modules/profiles";
 import {
   parseCompleteOnboardingRequest,
+  parseNotificationCleanupRequest,
   parseUpdateAboutRequest,
   parseUpdateGenderPreferenceRequest,
   parseUpdateStateIntentRequest,
@@ -33,8 +34,12 @@ export class ProfileController {
   }
 
   @Post("notifications/cleanup")
-  async cleanupNotifications(@AuthenticatedUser() user: AuthenticatedUserContext) {
-    await this.notifications.cleanupNotifications(user.telegramUserId);
+  async cleanupNotifications(
+    @AuthenticatedUser() user: AuthenticatedUserContext,
+    @Body() body: unknown
+  ) {
+    const { notificationId } = parseNotificationCleanupRequest(body);
+    await this.notifications.cleanupNotification(user.telegramUserId, notificationId);
     return { ok: true };
   }
 

@@ -107,6 +107,23 @@ export function parseAuthBootstrapRequest(input: unknown): AuthBootstrapRequest 
   };
 }
 
+export function parseNotificationCleanupRequest(input: unknown): {
+  notificationId: string;
+} {
+  const body = ensurePlainObject(input);
+  const notificationId = readString(body, "notificationId", { min: 36, max: 36 });
+
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      notificationId
+    )
+  ) {
+    throw new BadRequestException("notificationId must be an opaque UUID");
+  }
+
+  return { notificationId };
+}
+
 export function parseUpdateStateIntentRequest(input: unknown): UpdateStateIntentRequest {
   const body = ensurePlainObject(input);
   return {

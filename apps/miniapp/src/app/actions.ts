@@ -30,9 +30,12 @@ async function sendApiMutation(path: string, init: RequestInit): Promise<void> {
   }
 }
 
-export async function cleanupBotNotificationsAction(): Promise<void> {
+export async function cleanupBotNotificationsAction(notificationId: string): Promise<void> {
   try {
-    await sendApiMutation("/api/profile/notifications/cleanup", { method: "POST" });
+    await sendApiMutation("/api/profile/notifications/cleanup", {
+      method: "POST",
+      body: JSON.stringify({ notificationId })
+    });
   } catch {
     // Silent — cleanup is best-effort
   }

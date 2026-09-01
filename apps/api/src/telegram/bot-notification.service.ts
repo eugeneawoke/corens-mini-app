@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { Injectable, Logger } from "@nestjs/common";
 import { InlineKeyboard } from "grammy";
 import { readAppEnv } from "@corens/config";
@@ -87,6 +88,28 @@ export class BotNotificationService {
     );
   }
 
+  async cleanupNotification(
+    telegramUserId: string,
+    notificationId: string
+  ): Promise<void> {
+    const message = await this.prisma.clientInstance.botNotificationMessage.findFirst({
+      where: {
+        id: notificationId,
+        telegramUserId
+      }
+    });
+
+    if (!message) return;
+
+    await this.botWebhook.getBot().api.deleteMessage(telegramUserId, message.messageId);
+    await this.prisma.clientInstance.botNotificationMessage.deleteMany({
+      where: {
+        id: notificationId,
+        telegramUserId
+      }
+    });
+  }
+
   private notificationUrl(connectionId?: string): string {
     return connectionId
       ? this.buildMiniAppUrl(`/connection/${encodeURIComponent(connectionId)}`)
@@ -102,12 +125,18 @@ export class BotNotificationService {
 
   private async send(telegramUserId: string, text: string, url = this.miniAppUrl): Promise<void> {
     try {
-      const keyboard = new InlineKeyboard().webApp("Открыть приложение", url);
+      const notificationId = randomUUID();
+      const notificationUrl = new URL(url);
+      notificationUrl.searchParams.set("notificationId", notificationId);
+      const keyboard = new InlineKeyboard().webApp(
+        "Открыть приложение",
+        notificationUrl.toString()
+      );
       const message = await this.botWebhook.getBot().api.sendMessage(telegramUserId, text, {
         reply_markup: keyboard
       });
       await this.prisma.clientInstance.botNotificationMessage.create({
-        data: { telegramUserId, messageId: message.message_id }
+        data: { id: notificationId, telegramUserId, messageId: message.message_id }
       });
     } catch (error) {
       this.logger.error(

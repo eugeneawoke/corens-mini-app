@@ -99,7 +99,7 @@ describe("new-match Telegram notification", () => {
     ]);
   });
 
-  it("builds a Mini App button for the exact connection and removes stale query data", async () => {
+  it("builds an addressed Mini App button for the exact connection", async () => {
     const sendMessage = vi.fn().mockResolvedValue({ message_id: 41 });
     const create = vi.fn().mockResolvedValue(undefined);
     const service = new BotNotificationService(
@@ -115,14 +115,17 @@ describe("new-match Telegram notification", () => {
 
     const options = sendMessage.mock.calls[0]?.[2];
     const button = options.reply_markup.inline_keyboard[0]?.[0];
-    expect(button).toMatchObject({
-      text: "Открыть приложение",
-      web_app: {
-        url: "https://example.test/connection/match-created"
-      }
-    });
+    const notificationUrl = new URL(button.web_app.url);
+    const notificationId = notificationUrl.searchParams.get("notificationId");
+
+    expect(button.text).toBe("Открыть приложение");
+    expect(notificationUrl.pathname).toBe("/connection/match-created");
+    expect(notificationUrl.searchParams.has("stale")).toBe(false);
+    expect(notificationId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+    );
     expect(create).toHaveBeenCalledWith({
-      data: { telegramUserId: "telegram-a", messageId: 41 }
+      data: { id: notificationId, telegramUserId: "telegram-a", messageId: 41 }
     });
   });
 });

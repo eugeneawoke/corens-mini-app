@@ -53,6 +53,18 @@ export class ConsentRuntimeService {
     }
 
     const recordId = `${match.id}:${match.selfUserId}:${channel}`;
+    const existingDecision =
+      channel === "contact"
+        ? await this.prisma.clientInstance.contactConsent.findUnique({
+            where: { id: recordId },
+            select: { requestStatus: true }
+          })
+        : await this.prisma.clientInstance.photoRevealConsent.findUnique({
+            where: { id: recordId },
+            select: { requestStatus: true }
+          });
+    const becameApproved =
+      decision === "approved" && existingDecision?.requestStatus !== "approved";
 
     if (channel === "contact") {
       await this.prisma.clientInstance.contactConsent.upsert({
@@ -86,7 +98,7 @@ export class ConsentRuntimeService {
       });
     }
 
-    if (decision === "approved" && match.peerTelegram) {
+    if (becameApproved && match.peerTelegram) {
       const selfProfile = await this.prisma.clientInstance.profile.findUnique({
         where: { userId: match.selfUserId },
         select: { displayName: true }

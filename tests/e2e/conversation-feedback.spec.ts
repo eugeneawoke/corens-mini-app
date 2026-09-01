@@ -141,6 +141,8 @@ function createFlowFixture() {
       })
     },
     contactConsent: {
+      findUnique: async ({ where }: { where: { id: string } }) =>
+        consents.find((consent) => consent.id === where.id) ?? null,
       upsert: async ({
         where,
         update,
@@ -175,6 +177,7 @@ function createFlowFixture() {
         )
     },
     photoRevealConsent: {
+      findUnique: async () => null,
       upsert: async () => undefined,
       findMany: async () => []
     },

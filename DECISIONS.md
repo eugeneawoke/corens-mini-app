@@ -74,6 +74,12 @@ _Store accepted decisions only. Hypotheses stay out until validated._
 
 **Why:** This preserves the existing privacy-first architecture and keeps the conversation in the channel users already use.
 
+### Telegram notification acknowledgement
+
+**Decision:** Match, consent-request, and connection-closed notifications remain in the Telegram bot until the participant opens that specific notification. Opening or authenticating the Mini App normally must not remove other notifications. Each notification uses an opaque actor-bound acknowledgement id; after its button opens the target Mini App page, Corens deletes only that Telegram message.
+
+**Why:** Participants need timely, independently visible notifications without losing unread events when they open the app for another reason. Addressed acknowledgement preserves a clean bot history without blanket deletion or cross-user message access.
+
 ### Conversation outcome feedback
 
 **Decision:** Validate post-handoff outcomes through a match-scoped, three-question bot sequence sent independently to both participants. The sequence records outcome, value or obstacle, and next-conversation intent, then thanks the participant.
