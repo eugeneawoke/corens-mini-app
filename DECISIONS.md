@@ -109,3 +109,9 @@ _Store accepted decisions only. Hypotheses stay out until validated._
 **Decision:** After mutual contact approval, show one optional opening-message suggestion selected from the approved universal copy pool. Selection must not depend on inferred experience, conversation topic, current state, intent, Trust Keys, profile text, or private message content.
 
 **Why:** A concrete first phrase can reduce the friction between opening a contact and starting a conversation, while universal wording avoids making unsupported claims such as `я тебя понимаю` or `у меня был похожий опыт`.
+
+### Post-onboarding profile settings hierarchy
+
+**Decision:** Use `/profile` as a compact settings overview with a gender-neutral identity header, real search-visibility status, read-only bio preview, concise context/search/account groups, and dedicated full-screen editors. Individual context rows edit only their named value; `Изменить весь контекст` is the only sequential intent → state → Trust Keys flow. `Кого искать` remains outside context editing. Own gender is omitted from the overview and may be changed only through a protected confirmation flow inside search settings. Display-name correction is routed through common Support requests rather than an adjacent profile action.
+
+**Why:** The current profile is an understandable but oversized editing wall. Progressive disclosure makes the current state scannable, avoids nested scrolling, preserves the contextual matching signals, and keeps identity-sensitive changes deliberate without representing gender through ambiguous icons or silhouettes.

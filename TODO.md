@@ -4,15 +4,15 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 
 ## Active Task
 
-- [ ] Phase F / Session 1 — Closed-cohort runbook and privacy-safe sampling record
-  - define the coordinated pilot window, participant eligibility, and pairing readiness checks
-  - define a local sampling record that uses Corens user ids only operationally and is never included in the pilot evidence export
-  - specify consent, support, incident, and stop criteria before any invitations are sent
-  - do not invite, message, deploy, or mutate external systems in this preparation session
+- [ ] Implement the approved post-onboarding profile/settings redesign in an isolated worktree
+  - follow `docs/superpowers/plans/2026-09-02-profile-settings-redesign.md`
+  - treat `docs/plans/2026-09-02-profile-settings-redesign-design.md` as the approved UX specification
+  - do not deploy or mutate production/external systems in the implementation session
 
 ## Up Next — One Fresh Session Each
 
-1. Phase F / Session 2 — Recruit the approved cohort only after the runbook and sampling record are reviewed.
+1. Phase F / Session 1 — Define the closed-cohort runbook and privacy-safe sampling record.
+2. Phase F / Session 2 — Recruit the approved cohort only after the runbook and sampling record are reviewed.
 
 ## Backlog
 
