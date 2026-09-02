@@ -1,6 +1,6 @@
 # Profile Settings Redesign Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` to implement this plan with one fresh implementer and one task reviewer per task, followed by a whole-branch review. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace the post-onboarding profile wall with a compact, accurate overview and dedicated full-screen editors for context, search settings, identity correction, bio, privacy, and support.
 
@@ -21,6 +21,14 @@
 - Do not add dependencies, a new font, a new component library, external plugins, analytics events, or deployment work.
 - Preserve user-owned changes in `.claude/settings.local.json` and `AGENTS.md`.
 - Before editing every function, class, or method, run GitNexus upstream impact analysis and report the risk. Re-index first because the index was two commits behind when this plan was written.
+
+## Agent-Driven Execution Model
+
+- The controller owns the worktree, SDD ledger, task ordering, rulings, review packages, and final verification.
+- Dispatch Tasks 1–6 sequentially. Each task receives a fresh implementer agent and must pass specification plus code-quality review before the next task begins.
+- Never run two implementation agents concurrently in the same worktree. Tasks 1–4 overlap through API contracts, `apps/miniapp/src/app/actions.ts`, profile routes, shared selectors, and `globals.css`; parallel writes would create hidden integration conflicts.
+- Parallel agents are allowed only for independent read-only work after a stable commit exists, such as accessibility inspection, sensitive-data review, or final diff review. They must not edit files.
+- Track every completed task, commit, review verdict, fix round, and ruling in the plan-specific `.superpowers/sdd/.../progress.md` ledger so compaction cannot cause completed work to be repeated.
 
 ---
 

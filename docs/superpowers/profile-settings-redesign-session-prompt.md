@@ -18,7 +18,7 @@ STARTUP
 
 REQUIRED SKILLS AND CAPABILITIES
 - `superpowers:using-git-worktrees` for isolation.
-- `superpowers:executing-plans` to execute the checked plan task-by-task. Do not reopen settled product decisions through a new brainstorming phase.
+- `superpowers:subagent-driven-development` as the implementation controller. Use its plan-specific SDD workspace and ledger, a fresh implementer for each task, a specification/code-quality review gate after each task, fix rounds when needed, and a whole-branch review at the end. Do not reopen settled product decisions through a new brainstorming phase.
 - `frontend-design` for production-quality implementation while preserving Corens' existing calm visual language and tokens.
 - `ui-ux-pro-max` for accessibility, touch targets, progressive disclosure, responsive behavior, and interaction-state review. Its generic style suggestions must not override the approved Corens design.
 - `gitnexus-exploring` and `gitnexus-impact-analysis`, plus GitNexus query/context/impact tools, for code navigation and required blast-radius checks.
@@ -43,13 +43,16 @@ NON-NEGOTIABLE PRODUCT RULES
 - Reuse existing tokens, typography, radii, selectors, and components. Add no dependencies, new font, decorative animation, bright dashboard palette, or second design system.
 
 EXECUTION RULES
-1. Follow the six tasks in the implementation plan in order.
-2. Before editing every function, class, or method, run upstream GitNexus impact analysis and report direct callers, affected processes, modules, and risk. Stop and warn before HIGH or CRITICAL edits.
-3. Write the failing focused test, run it and observe the expected failure, then implement the minimum coherent change.
-4. Keep each task independently green and commit it with the commit message specified in the plan.
-5. Do not stage or commit unrelated/user-owned changes.
-6. If the code contradicts the design, stop and identify the exact conflict; do not silently reinterpret the approved UX.
-7. If a browser-auth fixture is missing, do not weaken auth or add a production bypass. Build a local test-only authenticated fixture or report the exact verification blocker.
+1. Follow the six tasks in the implementation plan in order through `superpowers:subagent-driven-development`.
+2. Run the SDD workspace helper for this exact plan, create or resume its ledger, and perform the required pre-flight task/interface overlap scan before dispatching Task 1.
+3. Dispatch exactly one implementation agent at a time. Tasks share API contracts, `actions.ts`, profile routes, selectors, and CSS, so parallel implementation in one worktree is forbidden. A task must be committed and pass its task reviewer before the next implementer starts.
+4. Parallel agents may be used only for independent read-only audits against a stable commit—for example accessibility, sensitive-data, or final-diff review. They must not edit the worktree.
+5. Before editing every function, class, or method, run upstream GitNexus impact analysis and report direct callers, affected processes, modules, and risk. Stop and warn before HIGH or CRITICAL edits.
+6. Write the failing focused test, run it and observe the expected failure, then implement the minimum coherent change.
+7. Keep each task independently green and commit it with the commit message specified in the plan.
+8. Do not stage or commit unrelated/user-owned changes.
+9. If the code contradicts the design, rule from the approved spec, record the ruling in the SDD ledger, and stop only for the skill's defined destructive, security-sensitive, external-side-effect, or fundamentally broken-plan conditions.
+10. If a browser-auth fixture is missing, do not weaken auth or add a production bypass. Build a local test-only authenticated fixture or report the exact verification blocker.
 
 RELEASE GATE
 - Focused tests for every task pass.
