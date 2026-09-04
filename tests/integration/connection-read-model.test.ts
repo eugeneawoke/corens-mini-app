@@ -84,5 +84,6 @@ describe("active connection read model", () => {
     ]);
     expect(connections[0]).toMatchObject({ kind: "active", about: "Люблю долгие прогулки" });
     expect(connections[1]).toMatchObject({ kind: "active", about: null });
+    expect(connections[4]).toMatchObject({ kind: "active", about: null });
   });
 });
