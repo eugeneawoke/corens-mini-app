@@ -8,6 +8,7 @@ export type ProfileContentCategory = ConfigProfileContentCategory;
 
 interface ContentViews {
   base: string;
+  patternInputs: string[];
   tokens: string[];
   compactRuns: TokenRange[];
   characterSequences: TokenRange[];
@@ -24,6 +25,7 @@ const categoryPrecedence: ProfileContentCategory[] = [
   "contact",
   "advertising"
 ];
+const MAX_PROFILE_CONTENT_CODE_UNITS = 1_024;
 
 export function classifyProfileContent(
   value: string,
@@ -44,15 +46,19 @@ export function classifyProfileContent(
 
 function createContentViews(value: string, config: ProfileContentModerationConfig): ContentViews {
   const base = value
+    .slice(0, MAX_PROFILE_CONTENT_CODE_UNITS)
     .normalize("NFKC")
     .toLowerCase()
     .replace(/[\u200B-\u200D\uFEFF\u202A-\u202E]/gu, "");
   const folded = fold(base, config);
+  const delimiterCompacted = folded.replace(/\s*([./:@()+-])\s*/gu, "$1");
+  const whitespaceCompacted = folded.replace(/\s+/gu, "");
   const tokens = folded.match(/[\p{L}\p{N}]+/gu) ?? [];
   const compactRuns = makeCompactRuns(base, config);
 
   return {
     base,
+    patternInputs: [...new Set([base, folded, delimiterCompacted, whitespaceCompacted])],
     tokens,
     compactRuns,
     characterSequences: makeCharacterSequences(tokens)
@@ -99,8 +105,13 @@ function matchesRules(
   return (
     rules.terms.some((term) => matchesTerm(term, views, config, exceptionTokenIndexes)) ||
     rules.phrases.some((phrase) => matchesPhrase(phrase, views, config, exceptionTokenIndexes)) ||
-    rules.patterns.some((pattern) => new RegExp(pattern, "iu").test(views.base))
+    rules.patterns.some((pattern) => matchesPattern(pattern, views.patternInputs))
   );
+}
+
+function matchesPattern(pattern: string, inputs: string[]): boolean {
+  const expression = new RegExp(pattern, "iu");
+  return inputs.some((input) => expression.test(input));
 }
 
 function matchesTerm(

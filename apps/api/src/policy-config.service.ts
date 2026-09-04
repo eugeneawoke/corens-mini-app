@@ -12,6 +12,10 @@ import type {
   RevealRulesConfig,
   RetentionPoliciesConfig
 } from "@corens/config";
+import {
+  ProfileContentConfigurationError,
+  validateProfileContentModerationConfig
+} from "./modules/profiles/profile-content-config";
 
 @Injectable()
 export class PolicyConfigService {
@@ -269,7 +273,20 @@ export class PolicyConfigService {
   }
 
   private async loadProfileContentRules(): Promise<ProfileContentModerationConfig> {
-    return this.readJson("config/moderation/profile-content.v1.json");
+    try {
+      const config = await this.readJson<unknown>(
+        "config/moderation/profile-content.v1.json"
+      );
+      return validateProfileContentModerationConfig(config);
+    } catch (error) {
+      if (error instanceof ProfileContentConfigurationError) {
+        throw error;
+      }
+      if (error instanceof SyntaxError) {
+        throw new ProfileContentConfigurationError("file must contain valid JSON");
+      }
+      throw error;
+    }
   }
 
   private async loadConversationFeedbackRules(): Promise<ConversationFeedbackRulesConfig> {

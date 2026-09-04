@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Field } from "@corens/ui";
 import { completeOnboardingAction } from "../app/actions";
 import { CONVERSATION_COPY } from "../lib/conversation-copy";
+import type { ProfileContentActionState } from "../lib/profile-content-errors";
 import { ProfileContentError } from "./profile-content-error";
 
 type TrustKeyGroup = {
@@ -64,6 +65,8 @@ export function OnboardingFormActions({
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [displayName, setDisplayName] = useState("");
+  const [dismissedDisplayNameErrorState, setDismissedDisplayNameErrorState] =
+    useState<ProfileContentActionState>(null);
   const [gender, setGender] = useState("");
 
   function getGroupIndex(item: string): number {
@@ -106,7 +109,11 @@ export function OnboardingFormActions({
 
   const isTrustValid = groups.every((_, groupIndex) => countForGroup(groupIndex) >= 1);
   const isIdentityValid = displayName.trim().length >= 2 && Boolean(gender);
-  const displayNameError = actionState?.error?.field === "displayName" ? actionState.error : null;
+  const displayNameError =
+    actionState !== dismissedDisplayNameErrorState &&
+    actionState?.error?.field === "displayName"
+      ? actionState.error
+      : null;
   const canContinue = currentStep === 0 || currentStep === 1
     ? true
     : currentStep === 2 ? isTrustValid : isIdentityValid;
@@ -233,7 +240,12 @@ export function OnboardingFormActions({
             name="displayName"
             label="Имя в профиле"
             value={displayName}
-            onChange={(event) => setDisplayName(event.currentTarget.value)}
+            onChange={(event) => {
+              setDisplayName(event.currentTarget.value);
+              if (displayNameError) {
+                setDismissedDisplayNameErrorState(actionState);
+              }
+            }}
             aria-describedby={displayNameError ? "display-name-content-error" : undefined}
             aria-invalid={Boolean(displayNameError)}
             minLength={2}
@@ -243,6 +255,7 @@ export function OnboardingFormActions({
           <span className="corens-onboarding-field-note">Минимум 2 символа</span>
           <ProfileContentError
             state={actionState}
+            dismissedState={dismissedDisplayNameErrorState}
             field="displayName"
             id="display-name-content-error"
           />

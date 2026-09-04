@@ -11,6 +11,7 @@ const pendingPhoto = {
 
 describe("active connection read model", () => {
   it("returns actionable connections first and normalizes the peer bio", async () => {
+    let activeSessionOrderBy: unknown;
     const sessions = [
       { id: "neutral-newest", userAId: "self", userBId: "peer-neutral", origin: "auto", score: 80, pairKey: "a", expiresAt: new Date("2026-09-05") },
       { id: "mutual-newest", userAId: "self", userBId: "peer-mutual-new", origin: "auto", score: 80, pairKey: "b", expiresAt: new Date("2026-09-05") },
@@ -30,8 +31,9 @@ describe("active connection read model", () => {
     const prisma = {
       clientInstance: {
         matchSession: {
-          findMany: async ({ where }: { where: { expiresAt?: unknown } }) => {
+          findMany: async ({ where, orderBy }: { where: { expiresAt?: unknown }; orderBy?: unknown }) => {
             if (where.expiresAt === null || typeof where.expiresAt === "object") return [];
+            activeSessionOrderBy = orderBy;
             return sessions;
           }
         },
@@ -85,5 +87,9 @@ describe("active connection read model", () => {
     expect(connections[0]).toMatchObject({ kind: "active", about: "Люблю долгие прогулки" });
     expect(connections[1]).toMatchObject({ kind: "active", about: null });
     expect(connections[4]).toMatchObject({ kind: "active", about: null });
+    expect(activeSessionOrderBy).toEqual([
+      { createdAt: "desc" },
+      { id: "desc" }
+    ]);
   });
 });

@@ -6,14 +6,15 @@ import {
 
 type Props = {
   state: ProfileContentActionState;
+  dismissedState?: ProfileContentActionState;
   field: ProfileContentField;
   id: string;
 };
 
-export function ProfileContentError({ state, field, id }: Props) {
+export function ProfileContentError({ state, dismissedState, field, id }: Props) {
   const error = state?.error;
 
-  if (!error || error.field !== field) {
+  if (!error || error.field !== field || state === dismissedState) {
     return null;
   }
 

@@ -43,7 +43,7 @@ export class MatchingRuntimeService {
         status: "active",
         OR: [{ userAId: record.user.id }, { userBId: record.user.id }]
       },
-      orderBy: { createdAt: "desc" }
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }]
     });
 
     const results: ConnectionSummary[] = [];

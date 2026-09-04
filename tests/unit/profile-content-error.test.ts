@@ -54,4 +54,32 @@ describe("ProfileContentError", () => {
     expect(markup).toContain("Задать вопрос поддержке");
     expect(markup).toContain("https://t.me/eugenegusakov?text=%D0%92%D0%BE%D0%BF%D1%80%D0%BE%D1%81%20%D0%BE%20%D0%BF%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D0%B0%D1%85%20%D0%BF%D1%80%D0%BE%D1%84%D0%B8%D0%BB%D1%8F");
   });
+
+  it("hides the rejected-name error state after that state is dismissed by an edit", () => {
+    const rejectedState = {
+      error: {
+        field: "displayName",
+        category: "contact",
+        message: "Не добавляйте ссылки и контактные данные"
+      }
+    } as const;
+    const hiddenMarkup = renderToStaticMarkup(createElement(ProfileContentError, {
+      state: rejectedState,
+      dismissedState: rejectedState,
+      field: "displayName",
+      id: "display-name-content-error"
+    }));
+    const nextRejectedState = { error: { ...rejectedState.error } };
+    const nextMarkup = renderToStaticMarkup(createElement(ProfileContentError, {
+      state: nextRejectedState,
+      dismissedState: rejectedState,
+      field: "displayName",
+      id: "display-name-content-error"
+    }));
+
+    expect(hiddenMarkup).toBe("");
+    expect(hiddenMarkup).not.toContain("Задать вопрос поддержке");
+    expect(nextMarkup).toContain("Не добавляйте ссылки и контактные данные");
+    expect(nextMarkup).toContain("Задать вопрос поддержке");
+  });
 });
