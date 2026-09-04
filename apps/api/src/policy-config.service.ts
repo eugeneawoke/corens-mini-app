@@ -8,9 +8,14 @@ import type {
   MatchingScoringConfig,
   MatchingStateMatrixConfig,
   PrivacyRulesConfig,
+  ProfileContentModerationConfig,
   RevealRulesConfig,
   RetentionPoliciesConfig
 } from "@corens/config";
+import {
+  ProfileContentConfigurationError,
+  validateProfileContentModerationConfig
+} from "./modules/profiles/profile-content-config";
 
 @Injectable()
 export class PolicyConfigService {
@@ -23,6 +28,7 @@ export class PolicyConfigService {
   private revealRulesPromise: Promise<RevealRulesConfig> | undefined;
   private retentionPoliciesPromise: Promise<RetentionPoliciesConfig> | undefined;
   private moderationRulesPromise: Promise<{ reportRequestsPerDay: number }> | undefined;
+  private profileContentRulesPromise: Promise<ProfileContentModerationConfig> | undefined;
   private conversationFeedbackRulesPromise: Promise<ConversationFeedbackRulesConfig> | undefined;
 
   getMatchingScoring(): Promise<MatchingScoringConfig> {
@@ -103,6 +109,16 @@ export class PolicyConfigService {
       }
     );
     return this.moderationRulesPromise;
+  }
+
+  getProfileContentRules(): Promise<ProfileContentModerationConfig> {
+    this.profileContentRulesPromise ??= this.memoizeWithRetry(
+      () => this.loadProfileContentRules(),
+      () => {
+        this.profileContentRulesPromise = undefined;
+      }
+    );
+    return this.profileContentRulesPromise;
   }
 
   getConversationFeedbackRules(): Promise<ConversationFeedbackRulesConfig> {
@@ -256,6 +272,23 @@ export class PolicyConfigService {
     };
   }
 
+  private async loadProfileContentRules(): Promise<ProfileContentModerationConfig> {
+    try {
+      const config = await this.readJson<unknown>(
+        "config/moderation/profile-content.v1.json"
+      );
+      return validateProfileContentModerationConfig(config);
+    } catch (error) {
+      if (error instanceof ProfileContentConfigurationError) {
+        throw error;
+      }
+      if (error instanceof SyntaxError) {
+        throw new ProfileContentConfigurationError("file must contain valid JSON");
+      }
+      throw error;
+    }
+  }
+
   private async loadConversationFeedbackRules(): Promise<ConversationFeedbackRulesConfig> {
     const raw = await this.readLines("config/conversation-feedback/rules.v1.yaml");
 
@@ -277,6 +310,11 @@ export class PolicyConfigService {
   private async readLines(relativePath: string): Promise<string[]> {
     const content = await readFile(resolve(this.configRoot, relativePath), "utf8");
     return content.split("\n");
+  }
+
+  private async readJson<T>(relativePath: string): Promise<T> {
+    const content = await readFile(resolve(this.configRoot, relativePath), "utf8");
+    return JSON.parse(content) as T;
   }
 
   private resolveConfigRoot(): string {

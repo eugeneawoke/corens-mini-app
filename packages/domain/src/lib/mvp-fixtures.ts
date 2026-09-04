@@ -184,6 +184,7 @@ export function createConnectionSummary(state: DemoMvpState): ConnectionSummary 
     kind: "active",
     id: "demo",
     displayName: state.connection.displayName,
+    about: null,
     matchScore: evaluation.score,
     trustLevel: state.connection.trustLevel,
     sharedKeys: ["Тихий разговор", "Честность", "Мягкий темп"],

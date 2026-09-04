@@ -11,6 +11,11 @@ const formActionsSource = readFileSync(
   "utf8"
 );
 
+const bioFieldSource = readFileSync(
+  new URL("../../apps/miniapp/src/components/bio-field.tsx", import.meta.url),
+  "utf8"
+);
+
 const intentSelectorUrl = new URL(
   "../../apps/miniapp/src/components/onboarding-intent-selector.tsx",
   import.meta.url
@@ -70,6 +75,25 @@ describe("structured single-page onboarding", () => {
     expect(formActionsSource).toContain("currentStep === 0 || currentStep === 1");
     expect(formActionsSource).toContain("currentStep === 2 ? isTrustValid : isIdentityValid");
     expect(formActionsSource).toContain("disabled={!canContinue}");
+  });
+
+  it("keeps a moderation error beside the editable display-name field", () => {
+    expect(onboardingSource).not.toContain("<form action={completeOnboardingAction}");
+    expect(formActionsSource).toContain("useActionState(completeOnboardingAction");
+    expect(formActionsSource).toContain('aria-describedby={displayNameError ? "display-name-content-error" : undefined}');
+    expect(formActionsSource).toContain('id="display-name-content-error"');
+  });
+
+  it("uses the shared conditional error presenter exactly once per field", () => {
+    expect(formActionsSource.match(/<ProfileContentError/g)).toHaveLength(1);
+    expect(bioFieldSource.match(/<ProfileContentError/g)).toHaveLength(1);
+    expect(formActionsSource).toContain('field="displayName"');
+    expect(bioFieldSource).toContain('field="about"');
+  });
+
+  it("reconciles refreshed bio props without replacing a divergent local draft", () => {
+    expect(bioFieldSource).toContain("reconcileBioSaveStateWithServer");
+    expect(bioFieldSource).toContain("setSaveState((current) =>");
   });
 
   it("does not use matching jargon in onboarding-facing copy", () => {

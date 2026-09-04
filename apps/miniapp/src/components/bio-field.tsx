@@ -3,21 +3,27 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 
 import { updateAboutAction } from "../app/actions";
+import {
+  createBioSaveRequest,
+  createBioSaveState,
+  reconcileBioSaveStateWithServer,
+  resolveBioSaveRequest,
+  setBioSaveValue,
+  settleBioSaveAction
+} from "../lib/bio-save-state";
+import { ProfileContentError } from "./profile-content-error";
 
 interface BioFieldProps {
   initialValue: string | null;
 }
 
 export function BioField({ initialValue }: BioFieldProps) {
-  const [value, setValue] = useState(initialValue ?? "");
+  const [saveState, setSaveState] = useState(() => createBioSaveState(initialValue ?? ""));
   const [, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const initialValueRef = useRef(initialValue ?? "");
 
   useEffect(() => {
-    const nextValue = initialValue ?? "";
-    setValue(nextValue);
-    initialValueRef.current = nextValue;
+    setSaveState((current) => reconcileBioSaveStateWithServer(current, initialValue ?? ""));
   }, [initialValue]);
 
   const resizeTextarea = () => {
@@ -33,15 +39,16 @@ export function BioField({ initialValue }: BioFieldProps) {
 
   useEffect(() => {
     resizeTextarea();
-  }, [value]);
+  }, [saveState.value]);
 
   const handleBlur = () => {
-    const trimmed = value.trim();
-    if (trimmed !== initialValueRef.current) {
+    const request = createBioSaveRequest(saveState);
+    if (request.value !== saveState.savedValue) {
       startTransition(() => {
-        updateAboutAction(trimmed);
+        void settleBioSaveAction(() => updateAboutAction(request.value)).then((result) => {
+          setSaveState((current) => resolveBioSaveRequest(current, request, result));
+        });
       });
-      initialValueRef.current = trimmed;
     }
   };
 
@@ -52,16 +59,23 @@ export function BioField({ initialValue }: BioFieldProps) {
         <textarea
           ref={textareaRef}
           className="corens-bio-textarea"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
+          value={saveState.value}
+          onChange={(event) => setSaveState((current) => setBioSaveValue(current, event.target.value))}
           onBlur={handleBlur}
+          aria-describedby={saveState.error ? "bio-content-error" : undefined}
+          aria-invalid={Boolean(saveState.error)}
           maxLength={200}
           placeholder="Расскажите немного о себе"
           rows={3}
         />
       </div>
+      <ProfileContentError
+        state={saveState.error ? { error: saveState.error } : null}
+        field="about"
+        id="bio-content-error"
+      />
       <p className="corens-copy corens-copy-muted corens-bio-counter">
-        {value.length}/200
+        {saveState.value.length}/200
       </p>
     </div>
   );

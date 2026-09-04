@@ -7,7 +7,7 @@ _Current phase is marked explicitly. Update when phase scope changes._
 **Status:** Planned
 **Goal:** Run a coordinated closed cohort and establish the first behavioral baseline for mutually confirmed, useful conversations.
 
-**Current deliverable:** Complete the approved post-onboarding profile/settings usability pass, then prepare a bounded cohort runbook and privacy-safe sampling record before participants are invited.
+**Current deliverable:** Complete the approved profile content-moderation and active-connection usability pass, then the post-onboarding profile/settings redesign, before preparing a bounded cohort runbook and privacy-safe sampling record.
 
 The validation release does not replace the current architecture or remove state, intent, Trust Keys, Beacon, consent, photo reveal, privacy, or moderation. Phase C/D hardening remains a release gate where the new flow touches those systems.
 
@@ -50,6 +50,8 @@ The validation release does not replace the current architecture or remove state
 
 ## Phase F Definition Of Done
 
+- [x] Unacceptable display names and bios are rejected at the API write boundary with config-backed multilingual rules and safe, actionable errors.
+- [x] Active conversations are ordered by actionability, compact consent states are accessible, and a filled peer bio is available on connection detail.
 - [ ] The approved compact profile/settings overview and full-screen editing flows are implemented and verified before cohort invitations.
 - [ ] A coordinated closed cohort has been invited and its sampling method is recorded.
 - [ ] Funnel baselines are recorded from onboarding through mutual conversation confirmation.

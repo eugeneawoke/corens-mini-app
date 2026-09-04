@@ -2,7 +2,6 @@ import { Compass } from "lucide-react";
 import { redirect } from "next/navigation";
 import { AppSurface } from "@corens/ui";
 
-import { completeOnboardingAction } from "../actions";
 import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import { OnboardingFormActions } from "../../components/onboarding-form-actions";
@@ -105,14 +104,12 @@ export default async function OnboardingPage() {
         <h1 className="corens-onboarding-title">Соберём контекст для хорошего разговора</h1>
       </header>
 
-      <form action={completeOnboardingAction} className="corens-onboarding-form">
-        <OnboardingFormActions
-          groups={snapshot.trustKeys.groups}
-          selected={snapshot.trustKeys.selected}
-          intentSection={intentSection}
-          stateSection={stateSection}
-        />
-      </form>
+      <OnboardingFormActions
+        groups={snapshot.trustKeys.groups}
+        selected={snapshot.trustKeys.selected}
+        intentSection={intentSection}
+        stateSection={stateSection}
+      />
     </AppSurface>
   );
 }

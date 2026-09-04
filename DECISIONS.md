@@ -115,3 +115,15 @@ _Store accepted decisions only. Hypotheses stay out until validated._
 **Decision:** Use `/profile` as a compact settings overview with a gender-neutral identity header, real search-visibility status, read-only bio preview, concise context/search/account groups, and dedicated full-screen editors. Individual context rows edit only their named value; `Изменить весь контекст` is the only sequential intent → state → Trust Keys flow. `Кого искать` remains outside context editing. Own gender is omitted from the overview and may be changed only through a protected confirmation flow inside search settings. Display-name correction is routed through common Support requests rather than an adjacent profile action.
 
 **Why:** The current profile is an understandable but oversized editing wall. Progressive disclosure makes the current state scannable, avoids nested scrolling, preserves the contextual matching signals, and keeps identity-sensitive changes deliberate without representing gender through ambiguous icons or silhouettes.
+
+### Config-backed profile content moderation
+
+**Decision:** Reject unacceptable display names during onboarding and unacceptable bios at every save in the API before persistence. Use one versioned repository configuration for Russian, English, transliterated, mixed-script, and obfuscated abusive language, contact details, and advertising rules, with explicit exceptions and stable category-specific errors. Add contextual Support links only beside a moderation error in the name and bio editors; never send the rejected text to Support. Do not add recurring scans, an admin violation browser, or automatic account punishment in the MVP.
+
+**Why:** Prevention at the canonical write boundary keeps prohibited content from entering the product regardless of client, while versioned rules are reviewable and deploy atomically with the implementation. Category-level explanations and a generic Support path are useful without disclosing filter internals or propagating sensitive user input.
+
+### Action-first active connection presentation
+
+**Decision:** Order active connections by mutual contact approval first, inbound unanswered contact requests second, and all other active matches third, newest first within each group. Keep cards compact: mutual access uses a green ready state with an accessible open-lock icon, inbound requests use an amber response state with an accessible icon, and default cards remain neutral. Include the peer bio in the active connection contract and show it only on the detail screen when non-empty.
+
+**Why:** The list should prioritize conversations on which the participant can act now. Compact semantic states make mutual access and an incoming request discoverable without growing every card, while the detail-only bio restores useful peer context without crowding the overview.

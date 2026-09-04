@@ -19,6 +19,7 @@ describe("MatchingController", () => {
       kind: "active",
       id: "match-1",
       displayName: "Alex",
+      about: null,
       matchScore: 87,
       trustLevel: 3,
       sharedKeys: ["night walks"],

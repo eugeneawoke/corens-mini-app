@@ -4,10 +4,8 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 
 ## Active Task
 
-- [ ] Implement the approved post-onboarding profile/settings redesign in an isolated worktree
+- [ ] Implement the approved post-onboarding profile/settings redesign
   - follow `docs/superpowers/plans/2026-09-02-profile-settings-redesign.md`
-  - treat `docs/plans/2026-09-02-profile-settings-redesign-design.md` as the approved UX specification
-  - do not deploy or mutate production/external systems in the implementation session
 
 ## Up Next — One Fresh Session Each
 
@@ -50,3 +48,4 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 | 2026-08-26 | Reframed entry, onboarding, connection, Beacon, and bot copy around a present conversation need and added the approved stable universal starter after mutual contact approval |
 | 2026-08-26 | Verified the complete same-match conversation-feedback path and added a privacy-safe read-only pilot export with HMAC-pseudonymous match identifiers |
 | 2026-08-26 | Rebuilt onboarding as a button-controlled four-card form with explicit required/optional rules, compact selected-option explanations, one neutral state selector without light/shadow grouping, and full-card fit at 390×844 |
+| 2026-09-04 | Added API-enforced profile content moderation, action-first connection ordering, compact accessible consent states, and peer bio on connection detail; completed the aggregate-only read-only production profile scan |

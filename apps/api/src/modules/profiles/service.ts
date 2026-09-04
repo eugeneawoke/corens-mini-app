@@ -23,6 +23,14 @@ import type { Profile, User } from "@corens/db";
 import { PrismaService } from "../../prisma.service";
 import { PolicyConfigService } from "../../policy-config.service";
 import type { AuthenticatedUserContext } from "../auth/service";
+import { classifyProfileContent, type ProfileContentCategory } from "./content-moderation";
+
+const profileContentMessages: Record<ProfileContentCategory, string> = {
+  abusive: "Уберите грубые или оскорбительные выражения",
+  contact: "Не добавляйте ссылки и контактные данные",
+  advertising: "Описание профиля нельзя использовать для рекламы"
+};
+
 const privacyRules = {
   hiddenProfileClosesPendingConnection: false,
   deletion: {
@@ -113,6 +121,8 @@ export class ProfilesService {
       throw new BadRequestException("Bio is too long");
     }
 
+    await this.assertProfileContentAllowed(about);
+
     const record = await this.ensureProfileRecord(user);
     const updated = await this.prisma.clientInstance.profile.update({
       where: { userId: record.user.id },
@@ -171,6 +181,7 @@ export class ProfilesService {
 
     const trustKeys = this.sanitizeTrustKeys(input.trustKeys);
     this.assertTrustKeyGroupLimits(trustKeys);
+    await this.assertProfileContentAllowed(displayName);
 
     const record = await this.ensureProfileRecord(user);
     const updated = await this.prisma.clientInstance.profile.update({
@@ -261,6 +272,19 @@ export class ProfilesService {
       throw new BadRequestException(
         `"${trustKeyGroups[1]?.title}" requires 1–2 keys, got ${group1Count}`
       );
+    }
+  }
+
+  private async assertProfileContentAllowed(value: string): Promise<void> {
+    const category = classifyProfileContent(value, await this.policyConfig.getProfileContentRules());
+
+    if (category) {
+      throw new BadRequestException({
+        statusCode: 400,
+        code: "profile_content_rejected",
+        category,
+        message: profileContentMessages[category]
+      });
     }
   }
 

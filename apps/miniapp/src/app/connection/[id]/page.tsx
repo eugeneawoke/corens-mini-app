@@ -18,6 +18,7 @@ import { BackendUnavailableScreen } from "../../../components/backend-unavailabl
 import { ContactHandoffButton } from "../../../components/contact-handoff-button";
 import { ConversationStarterCard } from "../../../components/conversation-starter-card";
 import { NotificationCleanup } from "../../../components/notification-cleanup";
+import { PeerBioSection } from "../../../components/peer-bio-section";
 import {
   getConnectionById,
   getProfileSummary,
@@ -135,8 +136,8 @@ export default async function ConnectionDetailPage({
       />
 
       <Panel className="corens-stack corens-gap-sm">
-        <div className="corens-row corens-row-between">
-          <div className="corens-stack corens-gap-xs">
+        <div className="corens-row corens-row-between corens-connection-detail-identity">
+          <div className="corens-stack corens-gap-xs corens-connection-detail-identity-copy">
             <span className="corens-eyebrow">Человек для разговора</span>
             <h2 className="corens-section-title">{connection.displayName}</h2>
             <p className="corens-copy corens-copy-muted">
@@ -155,6 +156,8 @@ export default async function ConnectionDetailPage({
           ))}
         </div>
       </Panel>
+
+      <PeerBioSection about={connection.about} />
 
       <Section title="Почему Corens предложил вам поговорить">
         <Panel>

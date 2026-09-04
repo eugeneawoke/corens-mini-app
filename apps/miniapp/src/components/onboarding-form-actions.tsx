@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import type { ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Field } from "@corens/ui";
+import { completeOnboardingAction } from "../app/actions";
 import { CONVERSATION_COPY } from "../lib/conversation-copy";
+import type { ProfileContentActionState } from "../lib/profile-content-errors";
+import { ProfileContentError } from "./profile-content-error";
 
 type TrustKeyGroup = {
   title: string;
@@ -57,10 +60,13 @@ export function OnboardingFormActions({
   intentSection,
   stateSection
 }: Props) {
+  const [actionState, formAction] = useActionState(completeOnboardingAction, null);
   const [checked, setChecked] = useState<string[]>(selected);
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [displayName, setDisplayName] = useState("");
+  const [dismissedDisplayNameErrorState, setDismissedDisplayNameErrorState] =
+    useState<ProfileContentActionState>(null);
   const [gender, setGender] = useState("");
 
   function getGroupIndex(item: string): number {
@@ -103,6 +109,11 @@ export function OnboardingFormActions({
 
   const isTrustValid = groups.every((_, groupIndex) => countForGroup(groupIndex) >= 1);
   const isIdentityValid = displayName.trim().length >= 2 && Boolean(gender);
+  const displayNameError =
+    actionState !== dismissedDisplayNameErrorState &&
+    actionState?.error?.field === "displayName"
+      ? actionState.error
+      : null;
   const canContinue = currentStep === 0 || currentStep === 1
     ? true
     : currentStep === 2 ? isTrustValid : isIdentityValid;
@@ -229,12 +240,25 @@ export function OnboardingFormActions({
             name="displayName"
             label="Имя в профиле"
             value={displayName}
-            onChange={(event) => setDisplayName(event.currentTarget.value)}
+            onChange={(event) => {
+              setDisplayName(event.currentTarget.value);
+              if (displayNameError) {
+                setDismissedDisplayNameErrorState(actionState);
+              }
+            }}
+            aria-describedby={displayNameError ? "display-name-content-error" : undefined}
+            aria-invalid={Boolean(displayNameError)}
             minLength={2}
             maxLength={48}
             required
           />
           <span className="corens-onboarding-field-note">Минимум 2 символа</span>
+          <ProfileContentError
+            state={actionState}
+            dismissedState={dismissedDisplayNameErrorState}
+            field="displayName"
+            id="display-name-content-error"
+          />
         </div>
 
         <div className="corens-panel" data-onboarding="gender-field">
@@ -290,7 +314,8 @@ export function OnboardingFormActions({
   const steps = [intentSection, stateSection, trustSection, identitySection];
 
   return (
-    <div className="corens-onboarding-flow">
+    <form action={formAction} className="corens-onboarding-form">
+      <div className="corens-onboarding-flow">
       <div
         className="corens-onboarding-progress"
         aria-label={`Шаг ${currentStep + 1} из ${ONBOARDING_STEP_COUNT}`}
@@ -352,6 +377,7 @@ export function OnboardingFormActions({
           </button>
         )}
       </div>
-    </div>
+      </div>
+    </form>
   );
 }

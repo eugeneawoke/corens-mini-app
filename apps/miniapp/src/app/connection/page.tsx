@@ -17,6 +17,7 @@ import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import { BeaconHero } from "../../components/beacon-hero";
 import { BeaconCountdown } from "../../components/beacon-countdown";
+import { ConnectionCardStatusIcon } from "../../components/connection-card-status-icon";
 import { NotificationCleanup } from "../../components/notification-cleanup";
 import {
   getBeaconSummary,
@@ -26,6 +27,7 @@ import {
   MiniAppSessionRequiredError
 } from "../../lib/api";
 import { CONVERSATION_COPY } from "../../lib/conversation-copy";
+import { getConnectionCardState } from "../../lib/connection-view";
 
 const FALLBACK_BEACON: BeaconSummary = {
   status: "inactive" as const,
@@ -106,19 +108,16 @@ export default async function ConnectionPage({
           <div className="corens-bento-grid">
             {activeConnections.map((connection, index) => {
               if (connection.kind !== "active") return null;
+              const cardState = getConnectionCardState(connection);
+
               return (
                 <Link
                   key={connection.id}
                   href={`/connection/${connection.id}`}
-                  className={`corens-connection-card ${
-                    connection.contactConsent.status === "pending" &&
-                    connection.contactConsent.myDecision === "pending" &&
-                    connection.contactConsent.peerRequested
-                      ? "corens-connection-card-incoming"
-                      : ""
-                  }`}
+                  className={`corens-connection-card corens-connection-card-${cardState}`}
                   style={{ animationDelay: `${index * 0.5}s` }}
                 >
+                  <ConnectionCardStatusIcon state={cardState} />
                   <div className="corens-connection-card-inner">
                     <h3 className="corens-connection-card-name">{connection.displayName}</h3>
                     <p className="corens-connection-card-state">{connection.sharedState}</p>

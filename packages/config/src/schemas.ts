@@ -83,3 +83,22 @@ export interface ConversationFeedbackRulesConfig {
     claimLeaseMinutes: number;
   };
 }
+
+export type ProfileContentCategory = "abusive" | "contact" | "advertising";
+
+export interface ProfileContentCategoryRules {
+  terms: string[];
+  phrases: string[];
+  patterns: string[];
+  obfuscatedPatterns?: string[];
+  exceptions: string[];
+}
+
+export interface ProfileContentModerationConfig {
+  version: string;
+  normalization: {
+    confusables: Record<string, string>;
+    leetspeak: Record<string, string>;
+  };
+  categories: Record<ProfileContentCategory, ProfileContentCategoryRules>;
+}
