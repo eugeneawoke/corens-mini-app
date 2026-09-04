@@ -2226,6 +2226,19 @@ select.corens-field {
   gap: 10px;
 }
 
+.corens-connection-detail-identity-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.corens-connection-detail-identity-copy .corens-section-title {
+  overflow-wrap: anywhere;
+}
+
+.corens-connection-detail-identity > .corens-lock-hint-wrapper {
+  flex-shrink: 0;
+}
+
 .corens-lock-hint-wrapper {
   position: relative;
   flex-shrink: 0;

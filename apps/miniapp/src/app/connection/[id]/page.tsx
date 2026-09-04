@@ -136,8 +136,8 @@ export default async function ConnectionDetailPage({
       />
 
       <Panel className="corens-stack corens-gap-sm">
-        <div className="corens-row corens-row-between">
-          <div className="corens-stack corens-gap-xs">
+        <div className="corens-row corens-row-between corens-connection-detail-identity">
+          <div className="corens-stack corens-gap-xs corens-connection-detail-identity-copy">
             <span className="corens-eyebrow">Человек для разговора</span>
             <h2 className="corens-section-title">{connection.displayName}</h2>
             <p className="corens-copy corens-copy-muted">

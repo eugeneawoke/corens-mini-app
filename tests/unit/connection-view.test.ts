@@ -201,3 +201,23 @@ describe("peer bio placement", () => {
     expect(markup).toContain('class="corens-copy corens-copy-muted"');
   });
 });
+
+describe("connection detail identity layout", () => {
+  it("contains long identity text without changing other shared rows", () => {
+    expect(connectionDetailSource).toContain(
+      'className="corens-row corens-row-between corens-connection-detail-identity"'
+    );
+    expect(connectionDetailSource).toContain(
+      'className="corens-stack corens-gap-xs corens-connection-detail-identity-copy"'
+    );
+    expect(globalsSource).toMatch(
+      /\.corens-connection-detail-identity-copy\s*\{[^}]*min-width:\s*0[^}]*flex:\s*1/s
+    );
+    expect(globalsSource).toMatch(
+      /\.corens-connection-detail-identity-copy \.corens-section-title\s*\{[^}]*overflow-wrap:\s*anywhere/s
+    );
+    expect(globalsSource).toMatch(
+      /\.corens-connection-detail-identity > \.corens-lock-hint-wrapper\s*\{[^}]*flex-shrink:\s*0/s
+    );
+  });
+});
