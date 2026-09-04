@@ -16,3 +16,4 @@ logs/*
 CLAUDE.md
 .claude/skills/gitnexus/
 .vercel
+.worktrees/
