@@ -4,15 +4,16 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 
 ## Active Task
 
-- [ ] Implement the approved post-onboarding profile/settings redesign in an isolated worktree
-  - follow `docs/superpowers/plans/2026-09-02-profile-settings-redesign.md`
-  - treat `docs/plans/2026-09-02-profile-settings-redesign-design.md` as the approved UX specification
-  - do not deploy or mutate production/external systems in the implementation session
+- [ ] Implement profile content moderation and action-first connection UX in an isolated worktree
+  - follow `docs/superpowers/plans/2026-09-04-content-moderation-connection-ux.md`
+  - treat `docs/plans/2026-09-04-content-moderation-connection-ux-design.md` as the approved product and UX specification
+  - perform only a one-time read-only existing-profile check; do not deploy or mutate production/external systems
 
 ## Up Next — One Fresh Session Each
 
-1. Phase F / Session 1 — Define the closed-cohort runbook and privacy-safe sampling record.
-2. Phase F / Session 2 — Recruit the approved cohort only after the runbook and sampling record are reviewed.
+1. Implement the approved post-onboarding profile/settings redesign from `docs/superpowers/plans/2026-09-02-profile-settings-redesign.md`.
+2. Phase F / Session 1 — Define the closed-cohort runbook and privacy-safe sampling record.
+3. Phase F / Session 2 — Recruit the approved cohort only after the runbook and sampling record are reviewed.
 
 ## Backlog
 
