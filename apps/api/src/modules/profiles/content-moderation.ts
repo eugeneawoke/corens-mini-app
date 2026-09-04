@@ -66,12 +66,18 @@ function createContentViews(value: string, config: ProfileContentModerationConfi
 }
 
 function fold(value: string, config: ProfileContentModerationConfig): string {
-  const mappings = {
+  const mixedTokenMappings = {
     ...config.normalization.confusables,
     ...config.normalization.leetspeak
   };
 
-  return Array.from(value, (character) => mappings[character] ?? character).join("");
+  return value.replace(/[\p{L}\p{N}@$]+/gu, (token) => {
+    const mappings = /^\p{N}+$/u.test(token)
+      ? config.normalization.confusables
+      : mixedTokenMappings;
+
+    return Array.from(token, (character) => mappings[character] ?? character).join("");
+  });
 }
 
 function getExceptionTokenIndexes(

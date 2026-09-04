@@ -79,3 +79,55 @@ Result: exit 1; 1 failed and 62 passed. The mixed-script, fully spaced `t . м e
 - Compare-to-`main` GitNexus reports CRITICAL for the complete 48-file feature branch (`140` changed symbols, `47` affected), as expected for the already-reviewed cross-API/UI feature. Staged-only detection reports MEDIUM (`16` changed symbols, `3` affected profile-update flows across `12` changed files). Every existing symbol changed in this final pass had a LOW direct impact result; the new standalone validator has no prior indexed symbol.
 - `notat.me/name` is now correctly contact content because `.me` is an allowlisted bare-domain TLD; `notat.meant/name` remains the non-domain boundary near-miss.
 - The successful Next.js build retains the existing multiple-lockfile workspace-root warning; no lockfile or build configuration was changed here.
+
+## Round 2 — adversarial rule refinements
+
+### Scope completed
+
+- Replaced the generic separated-number contact regex with bounded, explicit phone families: international `+` numbers, grouped `375` numbers, leading-`8` area-code numbers, parenthesized local area codes, and common grouped local seven-digit numbers.
+- Generalized bare-domain recognition to bounded ASCII TLDs of 2–24 letters, covering `.xyz`, `.info`, `.site`, and similarly shaped domains without an allowlist.
+- Kept dotted/dashed dates and times plus unformatted ordinary numbers safe, including `04.09.2026 18.30`, `04-09-2026 18-30`, `2026-09-04`, `455`, `375291234567`, and `80291234567`.
+- Expanded configured, boundary-aware Russian and transliterated abuse inflections and representative threat forms. Added the scoped `never hurt you` exception while preserving rejection of an affirmative `hurt you` threat.
+- Limited digit-to-letter folding to mixed letter/number/symbol tokens. All-digit tokens retain their numeric meaning, while mixed obfuscations such as `4ss` and `sh1t` still normalize.
+- Added configured Russian recruiting/earnings solicitation phrases and inflection-aware patterns, with ordinary job-description/discussion near-misses retained.
+
+### RED evidence
+
+Command:
+
+`corepack pnpm exec vitest run tests/unit/profile-content-moderation.test.ts`
+
+Result: exit 1; 19 failed and 72 passed. The expected failures covered both safe date/time cases, pure-number leetspeak (`455`), the negated English threat, new Russian/transliterated inflections and threat, arbitrary ASCII TLDs, parenthesized/local phone families, and three recruiting/earnings solicitations. Other new controls already passed: unformatted long numbers, ordinary job discussion, an affirmative English threat, mixed-token `4ss`, and grouped `8`/local-area phone forms.
+
+### GREEN evidence
+
+- Classifier: `corepack pnpm exec vitest run tests/unit/profile-content-moderation.test.ts` — 1 file, 91/91 passed.
+- Focused downstream: `corepack pnpm exec vitest run tests/unit/profile-content-moderation.test.ts tests/unit/policy-config-loading.test.ts tests/unit/profile-content-error.test.ts tests/integration/connection-read-model.test.ts` — 4 files, 101/101 passed.
+- Full suite: `corepack pnpm test` — 41 files, 234/234 passed; existing fixture WARN/DEBUG output remained unchanged.
+- Typecheck: `corepack pnpm typecheck` — all 8 participating workspace projects passed.
+- Build: `corepack pnpm build` — all workspace builds passed; Mini App compiled and generated 24/24 pages.
+- Hygiene: `git diff --check` passed.
+
+### Files in the round-2 fix commit
+
+- `apps/api/src/modules/profiles/content-moderation.ts`
+- `config/moderation/profile-content.v1.json`
+- `tests/unit/profile-content-moderation.test.ts`
+- `.superpowers/sdd/2026-09-04-content-moderation-connection-ux/final-fix-report.md`
+
+### Round-2 self-review
+
+- Category precedence is unchanged at `abusive -> contact -> advertising`; all evaluation still starts from the same 1,024-code-unit bounded input.
+- Every new phone repetition, domain label, and TLD length is bounded. The removed generic numeric regex no longer confuses required date/time shapes with phone numbers.
+- All behavior additions remain in the versioned configuration; code only distinguishes all-digit tokens from mixed obfuscation tokens during folding.
+- The existing profile-content loader validates the updated regexes before classifier use. No shared loader was changed in round 2.
+- Classifier output remains category-only. No matched term, phrase, regex, or rejected value is returned or logged.
+- Existing dirty `AGENTS.md`, design-file newline, Playwright artifacts, and `output/` were neither edited nor staged.
+
+### Round-2 concerns and rulings
+
+- The required compare-to-`main` GitNexus scan remains CRITICAL for the complete feature branch: 54 changed symbols, 46 affected symbols, and 48 changed files. This is branch-wide scope, not new round-2 coupling; the only existing symbol edited in round 2, `fold`, was LOW (3 direct callers and the single `updateAbout` process).
+- The isolated round-2 staged scan reports LOW across exactly 4 files, with 0 indexed changed symbols and 0 affected processes; the classifier/config additions are not fully resolved by the current index, so the explicit `fold` impact and executed profile-update tests are the stronger local evidence.
+- The earlier `.meant` near-miss ruling is superseded: arbitrary 2–24-letter ASCII TLD syntax now intentionally classifies `notat.meant/name` as contact. A one-letter pseudo-TLD such as `notat.m/name` remains a safe boundary case. This is syntax detection only; the zero-cost baseline does not add DNS/TLD network lookups.
+- The negation exception is deliberately token-scoped to `never hurt you`; other ambiguous threat-negation forms remain conservative rather than weakening affirmative-threat coverage.
+- The successful Next.js build retains the existing multiple-lockfile workspace-root warning; no lockfile or build configuration was changed in round 2.
