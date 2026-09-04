@@ -1,5 +1,5 @@
 import type { BeaconSummary } from "@corens/domain";
-import { CircleUserRound, LockOpen, Reply, User, UserRound } from "lucide-react";
+import { CircleUserRound, User, UserRound } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -17,6 +17,7 @@ import { AuthBootstrapScreen } from "../../components/auth-bootstrap";
 import { BackendUnavailableScreen } from "../../components/backend-unavailable";
 import { BeaconHero } from "../../components/beacon-hero";
 import { BeaconCountdown } from "../../components/beacon-countdown";
+import { ConnectionCardStatusIcon } from "../../components/connection-card-status-icon";
 import { NotificationCleanup } from "../../components/notification-cleanup";
 import {
   getBeaconSummary,
@@ -116,21 +117,7 @@ export default async function ConnectionPage({
                   className={`corens-connection-card corens-connection-card-${cardState}`}
                   style={{ animationDelay: `${index * 0.5}s` }}
                 >
-                  {cardState === "ready" ? (
-                    <span className="corens-connection-card-status-icon" data-state="ready">
-                      <LockOpen size={15} aria-hidden="true" />
-                      <span className="corens-visually-hidden">
-                        Контакт открыт — можно написать
-                      </span>
-                    </span>
-                  ) : cardState === "incoming" ? (
-                    <span className="corens-connection-card-status-icon" data-state="incoming">
-                      <Reply size={15} aria-hidden="true" />
-                      <span className="corens-visually-hidden">
-                        Нужно ответить на запрос контакта
-                      </span>
-                    </span>
-                  ) : null}
+                  <ConnectionCardStatusIcon state={cardState} />
                   <div className="corens-connection-card-inner">
                     <h3 className="corens-connection-card-name">{connection.displayName}</h3>
                     <p className="corens-connection-card-state">{connection.sharedState}</p>

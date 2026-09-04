@@ -2721,7 +2721,26 @@ select.corens-field {
 
 .corens-connection-card-status-icon[data-state="incoming"] {
   background: rgba(196, 129, 26, 0.11);
-  color: var(--corens-warning);
+  color: #9d6a1d;
+}
+
+.corens-connection-card-ready:focus-visible,
+.corens-connection-card-incoming:focus-visible,
+.corens-connection-card-default:focus-visible {
+  outline: 2px solid var(--corens-accent);
+  outline-offset: 3px;
+}
+
+.corens-connection-card-ready:focus-visible {
+  box-shadow:
+    0 10px 24px rgba(61, 155, 88, 0.1),
+    0 0 0 1px rgba(61, 155, 88, 0.22);
+}
+
+.corens-connection-card-incoming:focus-visible {
+  box-shadow:
+    0 12px 30px rgba(196, 129, 26, 0.12),
+    0 0 0 1px rgba(214, 154, 67, 0.22);
 }
 
 .corens-connection-card:active {
@@ -2745,6 +2764,7 @@ select.corens-field {
 
 .corens-connection-card-inner {
   padding: 18px 16px 20px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -2756,11 +2776,18 @@ select.corens-field {
 }
 
 .corens-connection-card-name {
+  min-width: 0;
   font-size: 17px;
   font-weight: 600;
   color: #1c1c1e;
   line-height: 1.2;
   margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.corens-connection-card-ready .corens-connection-card-name,
+.corens-connection-card-incoming .corens-connection-card-name {
+  padding-inline-end: 28px;
 }
 
 .corens-connection-card-state {

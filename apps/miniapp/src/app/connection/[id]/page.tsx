@@ -18,6 +18,7 @@ import { BackendUnavailableScreen } from "../../../components/backend-unavailabl
 import { ContactHandoffButton } from "../../../components/contact-handoff-button";
 import { ConversationStarterCard } from "../../../components/conversation-starter-card";
 import { NotificationCleanup } from "../../../components/notification-cleanup";
+import { PeerBioSection } from "../../../components/peer-bio-section";
 import {
   getConnectionById,
   getProfileSummary,
@@ -126,8 +127,6 @@ export default async function ConnectionDetailPage({
     );
   }
 
-  const peerAbout = connection.about?.trim();
-
   return (
     <AppSurface>
       <NotificationCleanup notificationId={notificationId} />
@@ -158,13 +157,7 @@ export default async function ConnectionDetailPage({
         </div>
       </Panel>
 
-      {peerAbout ? (
-        <Section title="О себе">
-          <Panel>
-            <p className="corens-copy corens-copy-muted">{peerAbout}</p>
-          </Panel>
-        </Section>
-      ) : null}
+      <PeerBioSection about={connection.about} />
 
       <Section title="Почему Corens предложил вам поговорить">
         <Panel>
