@@ -72,6 +72,14 @@ describe("structured single-page onboarding", () => {
     expect(formActionsSource).toContain("disabled={!canContinue}");
   });
 
+  it("keeps a moderation error beside the editable display-name field", () => {
+    expect(onboardingSource).not.toContain("<form action={completeOnboardingAction}");
+    expect(formActionsSource).toContain("useActionState(completeOnboardingAction");
+    expect(formActionsSource).toContain('aria-describedby="display-name-content-error"');
+    expect(formActionsSource).toContain('id="display-name-content-error"');
+    expect(formActionsSource).toContain("Задать вопрос поддержке");
+  });
+
   it("does not use matching jargon in onboarding-facing copy", () => {
     expect(onboardingSource).not.toMatch(/матчинг/i);
     expect(formActionsSource).not.toMatch(/матчинг/i);

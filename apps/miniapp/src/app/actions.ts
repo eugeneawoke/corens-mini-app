@@ -4,6 +4,10 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { intentOptions, stateOptions, trustKeyGroups } from "@corens/domain/profile-options";
+import {
+  getProfileContentActionError,
+  type ProfileContentActionState
+} from "../lib/profile-content-errors";
 import { MINIAPP_SESSION_COOKIE } from "../lib/session";
 
 async function sendApiMutation(path: string, init: RequestInit): Promise<void> {
@@ -27,6 +31,40 @@ async function sendApiMutation(path: string, init: RequestInit): Promise<void> {
 
   if (!response.ok) {
     throw new Error(`API mutation failed for ${path} with status ${response.status}`);
+  }
+}
+
+async function sendProfileContentMutation(
+  field: "displayName" | "about",
+  path: string,
+  init: RequestInit
+): Promise<ProfileContentActionState> {
+  try {
+    const baseUrl = process.env.CORENS_API_BASE_URL ?? process.env.NEXT_PUBLIC_CORENS_API_BASE_URL;
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get(MINIAPP_SESSION_COOKIE)?.value;
+
+    if (!baseUrl || !sessionToken) {
+      return getProfileContentActionError(field, null);
+    }
+
+    const response = await fetch(`${baseUrl.replace(/\/$/, "")}${path}`, {
+      ...init,
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${sessionToken}`,
+        ...(init.headers ?? {})
+      },
+      cache: "no-store"
+    });
+
+    if (response.ok) {
+      return null;
+    }
+
+    return getProfileContentActionError(field, await response.json().catch(() => null));
+  } catch {
+    return getProfileContentActionError(field, null);
   }
 }
 
@@ -105,7 +143,10 @@ export async function recordContactOpenedAction(connectionId: string): Promise<v
   });
 }
 
-export async function completeOnboardingAction(formData: FormData): Promise<void> {
+export async function completeOnboardingAction(
+  _previousState: ProfileContentActionState,
+  formData: FormData
+): Promise<ProfileContentActionState> {
   const displayName = String(formData.get("displayName") ?? "")
     .trim()
     .replace(/[\x00-\x1F\x7F]/g, "")
@@ -123,7 +164,7 @@ export async function completeOnboardingAction(formData: FormData): Promise<void
       allowedTrustKeys.has(value as (typeof trustKeyGroups)[number]["items"][number])
     );
 
-  await sendApiMutation("/api/profile/onboarding", {
+  const result = await sendProfileContentMutation("displayName", "/api/profile/onboarding", {
     method: "POST",
     body: JSON.stringify({
       displayName,
@@ -133,6 +174,10 @@ export async function completeOnboardingAction(formData: FormData): Promise<void
       trustKeys
     })
   });
+
+  if (result?.error) {
+    return result;
+  }
 
   revalidateTag("profile");
   revalidatePath("/");
@@ -186,14 +231,19 @@ export async function updateTrustKeysAction(formData: FormData): Promise<void> {
   redirect("/profile");
 }
 
-export async function updateAboutAction(about: string): Promise<void> {
-  await sendApiMutation("/api/profile/about", {
+export async function updateAboutAction(about: string): Promise<ProfileContentActionState> {
+  const result = await sendProfileContentMutation("about", "/api/profile/about", {
     method: "PATCH",
     body: JSON.stringify({ about: about.trim() })
   });
 
+  if (result?.error) {
+    return result;
+  }
+
   revalidateTag("profile");
   revalidatePath("/profile");
+  return null;
 }
 
 export async function updateGenderPreferenceAction(formData: FormData): Promise<void> {

@@ -1546,6 +1546,30 @@ textarea:focus-visible,
   font-size: 12px;
 }
 
+.corens-profile-content-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--corens-warning);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.corens-profile-content-support-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: inherit;
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+.corens-profile-content-support-link:focus-visible {
+  outline: 3px solid rgba(108, 106, 196, 0.4);
+  outline-offset: 3px;
+}
+
 /* Intro onboarding slides */
 .corens-intro {
   min-height: 100dvh;
