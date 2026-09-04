@@ -50,8 +50,8 @@ The validation release does not replace the current architecture or remove state
 
 ## Phase F Definition Of Done
 
-- [ ] Unacceptable display names and bios are rejected at the API write boundary with config-backed multilingual rules and safe, actionable errors.
-- [ ] Active conversations are ordered by actionability, compact consent states are accessible, and a filled peer bio is available on connection detail.
+- [x] Unacceptable display names and bios are rejected at the API write boundary with config-backed multilingual rules and safe, actionable errors.
+- [x] Active conversations are ordered by actionability, compact consent states are accessible, and a filled peer bio is available on connection detail.
 - [ ] The approved compact profile/settings overview and full-screen editing flows are implemented and verified before cohort invitations.
 - [ ] A coordinated closed cohort has been invited and its sampling method is recorded.
 - [ ] Funnel baselines are recorded from onboarding through mutual conversation confirmation.

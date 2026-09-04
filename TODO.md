@@ -4,16 +4,13 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 
 ## Active Task
 
-- [ ] Implement profile content moderation and action-first connection UX in an isolated worktree
-  - follow `docs/superpowers/plans/2026-09-04-content-moderation-connection-ux.md`
-  - treat `docs/plans/2026-09-04-content-moderation-connection-ux-design.md` as the approved product and UX specification
-  - perform only a one-time read-only existing-profile check; do not deploy or mutate production/external systems
+- [ ] Implement the approved post-onboarding profile/settings redesign
+  - follow `docs/superpowers/plans/2026-09-02-profile-settings-redesign.md`
 
 ## Up Next — One Fresh Session Each
 
-1. Implement the approved post-onboarding profile/settings redesign from `docs/superpowers/plans/2026-09-02-profile-settings-redesign.md`.
-2. Phase F / Session 1 — Define the closed-cohort runbook and privacy-safe sampling record.
-3. Phase F / Session 2 — Recruit the approved cohort only after the runbook and sampling record are reviewed.
+1. Phase F / Session 1 — Define the closed-cohort runbook and privacy-safe sampling record.
+2. Phase F / Session 2 — Recruit the approved cohort only after the runbook and sampling record are reviewed.
 
 ## Backlog
 
@@ -51,3 +48,4 @@ _Keep one active task at a time. Start every task in a fresh session with `MASTE
 | 2026-08-26 | Reframed entry, onboarding, connection, Beacon, and bot copy around a present conversation need and added the approved stable universal starter after mutual contact approval |
 | 2026-08-26 | Verified the complete same-match conversation-feedback path and added a privacy-safe read-only pilot export with HMAC-pseudonymous match identifiers |
 | 2026-08-26 | Rebuilt onboarding as a button-controlled four-card form with explicit required/optional rules, compact selected-option explanations, one neutral state selector without light/shadow grouping, and full-card fit at 390×844 |
+| 2026-09-04 | Added API-enforced profile content moderation, action-first connection ordering, compact accessible consent states, and peer bio on connection detail; completed the aggregate-only read-only production profile scan |

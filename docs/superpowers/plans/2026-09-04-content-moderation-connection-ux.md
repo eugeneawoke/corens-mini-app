@@ -42,11 +42,11 @@
 
 **Produces:** `ProfileContentCategory`, typed `ProfileContentModerationConfig`, pure `classifyProfileContent(value, config)`, and memoized `PolicyConfigService.getProfileContentRules()`.
 
-- [ ] Impact-check `PolicyConfigService`, its moderation loader, and changed config exports.
-- [ ] Write failing tests for config loading/version; safe Russian/English names; profanity, insults, English abuse, transliteration, confusables, leetspeak, inserted spaces/punctuation; URLs, `t.me`, handles, email, phone, contact instructions; commercial calls to action; exceptions, substring safety, and category precedence.
-- [ ] Run `corepack pnpm exec vitest run tests/unit/profile-content-moderation.test.ts tests/unit/policy-config-loading.test.ts` and record the expected red result.
-- [ ] Implement NFKC/lowercase/zero-width cleanup, configured confusable and leet mappings, token and compact views, boundary-aware term/phrase checks, configured patterns, and explicit exceptions.
-- [ ] Run focused tests and `corepack pnpm typecheck`, run GitNexus change detection, then commit `feat: add profile content moderation rules`.
+- [x] Impact-check `PolicyConfigService`, its moderation loader, and changed config exports.
+- [x] Write failing tests for config loading/version; safe Russian/English names; profanity, insults, English abuse, transliteration, confusables, leetspeak, inserted spaces/punctuation; URLs, `t.me`, handles, email, phone, contact instructions; commercial calls to action; exceptions, substring safety, and category precedence.
+- [x] Run `corepack pnpm exec vitest run tests/unit/profile-content-moderation.test.ts tests/unit/policy-config-loading.test.ts` and record the expected red result.
+- [x] Implement NFKC/lowercase/zero-width cleanup, configured confusable and leet mappings, token and compact views, boundary-aware term/phrase checks, configured patterns, and explicit exceptions.
+- [x] Run focused tests and `corepack pnpm typecheck`, run GitNexus change detection, then commit `feat: add profile content moderation rules`.
 
 ### Task 2: Enforce moderation and surface safe editor errors
 
@@ -58,13 +58,13 @@
 
 **Produces:** stable API error `{statusCode: 400, code: "profile_content_rejected", category, message}`, a serializable server-action result, and a generic `getProfileContentSupportHref()` that never contains rejected input.
 
-- [ ] Impact-check `ProfilesService.completeOnboarding`, `ProfilesService.updateAbout`, `sendApiMutation`, both actions, `OnboardingFormActions`, and `BioField`.
-- [ ] Write failing tests proving each category causes zero profile writes, safe input persists, arbitrary backend errors are not exposed, error copy stays field-local, and Support URLs contain neither rejected content nor matched terms.
-- [ ] Run the new integration/action/onboarding tests and record the expected red result.
-- [ ] Load and apply rules before `ensureProfileRecord`/`profile.update`; throw the stable structured `BadRequestException` with approved category copy.
-- [ ] Parse only the stable moderation body through server actions and keep controlled rejected input available for revision.
-- [ ] Render exactly two conditional, field-associated `Задать вопрос поддержке` links with `aria-describedby`, `aria-live`, 44 px target, visible focus, and generic encoded topic.
-- [ ] Run focused regressions and typecheck, run change detection, then commit `feat: enforce moderated profile content`.
+- [x] Impact-check `ProfilesService.completeOnboarding`, `ProfilesService.updateAbout`, `sendApiMutation`, both actions, `OnboardingFormActions`, and `BioField`.
+- [x] Write failing tests proving each category causes zero profile writes, safe input persists, arbitrary backend errors are not exposed, error copy stays field-local, and Support URLs contain neither rejected content nor matched terms.
+- [x] Run the new integration/action/onboarding tests and record the expected red result.
+- [x] Load and apply rules before `ensureProfileRecord`/`profile.update`; throw the stable structured `BadRequestException` with approved category copy.
+- [x] Parse only the stable moderation body through server actions and keep controlled rejected input available for revision.
+- [x] Render exactly two conditional, field-associated `Задать вопрос поддержке` links with `aria-describedby`, `aria-live`, 44 px target, visible focus, and generic encoded topic.
+- [x] Run focused regressions and typecheck, run change detection, then commit `feat: enforce moderated profile content`.
 
 ### Task 3: Extend and rank the active connection read model
 
@@ -74,11 +74,11 @@
 
 **Produces:** `ActiveConnectionSummary.about: string | null`, a pure priority helper, and stable grouping mutual approved → inbound unanswered → ordinary → peer-deleted.
 
-- [ ] Impact-check `ActiveConnectionSummary`, `MatchingRuntimeService.getConnections`, and `buildActiveConnectionSummary`; inspect all consumers.
-- [ ] Write failing tests with deliberately interleaved newest-first fixtures. Assert grouping, stable order inside groups, peer-deleted last, filled peer bio propagation, and blank/missing bio normalization to `null`.
-- [ ] Run the focused unit/integration/contract tests and record the expected red result.
-- [ ] Add the contract field, select peer `about`, normalize blank to `null`, and stably sort using original list position as the secondary key.
-- [ ] Run focused tests and typecheck, run change detection, then commit `feat: prioritize actionable connections`.
+- [x] Impact-check `ActiveConnectionSummary`, `MatchingRuntimeService.getConnections`, and `buildActiveConnectionSummary`; inspect all consumers.
+- [x] Write failing tests with deliberately interleaved newest-first fixtures. Assert grouping, stable order inside groups, peer-deleted last, filled peer bio propagation, and blank/missing bio normalization to `null`.
+- [x] Run the focused unit/integration/contract tests and record the expected red result.
+- [x] Add the contract field, select peer `about`, normalize blank to `null`, and stably sort using original list position as the secondary key.
+- [x] Run focused tests and typecheck, run change detection, then commit `feat: prioritize actionable connections`.
 
 ### Task 4: Render compact states and peer bio
 
@@ -88,21 +88,21 @@
 
 **Produces:** `getConnectionCardState(connection): "ready" | "incoming" | "default"`, compact accessible icons/classes, and conditional detail-only bio.
 
-- [ ] Impact-check `ConnectionPage`, `ConnectionDetailPage`, and any extracted helper; verify CSS selector scope.
-- [ ] Write failing tests that ready wins, incoming matches only its canonical predicate, default is neutral, icons have hidden accessible labels, no visible `Ждёт вашего ответа` is added, and bio is detail-only/conditional.
-- [ ] Run focused tests and record the expected red result.
-- [ ] Add a restrained green ready state with open-lock icon and amber incoming state with response icon. Do not change card copy, density, height, or add animation.
-- [ ] Render a concise `О себе` section after identity only when `about?.trim()` is non-empty.
-- [ ] Verify at 390×844 and 390×667: no overflow, compact height, state distinction, accessible labels, conditional Support errors, and conditional bio.
-- [ ] Run focused tests and typecheck, run change detection, then commit `feat: clarify active connection states`.
+- [x] Impact-check `ConnectionPage`, `ConnectionDetailPage`, and any extracted helper; verify CSS selector scope.
+- [x] Write failing tests that ready wins, incoming matches only its canonical predicate, default is neutral, icons have hidden accessible labels, no visible `Ждёт вашего ответа` is added, and bio is detail-only/conditional.
+- [x] Run focused tests and record the expected red result.
+- [x] Add a restrained green ready state with open-lock icon and amber incoming state with response icon. Do not change card copy, density, height, or add animation.
+- [x] Render a concise `О себе` section after identity only when `about?.trim()` is non-empty.
+- [x] Verify at 390×844 and 390×667: no overflow, compact height, state distinction, accessible labels, conditional Support errors, and conditional bio.
+- [x] Run focused tests and typecheck, run change detection, then commit `feat: clarify active connection states`.
 
 ## Final Verification And Delivery
 
-- [ ] Run a one-time read-only existing-profile check with the same classifier. Record aggregate counts/categories only in `EVIDENCE.md`; if credentials are unavailable, record it as unperformed rather than inventing evidence.
-- [ ] Search for rejected-text flow into logs, analytics, Support URLs, or new persistence paths.
-- [ ] Run `corepack pnpm test`, `corepack pnpm typecheck`, and `corepack pnpm build`.
-- [ ] Run focused Playwright and manual mobile verification at both approved viewports.
-- [ ] Run final GitNexus compare-to-main change detection and inspect affected symbols/processes.
-- [ ] Dispatch a most-capable whole-branch reviewer; resolve load-bearing findings and perform a scoped re-review.
-- [ ] Update plan checkboxes, `TODO.md`, `PLAN.md`, and `EVIDENCE.md` with verified outcomes; change-detect and commit the documentation.
+- [x] Run a one-time read-only existing-profile check with the same classifier. Record aggregate counts/categories only in `EVIDENCE.md`; if credentials are unavailable, record it as unperformed rather than inventing evidence.
+- [x] Search for rejected-text flow into logs, analytics, Support URLs, or new persistence paths.
+- [x] Run `corepack pnpm test`, `corepack pnpm typecheck`, and `corepack pnpm build`.
+- [x] Run focused Playwright and manual mobile verification at both approved viewports.
+- [x] Run final GitNexus compare-to-main change detection and inspect affected symbols/processes.
+- [x] Dispatch a most-capable whole-branch reviewer; resolve load-bearing findings and perform a scoped re-review.
+- [x] Update plan checkboxes, `TODO.md`, `PLAN.md`, and `EVIDENCE.md` with verified outcomes; change-detect and commit the documentation.
 - [ ] Merge the feature branch to `main`, rerun full tests on merged `main`, and push `main` to `origin` without committing user-owned changes.
