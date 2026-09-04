@@ -67,6 +67,7 @@ export interface ActiveConnectionSummary {
   kind: "active";
   id: string;
   displayName: string;
+  about: string | null;
   matchScore: number;
   trustLevel: number;
   sharedKeys: string[];

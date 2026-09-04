@@ -13,6 +13,7 @@ import type { AuthenticatedUserContext } from "../auth/service";
 import { ConsentRuntimeService } from "../consents/runtime.service";
 import { ProfilesService } from "../profiles";
 import { BotNotificationService } from "../../telegram/bot-notification.service";
+import { rankConnectionSummaries } from "./connection-priority";
 
 type ActiveConnectionSummary = Extract<ConnectionSummary, { kind: "active" }>;
 type PeerDeletedConnectionSummary = Extract<ConnectionSummary, { kind: "peer_deleted" }>;
@@ -71,7 +72,7 @@ export class MatchingRuntimeService {
       }
     }
 
-    return results;
+    return rankConnectionSummaries(results);
   }
 
   // Returns a single connection by session ID (no match creation side-effect)
@@ -232,6 +233,7 @@ export class MatchingRuntimeService {
       kind: "active",
       id: session.id,
       displayName: peer.displayName,
+      about: peer.about?.trim() || null,
       matchScore: session.score ?? 0,
       trustLevel: Math.max(1, Math.min(5, sharedKeys.length + 1)),
       sharedKeys,
