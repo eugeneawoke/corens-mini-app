@@ -1,0 +1,44 @@
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+import type { ProfileContentModerationConfig } from "@corens/config";
+import {
+  classifyProfileContent,
+  type ProfileContentCategory
+} from "../../apps/api/src/modules/profiles/content-moderation";
+
+const rules = JSON.parse(
+  await readFile(
+    resolve(process.cwd(), "config/moderation/profile-content.v1.json"),
+    "utf8"
+  )
+) as ProfileContentModerationConfig;
+
+describe("classifyProfileContent", () => {
+  const cases: Array<[string, ProfileContentCategory | null]> = [
+    ["Анна, люблю пешие прогулки", null],
+    ["Alex, here to talk", null],
+    ["ты дурак", "abusive"],
+    ["сука", "abusive"],
+    ["what the f.u.c.k", "abusive"],
+    ["shіt", "abusive"],
+    ["h.u.y", "abusive"],
+    ["sh1t", "abusive"],
+    ["не дурак", null],
+    ["classical music and Scunthorpe", null],
+    ["https://example.com", "contact"],
+    ["t.me/example", "contact"],
+    ["@corens_help", "contact"],
+    ["hello@example.com", "contact"],
+    ["+375 (29) 123-45-67", "contact"],
+    ["пиши в лс", "contact"],
+    ["купите сейчас", "advertising"],
+    ["SALE today", "advertising"],
+    ["join my team", "advertising"],
+    ["ты дурак, t.me/example, купите сейчас", "abusive"]
+  ];
+
+  it.each(cases)("classifies %j as %s", (value, expected) => {
+    expect(classifyProfileContent(value, rules)).toBe(expected);
+  });
+});

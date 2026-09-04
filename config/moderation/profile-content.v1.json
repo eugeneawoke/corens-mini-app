@@ -1,0 +1,54 @@
+{
+  "version": "v1",
+  "normalization": {
+    "confusables": {
+      "а": "a",
+      "е": "e",
+      "о": "o",
+      "р": "p",
+      "с": "c",
+      "х": "x",
+      "у": "y",
+      "к": "k",
+      "м": "m",
+      "т": "t",
+      "і": "i"
+    },
+    "leetspeak": {
+      "0": "o",
+      "1": "i",
+      "3": "e",
+      "4": "a",
+      "5": "s",
+      "7": "t",
+      "@": "a",
+      "$": "s"
+    }
+  },
+  "categories": {
+    "abusive": {
+      "terms": ["дурак", "идиот", "сука", "хуй", "fuck", "shit", "ass", "huy"],
+      "phrases": ["иди нахуй"],
+      "patterns": [],
+      "exceptions": ["не дурак"]
+    },
+    "contact": {
+      "terms": [],
+      "phrases": ["пиши в лс", "пишите в лс", "write to me", "contact me"],
+      "patterns": [
+        "(?:https?://|www\\.)\\S+",
+        "(?:^|\\s)t\\.me/\\S+",
+        "(?:^|\\s)@[a-z0-9_]{3,}",
+        "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}",
+        "(?:\\+?\\d[\\s().-]*){7,}\\d"
+      ],
+      "exceptions": []
+    },
+    "advertising": {
+      "terms": ["продам", "sale"],
+      "phrases": ["купите сейчас", "join my team", "limited offer"],
+      "patterns": [],
+      "exceptions": []
+    }
+  }
+}
