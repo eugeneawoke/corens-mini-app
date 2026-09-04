@@ -6,11 +6,12 @@ import { updateAboutAction } from "../app/actions";
 import {
   createBioSaveRequest,
   createBioSaveState,
+  reconcileBioSaveStateWithServer,
   resolveBioSaveRequest,
   setBioSaveValue,
   settleBioSaveAction
 } from "../lib/bio-save-state";
-import { getProfileContentSupportHref } from "../lib/profile-content-errors";
+import { ProfileContentError } from "./profile-content-error";
 
 interface BioFieldProps {
   initialValue: string | null;
@@ -22,7 +23,7 @@ export function BioField({ initialValue }: BioFieldProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    setSaveState(createBioSaveState(initialValue ?? ""));
+    setSaveState((current) => reconcileBioSaveStateWithServer(current, initialValue ?? ""));
   }, [initialValue]);
 
   const resizeTextarea = () => {
@@ -68,20 +69,11 @@ export function BioField({ initialValue }: BioFieldProps) {
           rows={3}
         />
       </div>
-      {saveState.error ? (
-        <div id="bio-content-error" className="corens-profile-content-error" role="alert" aria-live="assertive">
-          <span>{saveState.error.message}</span>
-          {saveState.error.category ? (
-            <a
-              className="corens-profile-content-support-link"
-              href={getProfileContentSupportHref()}
-              aria-describedby="bio-content-error"
-            >
-              Задать вопрос поддержке
-            </a>
-          ) : null}
-        </div>
-      ) : null}
+      <ProfileContentError
+        state={saveState.error ? { error: saveState.error } : null}
+        field="about"
+        id="bio-content-error"
+      />
       <p className="corens-copy corens-copy-muted corens-bio-counter">
         {saveState.value.length}/200
       </p>

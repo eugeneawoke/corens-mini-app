@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Field } from "@corens/ui";
 import { completeOnboardingAction } from "../app/actions";
 import { CONVERSATION_COPY } from "../lib/conversation-copy";
-import { getProfileContentSupportHref } from "../lib/profile-content-errors";
+import { ProfileContentError } from "./profile-content-error";
 
 type TrustKeyGroup = {
   title: string;
@@ -241,20 +241,11 @@ export function OnboardingFormActions({
             required
           />
           <span className="corens-onboarding-field-note">Минимум 2 символа</span>
-          {displayNameError ? (
-            <div id="display-name-content-error" className="corens-profile-content-error" role="alert" aria-live="assertive">
-              <span>{displayNameError.message}</span>
-              {displayNameError.category ? (
-                <a
-                  className="corens-profile-content-support-link"
-                  href={getProfileContentSupportHref()}
-                  aria-describedby="display-name-content-error"
-                >
-                  Задать вопрос поддержке
-                </a>
-              ) : null}
-            </div>
-          ) : null}
+          <ProfileContentError
+            state={actionState}
+            field="displayName"
+            id="display-name-content-error"
+          />
         </div>
 
         <div className="corens-panel" data-onboarding="gender-field">

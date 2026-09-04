@@ -80,21 +80,20 @@ describe("structured single-page onboarding", () => {
   it("keeps a moderation error beside the editable display-name field", () => {
     expect(onboardingSource).not.toContain("<form action={completeOnboardingAction}");
     expect(formActionsSource).toContain("useActionState(completeOnboardingAction");
-    expect(formActionsSource).toContain('aria-describedby="display-name-content-error"');
+    expect(formActionsSource).toContain('aria-describedby={displayNameError ? "display-name-content-error" : undefined}');
     expect(formActionsSource).toContain('id="display-name-content-error"');
-    expect(formActionsSource).toContain("Задать вопрос поддержке");
   });
 
-  it("renders exactly two contextual support links only for moderation errors", () => {
-    const supportLinkCount = [formActionsSource, bioFieldSource]
-      .flatMap((source) => source.match(/Задать вопрос поддержке/g) ?? [])
-      .length;
+  it("uses the shared conditional error presenter exactly once per field", () => {
+    expect(formActionsSource.match(/<ProfileContentError/g)).toHaveLength(1);
+    expect(bioFieldSource.match(/<ProfileContentError/g)).toHaveLength(1);
+    expect(formActionsSource).toContain('field="displayName"');
+    expect(bioFieldSource).toContain('field="about"');
+  });
 
-    expect(supportLinkCount).toBe(2);
-    expect(formActionsSource).toContain("displayNameError.category ?");
-    expect(bioFieldSource).toContain("error.category ?");
-    expect(formActionsSource).toContain('aria-live="assertive"');
-    expect(bioFieldSource).toContain('aria-live="assertive"');
+  it("reconciles refreshed bio props without replacing a divergent local draft", () => {
+    expect(bioFieldSource).toContain("reconcileBioSaveStateWithServer");
+    expect(bioFieldSource).toContain("setSaveState((current) =>");
   });
 
   it("does not use matching jargon in onboarding-facing copy", () => {

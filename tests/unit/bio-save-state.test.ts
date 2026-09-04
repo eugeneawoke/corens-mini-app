@@ -2,12 +2,26 @@ import { describe, expect, it } from "vitest";
 import {
   createBioSaveRequest,
   createBioSaveState,
+  reconcileBioSaveStateWithServer,
   resolveBioSaveRequest,
   setBioSaveValue,
   settleBioSaveAction
 } from "../../apps/miniapp/src/lib/bio-save-state";
 
 describe("bio save state", () => {
+  it("preserves a divergent draft when a successful save refreshes the server value", () => {
+    const initial = createBioSaveState("Прежнее описание");
+    const submitted = setBioSaveValue(initial, "Сохранённое описание");
+    const draft = setBioSaveValue(submitted, "Новый черновик");
+
+    expect(reconcileBioSaveStateWithServer(draft, "Сохранённое описание")).toEqual({
+      value: "Новый черновик",
+      savedValue: "Сохранённое описание",
+      revision: 2,
+      error: undefined
+    });
+  });
+
   it("keeps revised text clear when an earlier rejected save settles", () => {
     const initial = createBioSaveState("Прежнее описание");
     const request = createBioSaveRequest(setBioSaveValue(initial, "t.me/secret"));

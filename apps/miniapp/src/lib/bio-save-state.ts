@@ -21,6 +21,21 @@ export function createBioSaveState(value: string): BioSaveState {
   return { value, savedValue: value, revision: 0 };
 }
 
+export function reconcileBioSaveStateWithServer(
+  state: BioSaveState,
+  serverValue: string
+): BioSaveState {
+  if (state.value !== state.savedValue) {
+    return { ...state, savedValue: serverValue };
+  }
+
+  if (state.value === serverValue && !state.error) {
+    return state;
+  }
+
+  return { ...state, value: serverValue, savedValue: serverValue, error: undefined };
+}
+
 export function setBioSaveValue(state: BioSaveState, value: string): BioSaveState {
   return {
     ...state,
