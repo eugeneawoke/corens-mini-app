@@ -9,6 +9,7 @@ export type ProfileContentCategory = ConfigProfileContentCategory;
 interface ContentViews {
   base: string;
   patternInputs: string[];
+  obfuscatedPatternInputs: string[];
   tokens: string[];
   compactRuns: TokenRange[];
   characterSequences: TokenRange[];
@@ -51,14 +52,13 @@ function createContentViews(value: string, config: ProfileContentModerationConfi
     .toLowerCase()
     .replace(/[\u200B-\u200D\uFEFF\u202A-\u202E]/gu, "");
   const folded = fold(base, config);
-  const delimiterCompacted = folded.replace(/\s*([./:@()+-])\s*/gu, "$1");
-  const whitespaceCompacted = folded.replace(/\s+/gu, "");
   const tokens = folded.match(/[\p{L}\p{N}]+/gu) ?? [];
   const compactRuns = makeCompactRuns(base, config);
 
   return {
     base,
-    patternInputs: [...new Set([base, folded, delimiterCompacted, whitespaceCompacted])],
+    patternInputs: [...new Set([base, folded])],
+    obfuscatedPatternInputs: [...new Set([base, folded])],
     tokens,
     compactRuns,
     characterSequences: makeCharacterSequences(tokens)
@@ -111,13 +111,46 @@ function matchesRules(
   return (
     rules.terms.some((term) => matchesTerm(term, views, config, exceptionTokenIndexes)) ||
     rules.phrases.some((phrase) => matchesPhrase(phrase, views, config, exceptionTokenIndexes)) ||
-    rules.patterns.some((pattern) => matchesPattern(pattern, views.patternInputs))
+    rules.patterns.some((pattern) =>
+      matchesPattern(pattern, views.patternInputs, config, exceptionTokenIndexes)
+    ) ||
+    (rules.obfuscatedPatterns ?? []).some((pattern) =>
+      matchesPattern(pattern, views.obfuscatedPatternInputs, config, exceptionTokenIndexes)
+    )
   );
 }
 
-function matchesPattern(pattern: string, inputs: string[]): boolean {
-  const expression = new RegExp(pattern, "iu");
-  return inputs.some((input) => expression.test(input));
+function matchesPattern(
+  pattern: string,
+  inputs: string[],
+  config: ProfileContentModerationConfig,
+  exceptionTokenIndexes: Set<number>
+): boolean {
+  if (exceptionTokenIndexes.size === 0) {
+    const expression = new RegExp(pattern, "iu");
+    return inputs.some((input) => expression.test(input));
+  }
+
+  return inputs.some((input) => {
+    const expression = new RegExp(pattern, "giu");
+
+    for (const match of input.matchAll(expression)) {
+      const startTokenIndex = normalizedTokens(
+        input.slice(0, match.index ?? 0),
+        config
+      ).length;
+      const matchedTokens = normalizedTokens(match[0], config);
+
+      if (
+        matchedTokens.length === 0 ||
+        matchedTokens.some((_, offset) => !exceptionTokenIndexes.has(startTokenIndex + offset))
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  });
 }
 
 function matchesTerm(

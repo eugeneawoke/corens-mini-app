@@ -90,6 +90,7 @@ export interface ProfileContentCategoryRules {
   terms: string[];
   phrases: string[];
   patterns: string[];
+  obfuscatedPatterns?: string[];
   exceptions: string[];
 }
 

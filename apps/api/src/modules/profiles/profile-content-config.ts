@@ -50,13 +50,28 @@ export function validateProfileContentModerationConfig(
       validateStringArray(rules[list], `categories.${category}.${list}`);
     }
 
-    for (const [index, pattern] of (rules.patterns as string[]).entries()) {
-      try {
-        new RegExp(pattern, "iu");
-      } catch {
-        invalid(
-          `categories.${category}.patterns[${index}] is not a valid regular expression`
-        );
+    if (rules.obfuscatedPatterns !== undefined) {
+      validateStringArray(
+        rules.obfuscatedPatterns,
+        `categories.${category}.obfuscatedPatterns`
+      );
+    }
+
+    for (const list of ["patterns", "obfuscatedPatterns"] as const) {
+      const patterns = rules[list];
+
+      if (patterns === undefined) {
+        continue;
+      }
+
+      for (const [index, pattern] of (patterns as string[]).entries()) {
+        try {
+          new RegExp(pattern, "iu");
+        } catch {
+          invalid(
+            `categories.${category}.${list}[${index}] is not a valid regular expression`
+          );
+        }
       }
     }
   }

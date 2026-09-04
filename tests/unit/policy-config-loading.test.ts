@@ -50,6 +50,9 @@ describe("PolicyConfigService moderation loading", () => {
     expect(first.version).toBe("v1");
     expect(first.categories.abusive.terms).toContain("дурак");
     expect(first.categories.contact.patterns).toContain("(?:https?://|www\\.)\\S+");
+    expect(first.categories.contact.obfuscatedPatterns).toContain(
+      "(?:^|[^\\p{L}\\p{N}_])t\\s*\\.\\s*m\\s*e\\s*/\\s*\\S+"
+    );
   });
 
   it("preserves the existing report-request moderation rules", async () => {
@@ -76,6 +79,22 @@ describe("PolicyConfigService moderation loading", () => {
     }
   });
 
+  it("rejects a malformed obfuscated-pattern list before returning it to the classifier", async () => {
+    const malformed = structuredClone(minimalProfileContentConfig) as unknown as {
+      categories: { contact: { obfuscatedPatterns?: unknown } };
+    };
+    malformed.categories.contact.obfuscatedPatterns = "not-an-array";
+    const { service, cleanup } = await serviceWithProfileContentConfig(malformed);
+
+    try {
+      await expect(service.getProfileContentRules()).rejects.toThrow(
+        "Invalid profile content moderation configuration: categories.contact.obfuscatedPatterns must be an array of strings"
+      );
+    } finally {
+      await cleanup();
+    }
+  });
+
   it.each<ProfileContentCategory>(["abusive", "contact", "advertising"])(
     "rejects an invalid %s regex without echoing the configured expression",
     async (category) => {
@@ -91,6 +110,29 @@ describe("PolicyConfigService moderation loading", () => {
           `Invalid profile content moderation configuration: categories.${category}.patterns[0] is not a valid regular expression`
         );
         expect((error as Error).message).not.toContain("private-invalid-pattern");
+      } finally {
+        await cleanup();
+      }
+    }
+  );
+
+  it.each<ProfileContentCategory>(["abusive", "contact", "advertising"])(
+    "rejects an invalid %s obfuscated regex without echoing the configured expression",
+    async (category) => {
+      const config = structuredClone(minimalProfileContentConfig) as unknown as {
+        categories: Record<ProfileContentCategory, { obfuscatedPatterns?: string[] }>;
+      };
+      config.categories[category].obfuscatedPatterns = ["private-invalid-obfuscated-pattern-("];
+      const { service, cleanup } = await serviceWithProfileContentConfig(config);
+
+      try {
+        const error = await service.getProfileContentRules().catch((caught: unknown) => caught);
+
+        expect(error).toBeInstanceOf(Error);
+        expect((error as Error).message).toBe(
+          `Invalid profile content moderation configuration: categories.${category}.obfuscatedPatterns[0] is not a valid regular expression`
+        );
+        expect((error as Error).message).not.toContain("private-invalid-obfuscated-pattern");
       } finally {
         await cleanup();
       }
