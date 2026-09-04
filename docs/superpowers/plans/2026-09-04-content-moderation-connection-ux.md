@@ -105,4 +105,4 @@
 - [x] Run final GitNexus compare-to-main change detection and inspect affected symbols/processes.
 - [x] Dispatch a most-capable whole-branch reviewer; resolve load-bearing findings and perform a scoped re-review.
 - [x] Update plan checkboxes, `TODO.md`, `PLAN.md`, and `EVIDENCE.md` with verified outcomes; change-detect and commit the documentation.
-- [ ] Merge the feature branch to `main`, rerun full tests on merged `main`, and push `main` to `origin` without committing user-owned changes.
+- [x] Merge the feature branch to `main`, rerun full tests on merged `main`, and push `main` to `origin` without committing user-owned changes.
