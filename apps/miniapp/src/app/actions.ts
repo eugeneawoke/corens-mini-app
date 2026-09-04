@@ -8,6 +8,7 @@ import {
   getProfileContentActionError,
   type ProfileContentActionState
 } from "../lib/profile-content-errors";
+import { executeProfileContentMutation } from "../lib/profile-content-mutation";
 import { MINIAPP_SESSION_COOKIE } from "../lib/session";
 
 async function sendApiMutation(path: string, init: RequestInit): Promise<void> {
@@ -48,21 +49,13 @@ async function sendProfileContentMutation(
       return getProfileContentActionError(field, null);
     }
 
-    const response = await fetch(`${baseUrl.replace(/\/$/, "")}${path}`, {
-      ...init,
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${sessionToken}`,
-        ...(init.headers ?? {})
-      },
-      cache: "no-store"
+    return executeProfileContentMutation({
+      field,
+      baseUrl,
+      sessionToken,
+      path,
+      init
     });
-
-    if (response.ok) {
-      return null;
-    }
-
-    return getProfileContentActionError(field, await response.json().catch(() => null));
   } catch {
     return getProfileContentActionError(field, null);
   }

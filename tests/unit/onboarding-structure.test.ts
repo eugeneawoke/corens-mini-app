@@ -11,6 +11,11 @@ const formActionsSource = readFileSync(
   "utf8"
 );
 
+const bioFieldSource = readFileSync(
+  new URL("../../apps/miniapp/src/components/bio-field.tsx", import.meta.url),
+  "utf8"
+);
+
 const intentSelectorUrl = new URL(
   "../../apps/miniapp/src/components/onboarding-intent-selector.tsx",
   import.meta.url
@@ -78,6 +83,18 @@ describe("structured single-page onboarding", () => {
     expect(formActionsSource).toContain('aria-describedby="display-name-content-error"');
     expect(formActionsSource).toContain('id="display-name-content-error"');
     expect(formActionsSource).toContain("Задать вопрос поддержке");
+  });
+
+  it("renders exactly two contextual support links only for moderation errors", () => {
+    const supportLinkCount = [formActionsSource, bioFieldSource]
+      .flatMap((source) => source.match(/Задать вопрос поддержке/g) ?? [])
+      .length;
+
+    expect(supportLinkCount).toBe(2);
+    expect(formActionsSource).toContain("displayNameError.category ?");
+    expect(bioFieldSource).toContain("error.category ?");
+    expect(formActionsSource).toContain('aria-live="assertive"');
+    expect(bioFieldSource).toContain('aria-live="assertive"');
   });
 
   it("does not use matching jargon in onboarding-facing copy", () => {

@@ -31,12 +31,22 @@ function createFixture() {
     updatedAt: new Date()
   };
   let profileWrites = 0;
+  let profileLookups = 0;
+  let userLookups = 0;
 
   const prisma = {
     clientInstance: {
-      user: { findUnique: async () => user },
+      user: {
+        findUnique: async () => {
+          userLookups += 1;
+          return user;
+        }
+      },
       profile: {
-        findUnique: async () => profile,
+        findUnique: async () => {
+          profileLookups += 1;
+          return profile;
+        },
         create: async () => {
           profileWrites += 1;
           return profile;
@@ -58,6 +68,8 @@ function createFixture() {
   return {
     profile,
     getProfileWrites: () => profileWrites,
+    getProfileLookups: () => profileLookups,
+    getUserLookups: () => userLookups,
     service: new ProfilesService(prisma, policyConfig)
   };
 }
@@ -86,6 +98,8 @@ describe("profile content enforcement", () => {
       }
     });
     expect(fixture.getProfileWrites()).toBe(0);
+    expect(fixture.getProfileLookups()).toBe(0);
+    expect(fixture.getUserLookups()).toBe(0);
   });
 
   it("rejects a prohibited onboarding name before looking up or writing a profile", async () => {
@@ -108,6 +122,8 @@ describe("profile content enforcement", () => {
       }
     });
     expect(fixture.getProfileWrites()).toBe(0);
+    expect(fixture.getProfileLookups()).toBe(0);
+    expect(fixture.getUserLookups()).toBe(0);
   });
 
   it("persists safe bio input", async () => {
@@ -116,6 +132,32 @@ describe("profile content enforcement", () => {
     await fixture.service.updateAbout(user, { about: "Люблю тихие прогулки и внимательные разговоры" });
 
     expect(fixture.profile.about).toBe("Люблю тихие прогулки и внимательные разговоры");
+    expect(fixture.getProfileWrites()).toBe(1);
+  });
+
+  it("persists a safe onboarding name", async () => {
+    const fixture = createFixture();
+
+    await fixture.service.completeOnboarding(user, {
+      displayName: "Анна",
+      gender: "female",
+      stateKey: "calm",
+      intentKey: "",
+      trustKeys: ["Тихий разговор", "Тёплая поддержка"]
+    });
+
+    expect(fixture.profile.displayName).toBe("Анна");
+    expect(fixture.profile.onboardingCompleted).toBe(true);
+    expect(fixture.getProfileWrites()).toBe(1);
+  });
+
+  it("allows a blank bio and clears it", async () => {
+    const fixture = createFixture();
+    fixture.profile.about = "Старое описание";
+
+    await fixture.service.updateAbout(user, { about: "   " });
+
+    expect(fixture.profile.about).toBeNull();
     expect(fixture.getProfileWrites()).toBe(1);
   });
 });
