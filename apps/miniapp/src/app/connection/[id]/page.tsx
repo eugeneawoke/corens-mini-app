@@ -126,6 +126,8 @@ export default async function ConnectionDetailPage({
     );
   }
 
+  const peerAbout = connection.about?.trim();
+
   return (
     <AppSurface>
       <NotificationCleanup notificationId={notificationId} />
@@ -155,6 +157,14 @@ export default async function ConnectionDetailPage({
           ))}
         </div>
       </Panel>
+
+      {peerAbout ? (
+        <Section title="О себе">
+          <Panel>
+            <p className="corens-copy corens-copy-muted">{peerAbout}</p>
+          </Panel>
+        </Section>
+      ) : null}
 
       <Section title="Почему Corens предложил вам поговорить">
         <Panel>

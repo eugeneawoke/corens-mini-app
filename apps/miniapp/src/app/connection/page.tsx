@@ -1,5 +1,5 @@
 import type { BeaconSummary } from "@corens/domain";
-import { CircleUserRound, User, UserRound } from "lucide-react";
+import { CircleUserRound, LockOpen, Reply, User, UserRound } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -26,6 +26,7 @@ import {
   MiniAppSessionRequiredError
 } from "../../lib/api";
 import { CONVERSATION_COPY } from "../../lib/conversation-copy";
+import { getConnectionCardState } from "../../lib/connection-view";
 
 const FALLBACK_BEACON: BeaconSummary = {
   status: "inactive" as const,
@@ -106,19 +107,30 @@ export default async function ConnectionPage({
           <div className="corens-bento-grid">
             {activeConnections.map((connection, index) => {
               if (connection.kind !== "active") return null;
+              const cardState = getConnectionCardState(connection);
+
               return (
                 <Link
                   key={connection.id}
                   href={`/connection/${connection.id}`}
-                  className={`corens-connection-card ${
-                    connection.contactConsent.status === "pending" &&
-                    connection.contactConsent.myDecision === "pending" &&
-                    connection.contactConsent.peerRequested
-                      ? "corens-connection-card-incoming"
-                      : ""
-                  }`}
+                  className={`corens-connection-card corens-connection-card-${cardState}`}
                   style={{ animationDelay: `${index * 0.5}s` }}
                 >
+                  {cardState === "ready" ? (
+                    <span className="corens-connection-card-status-icon" data-state="ready">
+                      <LockOpen size={15} aria-hidden="true" />
+                      <span className="corens-visually-hidden">
+                        Контакт открыт — можно написать
+                      </span>
+                    </span>
+                  ) : cardState === "incoming" ? (
+                    <span className="corens-connection-card-status-icon" data-state="incoming">
+                      <Reply size={15} aria-hidden="true" />
+                      <span className="corens-visually-hidden">
+                        Нужно ответить на запрос контакта
+                      </span>
+                    </span>
+                  ) : null}
                   <div className="corens-connection-card-inner">
                     <h3 className="corens-connection-card-name">{connection.displayName}</h3>
                     <p className="corens-connection-card-state">{connection.sharedState}</p>
