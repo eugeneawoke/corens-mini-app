@@ -9,8 +9,14 @@ export type ProfileContentCategory = ConfigProfileContentCategory;
 interface ContentViews {
   base: string;
   tokens: string[];
-  compactRuns: string[];
-  characterSequences: string[];
+  compactRuns: TokenRange[];
+  characterSequences: TokenRange[];
+}
+
+interface TokenRange {
+  value: string;
+  start: number;
+  end: number;
 }
 
 const categoryPrecedence: ProfileContentCategory[] = [
@@ -43,10 +49,7 @@ function createContentViews(value: string, config: ProfileContentModerationConfi
     .replace(/[\u200B-\u200D\uFEFF\u202A-\u202E]/gu, "");
   const folded = fold(base, config);
   const tokens = folded.match(/[\p{L}\p{N}]+/gu) ?? [];
-  const compactRuns = base
-    .split(/\s+/u)
-    .map((part) => fold(part, config).replace(/[^\p{L}\p{N}]/gu, ""))
-    .filter((part) => part.length > 0);
+  const compactRuns = makeCompactRuns(base, config);
 
   return {
     base,
@@ -113,13 +116,16 @@ function matchesTerm(
   }
 
   const compactTerm = normalizedTerm.replace(/[^\p{L}\p{N}]/gu, "");
-  const hasExactToken = views.tokens.includes(normalizedTerm);
   return (
     views.tokens.some(
       (token, index) => token === normalizedTerm && !exceptionTokenIndexes.has(index)
     ) ||
-    (!hasExactToken && views.compactRuns.includes(compactTerm)) ||
-    views.characterSequences.includes(compactTerm)
+    views.compactRuns.some(
+      (run) => run.value === compactTerm && hasAllowedTokenRange(run, exceptionTokenIndexes)
+    ) ||
+    views.characterSequences.some((run) =>
+      containsAllowedSpacedTerm(run, compactTerm, exceptionTokenIndexes)
+    )
   );
 }
 
@@ -149,8 +155,26 @@ function containsTokenSequenceAt(tokens: string[], phraseTokens: string[], index
   return phraseTokens.every((token, offset) => tokens[index + offset] === token);
 }
 
-function makeCharacterSequences(tokens: string[]): string[] {
-  const sequences: string[] = [];
+function makeCompactRuns(value: string, config: ProfileContentModerationConfig): TokenRange[] {
+  const runs: TokenRange[] = [];
+  let tokenIndex = 0;
+
+  for (const part of value.split(/\s+/u)) {
+    const partTokens = normalizedTokens(part, config);
+    const compact = partTokens.join("");
+    const start = tokenIndex;
+    tokenIndex += partTokens.length;
+
+    if (compact.length > 0) {
+      runs.push({ value: compact, start, end: tokenIndex });
+    }
+  }
+
+  return runs;
+}
+
+function makeCharacterSequences(tokens: string[]): TokenRange[] {
+  const sequences: TokenRange[] = [];
 
   for (let start = 0; start < tokens.length;) {
     if (tokens[start]?.length !== 1) {
@@ -163,9 +187,38 @@ function makeCharacterSequences(tokens: string[]): string[] {
       end += 1;
     }
 
-    sequences.push(tokens.slice(start, end).join(""));
+    sequences.push({ value: tokens.slice(start, end).join(""), start, end });
     start = end;
   }
 
   return sequences;
+}
+
+function hasAllowedTokenRange(range: TokenRange, exceptionTokenIndexes: Set<number>): boolean {
+  for (let index = range.start; index < range.end; index += 1) {
+    if (!exceptionTokenIndexes.has(index)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function containsAllowedSpacedTerm(
+  sequence: TokenRange,
+  term: string,
+  exceptionTokenIndexes: Set<number>
+): boolean {
+  for (let start = sequence.value.indexOf(term); start !== -1; start = sequence.value.indexOf(term, start + 1)) {
+    if (
+      hasAllowedTokenRange(
+        { value: term, start: sequence.start + start, end: sequence.start + start + term.length },
+        exceptionTokenIndexes
+      )
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }

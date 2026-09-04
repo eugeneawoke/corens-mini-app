@@ -26,6 +26,8 @@ describe("classifyProfileContent", () => {
     ["sh1t", "abusive"],
     ["не дурак", null],
     ["не дурак, идиот", "abusive"],
+    ["не дурак, ду.рак", "abusive"],
+    ["не дурак, д у р а к", "abusive"],
     ["classical music and Scunthorpe", null],
     ["https://example.com", "contact"],
     ["t.me/example", "contact"],
@@ -36,6 +38,10 @@ describe("classifyProfileContent", () => {
     ["пиши в лс", "contact"],
     ["ссылка:t.me/example", "contact"],
     ["telegram:@corens_help", "contact"],
+    ["ссылка/t.me/name", "contact"],
+    ["ТГ—@name", "contact"],
+    ["notat.me/name", null],
+    ["word@name", null],
     ["купите сейчас", "advertising"],
     ["SALE today", "advertising"],
     ["join my team", "advertising"],
@@ -50,5 +56,9 @@ describe("classifyProfileContent", () => {
     const value = Array.from({ length: 10_000 }, () => "a").join(" ");
 
     expect(classifyProfileContent(value, rules)).toBeNull();
+  });
+
+  it("detects a configured term inside a maximal spaced-character run", () => {
+    expect(classifyProfileContent("i f u c k", rules)).toBe("abusive");
   });
 });
