@@ -28,7 +28,7 @@ export function classifyProfileContent(
   for (const category of categoryPrecedence) {
     const rules = config.categories[category];
 
-    if (!matchesExceptions(rules, views, config) && matchesRules(rules, views, config)) {
+    if (matchesRules(rules, views, config, getExceptionTokenIndexes(rules, views, config))) {
       return category;
     }
   }
@@ -65,22 +65,37 @@ function fold(value: string, config: ProfileContentModerationConfig): string {
   return Array.from(value, (character) => mappings[character] ?? character).join("");
 }
 
-function matchesExceptions(
+function getExceptionTokenIndexes(
   rules: ProfileContentCategoryRules,
   views: ContentViews,
   config: ProfileContentModerationConfig
-): boolean {
-  return rules.exceptions.some((exception) => matchesPhrase(exception, views, config));
+): Set<number> {
+  const indexes = new Set<number>();
+
+  for (const exception of rules.exceptions) {
+    const exceptionTokens = normalizedTokens(exception, config);
+
+    for (let index = 0; index <= views.tokens.length - exceptionTokens.length; index += 1) {
+      if (containsTokenSequenceAt(views.tokens, exceptionTokens, index)) {
+        for (let offset = 0; offset < exceptionTokens.length; offset += 1) {
+          indexes.add(index + offset);
+        }
+      }
+    }
+  }
+
+  return indexes;
 }
 
 function matchesRules(
   rules: ProfileContentCategoryRules,
   views: ContentViews,
-  config: ProfileContentModerationConfig
+  config: ProfileContentModerationConfig,
+  exceptionTokenIndexes: Set<number>
 ): boolean {
   return (
-    rules.terms.some((term) => matchesTerm(term, views, config)) ||
-    rules.phrases.some((phrase) => matchesPhrase(phrase, views, config)) ||
+    rules.terms.some((term) => matchesTerm(term, views, config, exceptionTokenIndexes)) ||
+    rules.phrases.some((phrase) => matchesPhrase(phrase, views, config, exceptionTokenIndexes)) ||
     rules.patterns.some((pattern) => new RegExp(pattern, "iu").test(views.base))
   );
 }
@@ -88,18 +103,22 @@ function matchesRules(
 function matchesTerm(
   term: string,
   views: ContentViews,
-  config: ProfileContentModerationConfig
+  config: ProfileContentModerationConfig,
+  exceptionTokenIndexes: Set<number>
 ): boolean {
   const normalizedTerm = fold(term.normalize("NFKC").toLowerCase(), config);
 
   if (normalizedTerm.includes(" ")) {
-    return matchesPhrase(term, views, config);
+    return matchesPhrase(term, views, config, exceptionTokenIndexes);
   }
 
   const compactTerm = normalizedTerm.replace(/[^\p{L}\p{N}]/gu, "");
+  const hasExactToken = views.tokens.includes(normalizedTerm);
   return (
-    views.tokens.includes(normalizedTerm) ||
-    views.compactRuns.includes(compactTerm) ||
+    views.tokens.some(
+      (token, index) => token === normalizedTerm && !exceptionTokenIndexes.has(index)
+    ) ||
+    (!hasExactToken && views.compactRuns.includes(compactTerm)) ||
     views.characterSequences.includes(compactTerm)
   );
 }
@@ -107,30 +126,45 @@ function matchesTerm(
 function matchesPhrase(
   phrase: string,
   views: ContentViews,
-  config: ProfileContentModerationConfig
+  config: ProfileContentModerationConfig,
+  exceptionTokenIndexes: Set<number>
 ): boolean {
-  const phraseTokens = fold(phrase.normalize("NFKC").toLowerCase(), config).match(/[\p{L}\p{N}]+/gu) ?? [];
+  const phraseTokens = normalizedTokens(phrase, config);
 
-  return phraseTokens.length > 0 && containsTokenSequence(views.tokens, phraseTokens);
+  return (
+    phraseTokens.length > 0 &&
+    views.tokens.some(
+      (_, index) =>
+        containsTokenSequenceAt(views.tokens, phraseTokens, index) &&
+        phraseTokens.some((_, offset) => !exceptionTokenIndexes.has(index + offset))
+    )
+  );
 }
 
-function containsTokenSequence(tokens: string[], phraseTokens: string[]): boolean {
-  return tokens.some((_, index) => phraseTokens.every((token, offset) => tokens[index + offset] === token));
+function normalizedTokens(value: string, config: ProfileContentModerationConfig): string[] {
+  return fold(value.normalize("NFKC").toLowerCase(), config).match(/[\p{L}\p{N}]+/gu) ?? [];
+}
+
+function containsTokenSequenceAt(tokens: string[], phraseTokens: string[], index: number): boolean {
+  return phraseTokens.every((token, offset) => tokens[index + offset] === token);
 }
 
 function makeCharacterSequences(tokens: string[]): string[] {
   const sequences: string[] = [];
 
-  for (let start = 0; start < tokens.length; start += 1) {
+  for (let start = 0; start < tokens.length;) {
     if (tokens[start]?.length !== 1) {
+      start += 1;
       continue;
     }
 
-    let sequence = "";
-    for (let end = start; end < tokens.length && tokens[end]?.length === 1; end += 1) {
-      sequence += tokens[end];
-      sequences.push(sequence);
+    let end = start + 1;
+    while (end < tokens.length && tokens[end]?.length === 1) {
+      end += 1;
     }
+
+    sequences.push(tokens.slice(start, end).join(""));
+    start = end;
   }
 
   return sequences;

@@ -25,13 +25,17 @@ describe("classifyProfileContent", () => {
     ["h.u.y", "abusive"],
     ["sh1t", "abusive"],
     ["не дурак", null],
+    ["не дурак, идиот", "abusive"],
     ["classical music and Scunthorpe", null],
     ["https://example.com", "contact"],
     ["t.me/example", "contact"],
     ["@corens_help", "contact"],
     ["hello@example.com", "contact"],
     ["+375 (29) 123-45-67", "contact"],
+    ["2026-09-04", null],
     ["пиши в лс", "contact"],
+    ["ссылка:t.me/example", "contact"],
+    ["telegram:@corens_help", "contact"],
     ["купите сейчас", "advertising"],
     ["SALE today", "advertising"],
     ["join my team", "advertising"],
@@ -40,5 +44,11 @@ describe("classifyProfileContent", () => {
 
   it.each(cases)("classifies %j as %s", (value, expected) => {
     expect(classifyProfileContent(value, rules)).toBe(expected);
+  });
+
+  it("bounds spaced-character processing for long input", () => {
+    const value = Array.from({ length: 10_000 }, () => "a").join(" ");
+
+    expect(classifyProfileContent(value, rules)).toBeNull();
   });
 });
