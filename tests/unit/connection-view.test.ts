@@ -101,7 +101,7 @@ describe("connection card structure", () => {
     expect(connectionListSource).not.toContain("Ждёт вашего ответа");
   });
 
-  it("reserves icon space and wraps narrow-card content without changing base padding", () => {
+  it("reserves only the name lines beside the corner icon and preserves base padding", () => {
     expect(globalsSource).toContain(".corens-connection-card-ready");
     expect(globalsSource).toContain(".corens-connection-card-incoming");
     expect(globalsSource).toContain(".corens-connection-card-status-icon");
@@ -117,8 +117,11 @@ describe("connection card structure", () => {
     expect(globalsSource).toMatch(
       /\.corens-connection-card-name\s*\{[^}]*min-width:\s*0[^}]*overflow-wrap:\s*anywhere/s
     );
+    expect(globalsSource).not.toMatch(
+      /\.corens-connection-card-(?:ready|incoming) \.corens-connection-card-name[^}]*padding-inline-end/s
+    );
     expect(globalsSource).toMatch(
-      /\.corens-connection-card-ready \.corens-connection-card-name,[\s\S]*?\.corens-connection-card-incoming \.corens-connection-card-name\s*\{[^}]*padding-inline-end:\s*28px/s
+      /\.corens-connection-card-ready \.corens-connection-card-name::before,[\s\S]*?\.corens-connection-card-incoming \.corens-connection-card-name::before\s*\{[^}]*content:\s*""[^}]*float:\s*inline-end[^}]*width:\s*28px[^}]*height:\s*1\.2em/s
     );
   });
 

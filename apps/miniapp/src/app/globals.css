@@ -2785,9 +2785,12 @@ select.corens-field {
   overflow-wrap: anywhere;
 }
 
-.corens-connection-card-ready .corens-connection-card-name,
-.corens-connection-card-incoming .corens-connection-card-name {
-  padding-inline-end: 28px;
+.corens-connection-card-ready .corens-connection-card-name::before,
+.corens-connection-card-incoming .corens-connection-card-name::before {
+  content: "";
+  float: inline-end;
+  width: 28px;
+  height: 1.2em;
 }
 
 .corens-connection-card-state {
